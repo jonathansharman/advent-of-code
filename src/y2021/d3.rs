@@ -1,33 +1,33 @@
 use crate::io::read_lines;
 
-use std::collections::HashMap;
-
 pub fn part1() -> i64 {
-	let mut n = 0;
-	let mut counts = HashMap::new();
-	for line in read_lines("input/2021/3-1.txt") {
-		n += 1;
-		let mut m = u64::from_str_radix(&line, 2).expect("could not parse binary");
-		let mut place = 0;
-		while m > 0 {
-			let count = counts.entry(place).or_insert(0);
-			if m & 1 == 1 {
-				*count += 1;
+	let (bit_len, lines) = {
+		let mut lines = read_lines("input/2021/3-1.txt").peekable();
+		let len = lines
+			.peek()
+			.expect("expected at least one line of input")
+			.len();
+		(len, lines)
+	};
+	let mut bit_scores = vec![0; bit_len];
+	for line in lines {
+		for (idx, bit) in line.bytes().enumerate() {
+			match bit {
+				b'0' => bit_scores[idx] -= 1,
+				b'1' => bit_scores[idx] += 1,
+				_ => panic!("expected '0' or '1'"),
 			}
-			m /= 2;
-			place += 1;
 		}
 	}
-	let mut gamma = 0;
-	let mut epsilon = 0;
-	for (place, count) in counts {
-		if count > n / 2 {
-			gamma += 1 << place;
+	let (mut gamma, mut epsilon) = (0, 0);
+	for (idx, score) in bit_scores.into_iter().rev().enumerate() {
+		if score > 0 {
+			gamma += 1 << idx;
 		} else {
-			epsilon += 1 << place;
+			epsilon += 1 << idx;
 		}
 	}
-	epsilon * gamma
+	gamma * epsilon
 }
 
 pub fn part2() -> i64 {
