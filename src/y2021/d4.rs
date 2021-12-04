@@ -2,6 +2,8 @@ use crate::io::read_lines;
 
 use itertools::Itertools;
 
+use std::collections::HashSet;
+
 pub fn part1() -> i64 {
 	let mut lines = read_lines("input/2021/4-1.txt");
 	let numbers = lines
@@ -78,5 +80,42 @@ impl Board {
 }
 
 pub fn part2() -> i64 {
+	let mut lines = read_lines("input/2021/4-2.txt");
+	let numbers = lines
+		.next()
+		.expect("missing first line")
+		.split(',')
+		.map(|s| s.parse::<i64>().expect("failed to parse number"))
+		.collect::<Vec<i64>>();
+
+	let mut boards = Vec::<Board>::new();
+	for chunk in lines.chunks(6).into_iter() {
+		let mut board = Board { v: Vec::new() };
+		for line in chunk.skip(1) {
+			board.v.push(
+				line.split_whitespace()
+					.map(|s| Some(s.parse::<i64>().expect("failed to parse board space")))
+					.collect(),
+			);
+		}
+		boards.push(board);
+	}
+	let boards_len = boards.len();
+
+	let mut winning_boards = HashSet::<usize>::new();
+	for n in numbers {
+		for (idx, board) in boards.iter_mut().enumerate() {
+			if winning_boards.contains(&idx) {
+				continue;
+			}
+			board.check(n);
+			if board.bingo() {
+				winning_boards.insert(idx);
+				if winning_boards.len() == boards_len {
+					return board.score() * n;
+				}
+			}
+		}
+	}
 	0
 }
