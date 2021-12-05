@@ -3,7 +3,7 @@ use itertools::Itertools;
 use crate::io::read_lines;
 
 pub fn part1() -> i64 {
-	let (depth, latitude) = read_lines("input/2021/2-1.txt")
+	let (depth, latitude) = read_lines("input/2021/2.txt")
 		.map(|line| {
 			let (direction, distance_string) = line
 				.split(' ')
@@ -27,7 +27,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let (depth, latitude, _) = read_lines("input/2021/2-1.txt")
+	let (depth, latitude, _) = read_lines("input/2021/2.txt")
 		.map(|line| {
 			let (direction, distance_string) = line
 				.split(' ')

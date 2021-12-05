@@ -4,7 +4,7 @@ type Point = (i64, i64);
 type Line = (Point, Point);
 
 pub fn part1() -> i64 {
-	let lines = read_lines("input/2021/5-1.txt");
+	let lines = read_lines("input/2021/5.txt");
 	let lines = lines
 		.map(|line| {
 			let start_end = line.split(" -> ").collect::<Vec<&str>>();
@@ -81,7 +81,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let lines = read_lines("input/2021/5-2.txt");
+	let lines = read_lines("input/2021/5.txt");
 	let lines = lines
 		.map(|line| {
 			let start_end = line.split(" -> ").collect::<Vec<&str>>();

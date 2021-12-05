@@ -2,7 +2,7 @@ use crate::io::read_lines;
 
 pub fn part1() -> i64 {
 	let (bit_len, lines) = {
-		let mut lines = read_lines("input/2021/3-1.txt").peekable();
+		let mut lines = read_lines("input/2021/3.txt").peekable();
 		let len = lines
 			.peek()
 			.expect("expected at least one line of input")
@@ -31,7 +31,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut lines = read_lines("input/2021/3-2.txt").collect::<Vec<String>>();
+	let mut lines = read_lines("input/2021/3.txt").collect::<Vec<String>>();
 
 	// Sort the lines to enable partitioning by bits at each index.
 	lines.sort();

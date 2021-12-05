@@ -68,7 +68,7 @@ fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
 }
 
 pub fn part1() -> i64 {
-	let mut lines = read_lines("input/2021/4-1.txt");
+	let mut lines = read_lines("input/2021/4.txt");
 	let numbers = read_numbers(&mut lines);
 	let mut boards = read_boards(&mut lines);
 
@@ -84,7 +84,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut lines = read_lines("input/2021/4-2.txt");
+	let mut lines = read_lines("input/2021/4.txt");
 	let numbers = read_numbers(&mut lines);
 	let mut boards = read_boards(&mut lines);
 
