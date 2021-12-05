@@ -20,7 +20,7 @@ fn main() {
 	.cloned()
 	.collect();
 
-	let (year, day, part) = (2021, 5, 1);
+	let (year, day, part) = (2021, 5, 2);
 	println!(
 		"{}-{}-{}: {}",
 		year,
