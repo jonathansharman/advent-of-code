@@ -103,3 +103,16 @@ pub fn part2() -> i64 {
 	}
 	last_score
 }
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn part1() {
+		assert_eq!(38594, super::part1());
+	}
+
+	#[test]
+	fn part2() {
+		assert_eq!(21184, super::part2());
+	}
+}

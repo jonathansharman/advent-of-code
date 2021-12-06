@@ -74,3 +74,16 @@ pub fn part1() -> i64 {
 pub fn part2() -> i64 {
 	intersections(false)
 }
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn part1() {
+		assert_eq!(6225, super::part1());
+	}
+
+	#[test]
+	fn part2() {
+		assert_eq!(22116, super::part2());
+	}
+}

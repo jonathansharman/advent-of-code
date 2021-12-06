@@ -17,3 +17,16 @@ pub fn part2() -> i64 {
 		.filter(|(prev, next)| prev < next)
 		.count() as i64
 }
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn part1() {
+		assert_eq!(1162, super::part1());
+	}
+
+	#[test]
+	fn part2() {
+		assert_eq!(1190, super::part2());
+	}
+}

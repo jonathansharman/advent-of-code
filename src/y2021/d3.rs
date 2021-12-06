@@ -62,3 +62,16 @@ enum Criteria {
 	Oxygen,
 	CO2,
 }
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn part1() {
+		assert_eq!(841526, super::part1());
+	}
+
+	#[test]
+	fn part2() {
+		assert_eq!(4790390, super::part2());
+	}
+}

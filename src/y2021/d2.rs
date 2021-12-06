@@ -49,3 +49,16 @@ pub fn part2() -> i64 {
 		);
 	depth * latitude
 }
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn part1() {
+		assert_eq!(2187380, super::part1());
+	}
+
+	#[test]
+	fn part2() {
+		assert_eq!(2086357770, super::part2());
+	}
+}
