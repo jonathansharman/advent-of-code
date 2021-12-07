@@ -17,12 +17,14 @@ fn main() {
 		((2021, 5, 2), y2021::d5::part2),
 		((2021, 6, 1), y2021::d6::part1),
 		((2021, 6, 2), y2021::d6::part2),
+		((2021, 7, 1), y2021::d7::part1),
+		((2021, 7, 2), y2021::d7::part2),
 	]
 	.iter()
 	.cloned()
 	.collect();
 
-	let (year, day, part) = (2021, 6, 2);
+	let (year, day, part) = (2021, 7, 1);
 	println!(
 		"{}-{}-{}: {}",
 		year,
