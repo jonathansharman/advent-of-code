@@ -1,4 +1,4 @@
-use crate::io::read_lines;
+use crate::{io::read_lines, solution::Solution};
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 struct Point {
@@ -67,23 +67,37 @@ fn intersections(ignore_diagonals: bool) -> i64 {
 		.count() as i64
 }
 
-pub fn part1() -> i64 {
-	intersections(true)
-}
+pub struct Day5;
 
-pub fn part2() -> i64 {
-	intersections(false)
+impl Solution for Day5 {
+	fn year(&self) -> u32 {
+		2021
+	}
+
+	fn day(&self) -> u32 {
+		5
+	}
+
+	fn part1(&self) -> i64 {
+		intersections(true)
+	}
+
+	fn part2(&self) -> i64 {
+		intersections(false)
+	}
 }
 
 #[cfg(test)]
 mod tests {
+	use super::*;
+
 	#[test]
 	fn part1() {
-		assert_eq!(6225, super::part1());
+		assert_eq!(6225, Day5.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(22116, super::part2());
+		assert_eq!(22116, Day5.part2());
 	}
 }

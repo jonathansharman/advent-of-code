@@ -1,35 +1,51 @@
 mod io;
+mod solution;
 mod y2021;
+
+use solution::Solution;
+
+use structopt::StructOpt;
 
 use std::collections::HashMap;
 
+#[derive(StructOpt)]
+#[structopt(name = "advent-of-code")]
+struct Opt {
+	#[structopt(short, long, default_value = "2021")]
+	year: u32,
+	#[structopt(short, long, default_value = "7")]
+	day: u32,
+	#[structopt(short, long, default_value = "2")]
+	part: u32,
+}
+
 fn main() {
-	let solution_map: HashMap<(i32, i32, i32), fn() -> i64> = [
-		((2021, 1, 1), y2021::d1::part1 as fn() -> i64),
-		((2021, 1, 2), y2021::d1::part2),
-		((2021, 2, 1), y2021::d2::part1),
-		((2021, 2, 2), y2021::d2::part2),
-		((2021, 3, 1), y2021::d3::part1),
-		((2021, 3, 2), y2021::d3::part2),
-		((2021, 4, 1), y2021::d4::part1),
-		((2021, 4, 2), y2021::d4::part2),
-		((2021, 5, 1), y2021::d5::part1),
-		((2021, 5, 2), y2021::d5::part2),
-		((2021, 6, 1), y2021::d6::part1),
-		((2021, 6, 2), y2021::d6::part2),
-		((2021, 7, 1), y2021::d7::part1),
-		((2021, 7, 2), y2021::d7::part2),
+	let opt = Opt::from_args();
+
+	let solution_map: HashMap<(u32, u32), &dyn Solution> = [
+		&y2021::Day1 as &dyn Solution,
+		&y2021::Day2,
+		&y2021::Day3,
+		&y2021::Day4,
+		&y2021::Day5,
+		&y2021::Day6,
+		&y2021::Day7,
 	]
 	.iter()
-	.cloned()
-	.collect();
+	.fold(HashMap::new(), |mut acc, &solution| {
+		acc.insert((solution.year(), solution.day()), solution);
+		acc
+	});
 
-	let (year, day, part) = (2021, 7, 2);
+	if let Some(solution) = solution_map.get(&(opt.year, opt.day)) {
+		if opt.part == 1 {
+			return println!("{}-{}-1: {}", opt.year, opt.day, solution.part1());
+		} else if opt.part == 2 {
+			return println!("{}-{}-2: {}", opt.year, opt.day, solution.part2());
+		}
+	}
 	println!(
-		"{}-{}-{}: {}",
-		year,
-		day,
-		part,
-		solution_map[&(year, day, part)]()
+		"No solution for {}, day {}, part {}",
+		opt.year, opt.day, opt.part
 	);
 }

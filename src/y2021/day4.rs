@@ -1,4 +1,4 @@
-use crate::io::read_lines;
+use crate::{io::read_lines, solution::Solution};
 
 use itertools::Itertools;
 
@@ -67,52 +67,66 @@ fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
 		.collect()
 }
 
-pub fn part1() -> i64 {
-	let mut lines = read_lines("input/2021/4.txt");
-	let numbers = read_numbers(&mut lines);
-	let mut boards = read_boards(&mut lines);
+pub struct Day4;
 
-	for n in numbers {
-		for board in boards.iter_mut() {
-			board.tick(n);
-			if let Some(score) = board.score {
-				return score;
+impl Solution for Day4 {
+	fn year(&self) -> u32 {
+		2021
+	}
+
+	fn day(&self) -> u32 {
+		4
+	}
+
+	fn part1(&self) -> i64 {
+		let mut lines = read_lines("input/2021/4.txt");
+		let numbers = read_numbers(&mut lines);
+		let mut boards = read_boards(&mut lines);
+
+		for n in numbers {
+			for board in boards.iter_mut() {
+				board.tick(n);
+				if let Some(score) = board.score {
+					return score;
+				}
 			}
 		}
+		0
 	}
-	0
-}
 
-pub fn part2() -> i64 {
-	let mut lines = read_lines("input/2021/4.txt");
-	let numbers = read_numbers(&mut lines);
-	let mut boards = read_boards(&mut lines);
+	fn part2(&self) -> i64 {
+		let mut lines = read_lines("input/2021/4.txt");
+		let numbers = read_numbers(&mut lines);
+		let mut boards = read_boards(&mut lines);
 
-	let mut last_score = 0;
-	for n in numbers {
-		for board in boards.iter_mut() {
-			board.tick(n);
-			if let Some(score) = board.score {
-				last_score = score;
+		let mut last_score = 0;
+		for n in numbers {
+			for board in boards.iter_mut() {
+				board.tick(n);
+				if let Some(score) = board.score {
+					last_score = score;
+				}
+			}
+			boards.retain(|board| board.score.is_none());
+			if boards.is_empty() {
+				break;
 			}
 		}
-		boards.retain(|board| board.score.is_none());
-		if boards.is_empty() {
-			break;
-		}
+		last_score
 	}
-	last_score
 }
 
 #[cfg(test)]
 mod tests {
+	use super::*;
+
 	#[test]
 	fn part1() {
-		assert_eq!(38594, super::part1());
+		assert_eq!(38594, Day4.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(21184, super::part2());
+		assert_eq!(21184, Day4.part2());
 	}
 }

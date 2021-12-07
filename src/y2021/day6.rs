@@ -1,13 +1,25 @@
+use crate::{io::read_comma_separated_integers, solution::Solution};
+
 use std::collections::{hash_map::Entry, HashMap};
 
-use crate::io::read_comma_separated_integers;
+pub struct Day6;
 
-pub fn part1() -> i64 {
-	fish(80)
-}
+impl Solution for Day6 {
+	fn year(&self) -> u32 {
+		2021
+	}
 
-pub fn part2() -> i64 {
-	fish(256)
+	fn day(&self) -> u32 {
+		5
+	}
+
+	fn part1(&self) -> i64 {
+		fish(80)
+	}
+
+	fn part2(&self) -> i64 {
+		fish(256)
+	}
 }
 
 pub fn fish(days: i64) -> i64 {
@@ -35,13 +47,15 @@ fn get_count(cache: &mut HashMap<(i64, i64), i64>, timer: i64, days: i64) -> i64
 
 #[cfg(test)]
 mod tests {
+	use super::*;
+
 	#[test]
 	fn part1() {
-		assert_eq!(379114, super::part1());
+		assert_eq!(379114, Day6.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(1702631502303, super::part2());
+		assert_eq!(1702631502303, Day6.part2());
 	}
 }
