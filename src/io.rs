@@ -5,15 +5,26 @@ pub fn read_lines<P>(path: P) -> impl Iterator<Item = String>
 where
 	P: AsRef<Path>,
 {
-	let file = std::fs::File::open(path).expect("could not open input file");
-	BufReader::new(file)
-		.lines()
-		.map(|line| line.expect("could not read line"))
+	let file = std::fs::File::open(path).unwrap();
+	BufReader::new(file).lines().map(Result::unwrap)
 }
 
-pub fn read_integers<P>(path: P) -> impl Iterator<Item = i32>
+pub fn read_integer_lines<P>(path: P) -> impl Iterator<Item = i64>
 where
 	P: AsRef<Path>,
 {
-	read_lines(path).map(|line| line.parse::<i32>().expect("could not parse line as i32"))
+	read_lines(path).map(|line| line.parse::<i64>().unwrap())
+}
+
+pub fn read_comma_separated_integers<P>(path: P) -> impl Iterator<Item = i64>
+where
+	P: AsRef<Path>,
+{
+	let file = std::fs::File::open(path).unwrap();
+	BufReader::new(file).split(b',').map(|s| {
+		std::str::from_utf8(&s.unwrap())
+			.unwrap()
+			.parse::<i64>()
+			.unwrap()
+	})
 }

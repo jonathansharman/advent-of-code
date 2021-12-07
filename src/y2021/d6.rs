@@ -1,5 +1,7 @@
 use std::collections::{hash_map::Entry, HashMap};
 
+use crate::io::read_comma_separated_integers;
+
 pub fn part1() -> i64 {
 	fish(80)
 }
@@ -10,11 +12,7 @@ pub fn part2() -> i64 {
 
 pub fn fish(days: i64) -> i64 {
 	let mut cache: HashMap<(i64, i64), i64> = HashMap::new();
-
-	std::fs::read_to_string("input/2021/6.txt")
-		.expect("error reading input")
-		.split(',')
-		.map(|fish| fish.parse::<i64>().expect("error parsing number"))
+	read_comma_separated_integers("input/2021/6.txt")
 		.fold(0, |acc, timer| acc + get_count(&mut cache, timer, days))
 }
 
