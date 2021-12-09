@@ -24,13 +24,13 @@ impl Solution for Day9 {
 		let mut sum = 0;
 		for i in 0..field.len() {
 			for j in 0..field[i].len() {
-				let x = field[i][j];
-				if (i == 0 || field[i - 1][j] > x)
-					&& (i == field.len() - 1 || field[i + 1][j] > x)
-					&& (j == 0 || field[i][j - 1] > x)
-					&& (j == field[i].len() - 1 || field[i][j + 1] > x)
+				let height = field[i][j];
+				if (i == 0 || field[i - 1][j] > height)
+					&& (i == field.len() - 1 || field[i + 1][j] > height)
+					&& (j == 0 || field[i][j - 1] > height)
+					&& (j == field[i].len() - 1 || field[i][j + 1] > height)
 				{
-					sum += x + 1
+					sum += height + 1
 				}
 			}
 		}
@@ -60,7 +60,7 @@ impl Solution for Day9 {
 			}
 		}
 
-		basin_sizes.pop().unwrap() * basin_sizes.pop().unwrap() * basin_sizes.pop().unwrap()
+		basin_sizes.iter().take(3).product()
 	}
 }
 
@@ -69,27 +69,21 @@ fn dfs(field: &[Vec<i64>], visited: &mut Vec<Vec<bool>>, i: usize, j: usize) -> 
 		return 0;
 	}
 	visited[i][j] = true;
-	let up = if i == 0 {
-		0
-	} else {
-		dfs(field, visited, i - 1, j)
+
+	let mut sum = 1;
+	if i > 0 {
+		sum += dfs(field, visited, i - 1, j)
 	};
-	let down = if i == field.len() - 1 {
-		0
-	} else {
-		dfs(field, visited, i + 1, j)
+	if i < field.len() - 1 {
+		sum += dfs(field, visited, i + 1, j)
 	};
-	let left = if j == 0 {
-		0
-	} else {
-		dfs(field, visited, i, j - 1)
+	if j > 0 {
+		sum += dfs(field, visited, i, j - 1)
 	};
-	let right = if j == field[i].len() - 1 {
-		0
-	} else {
-		dfs(field, visited, i, j + 1)
+	if j < field[i].len() - 1 {
+		sum += dfs(field, visited, i, j + 1)
 	};
-	1 + up + down + left + right
+	sum
 }
 
 #[cfg(test)]
