@@ -13,7 +13,7 @@ use std::collections::HashMap;
 struct Opt {
 	#[structopt(short, long, default_value = "2021")]
 	year: u32,
-	#[structopt(short, long, default_value = "8")]
+	#[structopt(short, long, default_value = "9")]
 	day: u32,
 	#[structopt(short, long, default_value = "2")]
 	part: u32,
@@ -31,6 +31,7 @@ fn main() {
 		&y2021::Day6,
 		&y2021::Day7,
 		&y2021::Day8,
+		&y2021::Day9,
 	]
 	.iter()
 	.fold(HashMap::new(), |mut acc, &solution| {
