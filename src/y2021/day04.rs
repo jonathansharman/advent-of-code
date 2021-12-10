@@ -67,9 +67,9 @@ fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
 		.collect()
 }
 
-pub struct Day4;
+pub struct Day04;
 
-impl Solution for Day4 {
+impl Solution for Day04 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -122,11 +122,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(38594, Day4.part1());
+		assert_eq!(38594, Day04.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(21184, Day4.part2());
+		assert_eq!(21184, Day04.part2());
 	}
 }

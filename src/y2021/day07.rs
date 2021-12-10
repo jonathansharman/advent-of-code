@@ -2,9 +2,9 @@ use crate::{io::read_comma_separated_integers, solution::Solution};
 
 use itertools::{Itertools, MinMaxResult};
 
-pub struct Day7;
+pub struct Day07;
 
-impl Solution for Day7 {
+impl Solution for Day07 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -51,11 +51,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(343605, Day7.part1());
+		assert_eq!(343605, Day07.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(96744904, Day7.part2());
+		assert_eq!(96744904, Day07.part2());
 	}
 }

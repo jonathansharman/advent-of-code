@@ -2,9 +2,9 @@ use crate::{io::read_lines, solution::Solution};
 
 use std::collections::{HashMap, HashSet};
 
-pub struct Day8;
+pub struct Day08;
 
-impl Solution for Day8 {
+impl Solution for Day08 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -184,11 +184,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(367, Day8.part1());
+		assert_eq!(367, Day08.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(974512, Day8.part2());
+		assert_eq!(974512, Day08.part2());
 	}
 }

@@ -2,9 +2,9 @@ use crate::{io::read_integer_lines, solution::Solution};
 
 use itertools::Itertools;
 
-pub struct Day1;
+pub struct Day01;
 
-impl Solution for Day1 {
+impl Solution for Day01 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -36,11 +36,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(1162, Day1.part1());
+		assert_eq!(1162, Day01.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(1190, Day1.part2());
+		assert_eq!(1190, Day01.part2());
 	}
 }

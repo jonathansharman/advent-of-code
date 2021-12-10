@@ -67,9 +67,9 @@ fn intersections(ignore_diagonals: bool) -> i64 {
 		.count() as i64
 }
 
-pub struct Day5;
+pub struct Day05;
 
-impl Solution for Day5 {
+impl Solution for Day05 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -93,11 +93,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(6225, Day5.part1());
+		assert_eq!(6225, Day05.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(22116, Day5.part2());
+		assert_eq!(22116, Day05.part2());
 	}
 }

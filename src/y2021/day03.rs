@@ -1,8 +1,8 @@
 use crate::{io::read_lines, solution::Solution};
 
-pub struct Day3;
+pub struct Day03;
 
-impl Solution for Day3 {
+impl Solution for Day03 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -81,11 +81,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(841526, Day3.part1());
+		assert_eq!(841526, Day03.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(4790390, Day3.part2());
+		assert_eq!(4790390, Day03.part2());
 	}
 }

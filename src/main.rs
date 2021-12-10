@@ -13,9 +13,9 @@ use std::collections::HashMap;
 struct Opt {
 	#[structopt(short, long, default_value = "2021")]
 	year: u32,
-	#[structopt(short, long, default_value = "9")]
+	#[structopt(short, long, default_value = "10")]
 	day: u32,
-	#[structopt(short, long, default_value = "2")]
+	#[structopt(short, long, default_value = "1")]
 	part: u32,
 }
 
@@ -23,15 +23,16 @@ fn main() {
 	let opt = Opt::from_args();
 
 	let solution_map: HashMap<(u32, u32), &dyn Solution> = [
-		&y2021::Day1 as &dyn Solution,
-		&y2021::Day2,
-		&y2021::Day3,
-		&y2021::Day4,
-		&y2021::Day5,
-		&y2021::Day6,
-		&y2021::Day7,
-		&y2021::Day8,
-		&y2021::Day9,
+		&y2021::Day01 as &dyn Solution,
+		&y2021::Day02,
+		&y2021::Day03,
+		&y2021::Day04,
+		&y2021::Day05,
+		&y2021::Day06,
+		&y2021::Day07,
+		&y2021::Day08,
+		&y2021::Day09,
+		&y2021::Day10,
 	]
 	.iter()
 	.fold(HashMap::new(), |mut acc, &solution| {

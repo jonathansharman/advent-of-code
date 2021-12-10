@@ -2,9 +2,9 @@ use crate::{io::read_comma_separated_integers, solution::Solution};
 
 use std::collections::{hash_map::Entry, HashMap};
 
-pub struct Day6;
+pub struct Day06;
 
-impl Solution for Day6 {
+impl Solution for Day06 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -51,11 +51,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(379114, Day6.part1());
+		assert_eq!(379114, Day06.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(1702631502303, Day6.part2());
+		assert_eq!(1702631502303, Day06.part2());
 	}
 }

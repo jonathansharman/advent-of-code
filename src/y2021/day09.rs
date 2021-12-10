@@ -2,9 +2,9 @@ use crate::{io::read_lines, solution::Solution};
 
 use std::collections::BinaryHeap;
 
-pub struct Day9;
+pub struct Day09;
 
-impl Solution for Day9 {
+impl Solution for Day09 {
 	fn year(&self) -> u32 {
 		2021
 	}
@@ -92,11 +92,11 @@ mod tests {
 
 	#[test]
 	fn part1() {
-		assert_eq!(452, Day9.part1());
+		assert_eq!(452, Day09.part1());
 	}
 
 	#[test]
 	fn part2() {
-		assert_eq!(1263735, Day9.part2());
+		assert_eq!(1263735, Day09.part2());
 	}
 }
