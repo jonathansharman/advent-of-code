@@ -16,11 +16,11 @@ impl Solution for Day12 {
 	}
 
 	fn part1(&self) -> i64 {
-		count_paths(&read_graph(), "start", "end")
+		count_paths_1(&read_graph(), "start", "end")
 	}
 
 	fn part2(&self) -> i64 {
-		count_paths(&read_graph(), "start", "end")
+		count_paths_2(&read_graph(), HashMap::new(), false, "start", "end")
 	}
 }
 
@@ -43,14 +43,14 @@ fn read_graph() -> Graph {
 	graph
 }
 
-fn count_paths(graph: &Graph, from: &str, to: &str) -> i64 {
+fn count_paths_1(graph: &Graph, from: &str, to: &str) -> i64 {
 	if from == to {
 		return 1;
 	}
 	if from.chars().all(char::is_uppercase) {
 		graph[from]
 			.iter()
-			.map(|neighbor| count_paths(graph, neighbor, to))
+			.map(|neighbor| count_paths_1(graph, neighbor, to))
 			.sum()
 	} else {
 		match graph.get(from) {
@@ -59,12 +59,45 @@ fn count_paths(graph: &Graph, from: &str, to: &str) -> i64 {
 				graph.remove(from);
 				neighbors
 					.iter()
-					.map(|neighbor| count_paths(&graph, neighbor, to))
+					.map(|neighbor| count_paths_1(&graph, neighbor, to))
 					.sum()
 			}
 			None => 0,
 		}
 	}
+}
+
+fn count_paths_2(
+	graph: &Graph,
+	mut visit_map: HashMap<String, u32>,
+	double_used: bool,
+	from: &str,
+	to: &str,
+) -> i64 {
+	if from == to {
+		return 1;
+	}
+	let visits = visit_map.entry(from.into()).or_insert(0);
+	*visits += 1;
+	if !from.chars().all(char::is_uppercase) {
+		if *visits == 1 {
+			return graph[from]
+				.iter()
+				.map(|neighbor| count_paths_2(graph, visit_map.clone(), double_used, neighbor, to))
+				.sum();
+		}
+		if *visits == 2 && !double_used && from != "start" {
+			return graph[from]
+				.iter()
+				.map(|neighbor| count_paths_2(graph, visit_map.clone(), true, neighbor, to))
+				.sum();
+		}
+		return 0;
+	}
+	graph[from]
+		.iter()
+		.map(|neighbor| count_paths_2(graph, visit_map.clone(), double_used, neighbor, to))
+		.sum()
 }
 
 #[cfg(test)]
@@ -78,6 +111,6 @@ mod tests {
 
 	#[test]
 	fn part2() {
-		assert_eq!(0, Day12.part2());
+		assert_eq!(130493, Day12.part2());
 	}
 }

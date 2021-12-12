@@ -15,7 +15,7 @@ struct Opt {
 	year: u32,
 	#[structopt(short, long, default_value = "12")]
 	day: u32,
-	#[structopt(short, long, default_value = "1")]
+	#[structopt(short, long, default_value = "2")]
 	part: u32,
 }
 
