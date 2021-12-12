@@ -15,7 +15,7 @@ pub fn part2() -> i64 {
 
 pub fn fish(days: i64) -> i64 {
 	let mut cache: HashMap<(i64, i64), i64> = HashMap::new();
-	read_comma_separated_integers("input/2021/6.txt")
+	read_comma_separated_integers("input/2021/06.txt")
 		.fold(0, |acc, timer| acc + get_count(&mut cache, timer, days))
 }
 

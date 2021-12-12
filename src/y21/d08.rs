@@ -6,7 +6,7 @@ crate::test::test_part!(test1, part1, 367);
 crate::test::test_part!(test2, part2, 974512);
 
 pub fn part1() -> i64 {
-	read_lines("input/2021/8.txt")
+	read_lines("input/2021/08.txt")
 		.map(|line| -> i64 {
 			line.split(" | ")
 				.nth(1)
@@ -22,7 +22,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	read_lines("input/2021/8.txt")
+	read_lines("input/2021/08.txt")
 		.map(|line| -> i64 {
 			let split = line
 				.splitn(2, '|')

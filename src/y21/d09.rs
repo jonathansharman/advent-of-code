@@ -6,7 +6,7 @@ crate::test::test_part!(test1, part1, 452);
 crate::test::test_part!(test2, part2, 1263735);
 
 pub fn part1() -> i64 {
-	let field: Vec<Vec<i64>> = read_lines("input/2021/9.txt")
+	let field: Vec<Vec<i64>> = read_lines("input/2021/09.txt")
 		.map(|line| {
 			line.chars()
 				.map(|c| c.to_digit(10).unwrap() as i64)
@@ -30,7 +30,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let field: Vec<Vec<i64>> = read_lines("input/2021/9.txt")
+	let field: Vec<Vec<i64>> = read_lines("input/2021/09.txt")
 		.map(|line| {
 			line.chars()
 				.map(|c| c.to_digit(10).unwrap() as i64)

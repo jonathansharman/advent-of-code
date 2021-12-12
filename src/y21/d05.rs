@@ -15,7 +15,7 @@ struct Line {
 }
 
 fn intersections(ignore_diagonals: bool) -> i64 {
-	let lines = read_lines("input/2021/5.txt")
+	let lines = read_lines("input/2021/05.txt")
 		.map(|line_str| {
 			let points = line_str
 				.splitn(2, " -> ")

@@ -6,7 +6,7 @@ crate::test::test_part!(test1, part1, 2187380);
 crate::test::test_part!(test2, part2, 2086357770);
 
 pub fn part1() -> i64 {
-	let (depth, latitude) = read_lines("input/2021/2.txt")
+	let (depth, latitude) = read_lines("input/2021/02.txt")
 		.map(|line| {
 			let (direction, distance_string) = line
 				.split(' ')
@@ -30,7 +30,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let (depth, latitude, _) = read_lines("input/2021/2.txt")
+	let (depth, latitude, _) = read_lines("input/2021/02.txt")
 		.map(|line| {
 			let (direction, distance_string) = line
 				.split(' ')
