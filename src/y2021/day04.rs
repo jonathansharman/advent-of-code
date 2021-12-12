@@ -1,6 +1,9 @@
-use crate::{io::read_lines, solution::Solution};
+use crate::io::read_lines;
 
 use itertools::Itertools;
+
+crate::test::test_part!(test1, part1, 38594);
+crate::test::test_part!(test2, part2, 21184);
 
 const SIDE_LENGTH: usize = 5;
 
@@ -67,66 +70,39 @@ fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
 		.collect()
 }
 
-pub struct Day04;
+pub fn part1() -> i64 {
+	let mut lines = read_lines("input/2021/4.txt");
+	let numbers = read_numbers(&mut lines);
+	let mut boards = read_boards(&mut lines);
 
-impl Solution for Day04 {
-	fn year(&self) -> u32 {
-		2021
-	}
-
-	fn day(&self) -> u32 {
-		4
-	}
-
-	fn part1(&self) -> i64 {
-		let mut lines = read_lines("input/2021/4.txt");
-		let numbers = read_numbers(&mut lines);
-		let mut boards = read_boards(&mut lines);
-
-		for n in numbers {
-			for board in boards.iter_mut() {
-				board.tick(n);
-				if let Some(score) = board.score {
-					return score;
-				}
+	for n in numbers {
+		for board in boards.iter_mut() {
+			board.tick(n);
+			if let Some(score) = board.score {
+				return score;
 			}
 		}
-		0
 	}
-
-	fn part2(&self) -> i64 {
-		let mut lines = read_lines("input/2021/4.txt");
-		let numbers = read_numbers(&mut lines);
-		let mut boards = read_boards(&mut lines);
-
-		let mut last_score = 0;
-		for n in numbers {
-			for board in boards.iter_mut() {
-				board.tick(n);
-				if let Some(score) = board.score {
-					last_score = score;
-				}
-			}
-			boards.retain(|board| board.score.is_none());
-			if boards.is_empty() {
-				break;
-			}
-		}
-		last_score
-	}
+	0
 }
 
-#[cfg(test)]
-mod tests {
-	use super::*;
+pub fn part2() -> i64 {
+	let mut lines = read_lines("input/2021/4.txt");
+	let numbers = read_numbers(&mut lines);
+	let mut boards = read_boards(&mut lines);
 
-	#[test]
-	fn part1() {
-		assert_eq!(38594, Day04.part1());
+	let mut last_score = 0;
+	for n in numbers {
+		for board in boards.iter_mut() {
+			board.tick(n);
+			if let Some(score) = board.score {
+				last_score = score;
+			}
+		}
+		boards.retain(|board| board.score.is_none());
+		if boards.is_empty() {
+			break;
+		}
 	}
-
-	#[test]
-	fn part2() {
-		assert_eq!(21184, Day04.part2());
-	}
+	last_score
 }

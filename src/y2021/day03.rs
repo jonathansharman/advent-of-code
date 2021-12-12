@@ -1,56 +1,47 @@
-use crate::{io::read_lines, solution::Solution};
+use crate::io::read_lines;
 
-pub struct Day03;
+crate::test::test_part!(test1, part1, 841526);
+crate::test::test_part!(test2, part2, 4790390);
 
-impl Solution for Day03 {
-	fn year(&self) -> u32 {
-		2021
-	}
-
-	fn day(&self) -> u32 {
-		3
-	}
-
-	fn part1(&self) -> i64 {
-		let (bit_len, lines) = {
-			let mut lines = read_lines("input/2021/3.txt").peekable();
-			let len = lines
-				.peek()
-				.expect("expected at least one line of input")
-				.len();
-			(len, lines)
-		};
-		let mut bit_scores = vec![0; bit_len];
-		for line in lines {
-			for (bit_idx, bit) in line.bytes().enumerate() {
-				match bit {
-					b'0' => bit_scores[bit_idx] -= 1,
-					b'1' => bit_scores[bit_idx] += 1,
-					_ => panic!("expected '0' or '1'"),
-				}
+pub fn part1() -> i64 {
+	let (bit_len, lines) = {
+		let mut lines = read_lines("input/2021/3.txt").peekable();
+		let len = lines
+			.peek()
+			.expect("expected at least one line of input")
+			.len();
+		(len, lines)
+	};
+	let mut bit_scores = vec![0; bit_len];
+	for line in lines {
+		for (bit_idx, bit) in line.bytes().enumerate() {
+			match bit {
+				b'0' => bit_scores[bit_idx] -= 1,
+				b'1' => bit_scores[bit_idx] += 1,
+				_ => panic!("expected '0' or '1'"),
 			}
 		}
-		let (mut gamma, mut epsilon) = (0, 0);
-		for (idx, score) in bit_scores.into_iter().rev().enumerate() {
-			if score > 0 {
-				gamma += 1 << idx;
-			} else {
-				epsilon += 1 << idx;
-			}
+	}
+	let (mut gamma, mut epsilon) = (0, 0);
+	for (idx, score) in bit_scores.into_iter().rev().enumerate() {
+		if score > 0 {
+			gamma += 1 << idx;
+		} else {
+			epsilon += 1 << idx;
 		}
-		gamma * epsilon
 	}
+	gamma * epsilon
+}
 
-	fn part2(&self) -> i64 {
-		let mut lines = read_lines("input/2021/3.txt").collect::<Vec<String>>();
+pub fn part2() -> i64 {
+	let mut lines = read_lines("input/2021/3.txt").collect::<Vec<String>>();
 
-		// Sort the lines to enable partitioning by bits at each index.
-		lines.sort();
+	// Sort the lines to enable partitioning by bits at each index.
+	lines.sort();
 
-		let oxygen_rating = rating(&lines[..], Criteria::CO2);
-		let co2_rating = rating(&lines[..], Criteria::Oxygen);
-		oxygen_rating * co2_rating
-	}
+	let oxygen_rating = rating(&lines[..], Criteria::CO2);
+	let co2_rating = rating(&lines[..], Criteria::Oxygen);
+	oxygen_rating * co2_rating
 }
 
 fn rating(mut slice: &[String], criteria: Criteria) -> i64 {
@@ -73,19 +64,4 @@ fn rating(mut slice: &[String], criteria: Criteria) -> i64 {
 enum Criteria {
 	Oxygen,
 	CO2,
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn part1() {
-		assert_eq!(841526, Day03.part1());
-	}
-
-	#[test]
-	fn part2() {
-		assert_eq!(4790390, Day03.part2());
-	}
 }
