@@ -1,4 +1,4 @@
-pub mod y2021;
+pub mod y21;
 
 mod io;
 mod test;
