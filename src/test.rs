@@ -16,7 +16,7 @@ macro_rules! test_part {
 		#[test]
 		fn $test_name() {
 			println!(
-				"{}::{} could be {}",
+				"{}::{} could be {:?}",
 				module_path!(),
 				stringify!($part),
 				$part()
