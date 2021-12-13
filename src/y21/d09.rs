@@ -5,13 +5,9 @@ use std::collections::BinaryHeap;
 crate::test::test_part!(test1, part1, 452);
 crate::test::test_part!(test2, part2, 1263735);
 
-pub fn part1() -> i64 {
-	let field: Vec<Vec<i64>> = read_lines("input/2021/09.txt")
-		.map(|line| {
-			line.chars()
-				.map(|c| c.to_digit(10).unwrap() as i64)
-				.collect()
-		})
+pub fn part1() -> u32 {
+	let field: Vec<Vec<u32>> = read_lines("input/2021/09.txt")
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut sum = 0;
 	for i in 0..field.len() {
@@ -29,13 +25,9 @@ pub fn part1() -> i64 {
 	sum
 }
 
-pub fn part2() -> i64 {
-	let field: Vec<Vec<i64>> = read_lines("input/2021/09.txt")
-		.map(|line| {
-			line.chars()
-				.map(|c| c.to_digit(10).unwrap() as i64)
-				.collect()
-		})
+pub fn part2() -> u32 {
+	let field: Vec<Vec<u32>> = read_lines("input/2021/09.txt")
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 
 	let mut visited: Vec<Vec<bool>> = field
@@ -43,7 +35,7 @@ pub fn part2() -> i64 {
 		.map(|row| row.iter().map(|&space| space == 9).collect())
 		.collect();
 
-	let mut basin_sizes: BinaryHeap<i64> = BinaryHeap::new();
+	let mut basin_sizes: BinaryHeap<u32> = BinaryHeap::new();
 	for i in 0..field.len() {
 		for j in 0..field[i].len() {
 			if !visited[i][j] {
@@ -55,7 +47,7 @@ pub fn part2() -> i64 {
 	basin_sizes.iter().take(3).product()
 }
 
-fn dfs(field: &[Vec<i64>], visited: &mut Vec<Vec<bool>>, i: usize, j: usize) -> i64 {
+fn dfs(field: &[Vec<u32>], visited: &mut Vec<Vec<bool>>, i: usize, j: usize) -> u32 {
 	if visited[i][j] {
 		return 0;
 	}

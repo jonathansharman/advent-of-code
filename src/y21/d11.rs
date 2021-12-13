@@ -3,13 +3,9 @@ use crate::io::read_lines;
 crate::test::test_part!(test1, part1, 1757);
 crate::test::test_part!(test2, part2, 422);
 
-pub fn part1() -> i64 {
-	let mut grid: Vec<Vec<i64>> = read_lines("input/2021/11.txt")
-		.map(|line| {
-			line.chars()
-				.map(|c| c.to_digit(10).unwrap() as i64)
-				.collect()
-		})
+pub fn part1() -> usize {
+	let mut grid: Vec<Vec<u32>> = read_lines("input/2021/11.txt")
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut flashes = 0;
 	let mut queue = Vec::new();
@@ -58,12 +54,8 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut grid: Vec<Vec<i64>> = read_lines("input/2021/11.txt")
-		.map(|line| {
-			line.chars()
-				.map(|c| c.to_digit(10).unwrap() as i64)
-				.collect()
-		})
+	let mut grid: Vec<Vec<u32>> = read_lines("input/2021/11.txt")
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut queue = Vec::new();
 	let mut time = 0;
@@ -109,16 +101,16 @@ pub fn part2() -> i64 {
 				}
 			}
 		}
-		if flashes == (grid.len() * grid[0].len()) as i64 {
+		if flashes == (grid.len() * grid[0].len()) {
 			return time;
 		}
 	}
 }
 
 fn process(
-	grid: &mut Vec<Vec<i64>>,
+	grid: &mut Vec<Vec<u32>>,
 	queue: &mut Vec<(usize, usize)>,
-	flashes: &mut i64,
+	flashes: &mut usize,
 	i: usize,
 	j: usize,
 ) {

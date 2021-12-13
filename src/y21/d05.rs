@@ -3,6 +3,14 @@ use crate::io::read_lines;
 crate::test::test_part!(test1, part1, 6225);
 crate::test::test_part!(test2, part2, 22116);
 
+pub fn part1() -> usize {
+	intersections(true)
+}
+
+pub fn part2() -> usize {
+	intersections(false)
+}
+
 #[derive(PartialEq, Eq, Clone, Copy)]
 struct Point {
 	x: usize,
@@ -14,7 +22,7 @@ struct Line {
 	end: Point,
 }
 
-fn intersections(ignore_diagonals: bool) -> i64 {
+fn intersections(ignore_diagonals: bool) -> usize {
 	let lines = read_lines("input/2021/05.txt")
 		.map(|line_str| {
 			let points = line_str
@@ -67,13 +75,5 @@ fn intersections(ignore_diagonals: bool) -> i64 {
 	field
 		.iter()
 		.flat_map(|row| row.iter().filter(|&&p| p > 1))
-		.count() as i64
-}
-
-pub fn part1() -> i64 {
-	intersections(true)
-}
-
-pub fn part2() -> i64 {
-	intersections(false)
+		.count()
 }
