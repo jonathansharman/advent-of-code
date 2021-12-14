@@ -8,11 +8,11 @@ crate::test::test_part!(test1, part1, 4707);
 crate::test::test_part!(test2, part2, 130493);
 
 pub fn part1() -> i64 {
-	count_paths_1(&read_graph(), "start", "end")
+	count_paths(&read_graph(), &HashMap::new(), true, "start")
 }
 
 pub fn part2() -> i64 {
-	count_paths_2(&read_graph(), HashMap::new(), false, "start", "end")
+	count_paths(&read_graph(), &HashMap::new(), false, "start")
 }
 
 type Graph = HashMap<String, HashSet<String>>;
@@ -34,59 +34,29 @@ fn read_graph() -> Graph {
 	graph
 }
 
-fn count_paths_1(graph: &Graph, from: &str, to: &str) -> i64 {
-	if from == to {
-		return 1;
-	}
-	if from.chars().all(char::is_uppercase) {
-		graph[from]
-			.iter()
-			.map(|neighbor| count_paths_1(graph, neighbor, to))
-			.sum()
-	} else {
-		match graph.get(from) {
-			Some(neighbors) => {
-				let mut graph = graph.clone();
-				graph.remove(from);
-				neighbors
-					.iter()
-					.map(|neighbor| count_paths_1(&graph, neighbor, to))
-					.sum()
-			}
-			None => 0,
-		}
-	}
-}
-
-fn count_paths_2(
+fn count_paths(
 	graph: &Graph,
-	mut visit_map: HashMap<String, u32>,
+	visit_map: &HashMap<String, u32>,
 	double_used: bool,
 	from: &str,
-	to: &str,
 ) -> i64 {
-	if from == to {
+	if from == "end" {
 		return 1;
 	}
+	let mut visit_map = visit_map.clone();
 	let visits = visit_map.entry(from.into()).or_insert(0);
 	*visits += 1;
-	if !from.chars().all(char::is_uppercase) {
-		if *visits == 1 {
-			return graph[from]
-				.iter()
-				.map(|neighbor| count_paths_2(graph, visit_map.clone(), double_used, neighbor, to))
-				.sum();
-		}
-		if *visits == 2 && !double_used && from != "start" {
-			return graph[from]
-				.iter()
-				.map(|neighbor| count_paths_2(graph, visit_map.clone(), true, neighbor, to))
-				.sum();
-		}
-		return 0;
+	if from.chars().all(char::is_uppercase) || *visits == 1 {
+		graph[from]
+			.iter()
+			.map(|neighbor| count_paths(graph, &visit_map, double_used, neighbor))
+			.sum()
+	} else if *visits == 2 && !double_used && from != "start" {
+		graph[from]
+			.iter()
+			.map(|neighbor| count_paths(graph, &visit_map, true, neighbor))
+			.sum()
+	} else {
+		0
 	}
-	graph[from]
-		.iter()
-		.map(|neighbor| count_paths_2(graph, visit_map.clone(), double_used, neighbor, to))
-		.sum()
 }
