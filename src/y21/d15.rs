@@ -1,6 +1,6 @@
 use crate::io::read_lines;
 use itertools::Itertools;
-use std::collections::HashSet;
+use std::collections::BinaryHeap;
 
 crate::test::test_part!(test1, part1, 435);
 crate::test::test_part!(test2, part2, 2842);
@@ -23,10 +23,10 @@ fn expand_maze(maze: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
 	let n = maze.len();
 	let mut expanded = vec![vec![0; 5 * n]; 5 * n];
 	for (i, row) in maze.into_iter().enumerate() {
-		for (j, space) in row.into_iter().enumerate() {
+		for (j, cost) in row.into_iter().enumerate() {
 			for k in 0..5 {
 				for l in 0..5 {
-					expanded[i + n * k as usize][j + n * l as usize] = (space + k + l - 1) % 9 + 1;
+					expanded[i + n * k as usize][j + n * l as usize] = (cost + k + l - 1) % 9 + 1;
 				}
 			}
 		}
@@ -34,39 +34,59 @@ fn expand_maze(maze: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
 	expanded
 }
 
+#[derive(PartialEq, Eq)]
+struct Node {
+	i: usize,
+	j: usize,
+	d: u32,
+}
+
+impl Ord for Node {
+	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+		self.d.cmp(&other.d).reverse()
+	}
+}
+
+impl PartialOrd for Node {
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		Some(self.cmp(other))
+	}
+}
+
 fn dijkstra(maze: Vec<Vec<u32>>) -> u32 {
 	let n = maze.len();
-	let mut distances = vec![vec![u32::MAX; n]; n];
-	distances[0][0] = 0;
-	let mut unvisited: HashSet<(usize, usize)> = HashSet::new();
-	for i in 0..n {
-		for j in 0..n {
-			unvisited.insert((i, j));
-		}
-	}
-	while !unvisited.is_empty() {
-		let (i, j) = *unvisited
-			.iter()
-			.min_by(|(i1, j1), (i2, j2)| distances[*i1][*j1].cmp(&distances[*i2][*j2]))
-			.unwrap();
-		unvisited.remove(&(i, j));
 
-		if i > 0 && unvisited.contains(&(i - 1, j)) {
-			distances[i - 1][j] =
-				distances[i - 1][j].min(distances[i][j].saturating_add(maze[i - 1][j]));
+	let mut ds = vec![vec![u32::MAX; n]; n];
+	ds[0][0] = 0;
+
+	let mut queue = BinaryHeap::new();
+	queue.push(Node { i: 0, j: 0, d: 0 });
+
+	while let Some(Node { i, j, d }) = queue.pop() {
+		if ds[i][j] < d {
+			continue;
 		}
-		if i < n - 1 && unvisited.contains(&(i + 1, j)) {
-			distances[i + 1][j] =
-				distances[i + 1][j].min(distances[i][j].saturating_add(maze[i + 1][j]));
+
+		let mut visit = |d: u32, i: usize, j: usize| {
+			let d_new = d.saturating_add(maze[i][j]);
+			if d_new < ds[i][j] {
+				ds[i][j] = d_new;
+				queue.push(Node { i, j, d: d_new });
+			}
+		};
+
+		if i > 0 {
+			visit(d, i - 1, j);
 		}
-		if j > 0 && unvisited.contains(&(i, j - 1)) {
-			distances[i][j - 1] =
-				distances[i][j - 1].min(distances[i][j].saturating_add(maze[i][j - 1]));
+		if i < n - 1 {
+			visit(d, i + 1, j);
 		}
-		if j < n - 1 && unvisited.contains(&(i, j + 1)) {
-			distances[i][j + 1] =
-				distances[i][j + 1].min(distances[i][j].saturating_add(maze[i][j + 1]));
+		if j > 0 {
+			visit(d, i, j - 1);
+		}
+		if j < n - 1 {
+			visit(d, i, j + 1);
 		}
 	}
-	distances[n - 1][n - 1]
+	ds[n - 1][n - 1]
 }
