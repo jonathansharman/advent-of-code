@@ -34,13 +34,12 @@ fn polymerize(steps: usize) -> usize {
 	let rules: HashMap<(u8, u8), u8> = lines.map(|line| ((line[0], line[1]), line[6])).collect();
 	// Apply the rules.
 	for _ in 0..steps {
-		let mut new_kmers = kmers.clone();
+		let mut new_kmers = HashMap::new();
 		for ((a, b), count) in kmers.into_iter() {
 			if let Some(&insertion) = rules.get(&(a, b)) {
 				*element_counts.entry(insertion).or_insert(0) += count;
 				*new_kmers.entry((a, insertion)).or_insert(0) += count;
 				*new_kmers.entry((insertion, b)).or_insert(0) += count;
-				*new_kmers.entry((a, b)).or_insert(0) -= count;
 			}
 		}
 		kmers = new_kmers;
