@@ -12,14 +12,15 @@ pub fn part2() -> u64 {
 }
 
 fn read_bits() -> Vec<u8> {
-	let input = read_lines("input/2021/16.txt").next().unwrap();
-	let bits: Vec<u8> = input
+	read_lines("input/2021/16.txt")
+		.next()
+		.unwrap()
 		.chars()
 		.map(|c| {
-			let mut hex = c.to_digit(16).unwrap();
+			let mut hex = c.to_digit(16).unwrap() as u8;
 			let mut bits = Vec::new();
 			for _ in 0..4 {
-				bits.insert(0, if hex & 1 == 1 { 1 } else { 0 });
+				bits.insert(0, hex & 1);
 				hex >>= 1;
 			}
 			bits
@@ -28,8 +29,7 @@ fn read_bits() -> Vec<u8> {
 			a.extend(b.into_iter());
 			a
 		})
-		.unwrap();
-	bits
+		.unwrap()
 }
 
 struct Packet {
@@ -61,9 +61,7 @@ impl Packet {
 	fn version_sum(&self) -> u64 {
 		let contents_version_sum = match &self.contents {
 			PacketContents::Literal { .. } => 0,
-			PacketContents::Operation { args, .. } => {
-				args.iter().fold(0, |acc, s| acc + s.version_sum())
-			}
+			PacketContents::Operation { args, .. } => args.iter().map(Packet::version_sum).sum(),
 		};
 		self.version + contents_version_sum
 	}
@@ -76,27 +74,9 @@ impl Packet {
 				Operator::Product => args.iter().map(Packet::eval).product(),
 				Operator::Minimum => args.iter().map(Packet::eval).min().unwrap(),
 				Operator::Maximum => args.iter().map(Packet::eval).max().unwrap(),
-				Operator::GreaterThan => {
-					if args[0].eval() > args[1].eval() {
-						1
-					} else {
-						0
-					}
-				}
-				Operator::LessThan => {
-					if args[0].eval() < args[1].eval() {
-						1
-					} else {
-						0
-					}
-				}
-				Operator::EqualTo => {
-					if args[0].eval() == args[1].eval() {
-						1
-					} else {
-						0
-					}
-				}
+				Operator::GreaterThan => (args[0].eval() > args[1].eval()) as u64,
+				Operator::LessThan => (args[0].eval() < args[1].eval()) as u64,
+				Operator::EqualTo => (args[0].eval() == args[1].eval()) as u64,
 			},
 		}
 	}
@@ -124,6 +104,16 @@ fn parse_packet(bits: &mut &[u8]) -> Packet {
 		PacketContents::Literal { value }
 	} else {
 		// Operation
+		let operator = match type_id {
+			0 => Operator::Sum,
+			1 => Operator::Product,
+			2 => Operator::Minimum,
+			3 => Operator::Maximum,
+			5 => Operator::GreaterThan,
+			6 => Operator::LessThan,
+			7 => Operator::EqualTo,
+			_ => panic!("invalid type_id"),
+		};
 		let length_type_id = parse_number(bits, 1);
 		let mut args = Vec::new();
 		if length_type_id == 0 {
@@ -141,16 +131,6 @@ fn parse_packet(bits: &mut &[u8]) -> Packet {
 				args.push(parse_packet(bits))
 			}
 		}
-		let operator = match type_id {
-			0 => Operator::Sum,
-			1 => Operator::Product,
-			2 => Operator::Minimum,
-			3 => Operator::Maximum,
-			5 => Operator::GreaterThan,
-			6 => Operator::LessThan,
-			7 => Operator::EqualTo,
-			_ => panic!("invalid type_id"),
-		};
 		PacketContents::Operation { operator, args }
 	};
 	Packet { version, contents }
