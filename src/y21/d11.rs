@@ -1,4 +1,4 @@
-use crate::io::read_lines;
+use crate::{io::read_lines, neighbors};
 
 crate::test::test_part!(test1, part1, 1757);
 crate::test::test_part!(test2, part2, 422);
@@ -19,32 +19,8 @@ pub fn part1() -> usize {
 		}
 		while !queue.is_empty() {
 			let (i, j) = queue.pop().unwrap();
-			let mut process = |i: usize, j: usize| {
+			for (i, j) in neighbors::eight(WIDTH, WIDTH, i, j) {
 				process(&mut grid, &mut queue, &mut flashes, i, j);
-			};
-			if i > 0 {
-				process(i - 1, j);
-				if j > 0 {
-					process(i - 1, j - 1);
-				}
-				if j < WIDTH - 1 {
-					process(i - 1, j + 1);
-				}
-			}
-			if i < WIDTH - 1 {
-				process(i + 1, j);
-				if j > 0 {
-					process(i + 1, j - 1);
-				}
-				if j < WIDTH - 1 {
-					process(i + 1, j + 1);
-				}
-			}
-			if j > 0 {
-				process(i, j - 1);
-			}
-			if j < WIDTH - 1 {
-				process(i, j + 1);
 			}
 		}
 		for row in grid.iter_mut() {
@@ -74,32 +50,8 @@ pub fn part2() -> i64 {
 		}
 		while !queue.is_empty() {
 			let (i, j) = queue.pop().unwrap();
-			let mut process = |i: usize, j: usize| {
+			for (i, j) in neighbors::eight(WIDTH, WIDTH, i, j) {
 				process(&mut grid, &mut queue, &mut flashes, i, j);
-			};
-			if i > 0 {
-				process(i - 1, j);
-				if j > 0 {
-					process(i - 1, j - 1);
-				}
-				if j < WIDTH - 1 {
-					process(i - 1, j + 1);
-				}
-			}
-			if i < WIDTH - 1 {
-				process(i + 1, j);
-				if j > 0 {
-					process(i + 1, j - 1);
-				}
-				if j < WIDTH - 1 {
-					process(i + 1, j + 1);
-				}
-			}
-			if j > 0 {
-				process(i, j - 1);
-			}
-			if j < WIDTH - 1 {
-				process(i, j + 1);
 			}
 		}
 		for row in grid.iter_mut() {

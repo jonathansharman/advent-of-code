@@ -1,4 +1,4 @@
-use crate::io::read_lines;
+use crate::{io::read_lines, neighbors};
 use itertools::Itertools;
 use std::collections::BinaryHeap;
 
@@ -67,25 +67,12 @@ fn dijkstra(maze: Vec<Vec<u32>>) -> u32 {
 			continue;
 		}
 
-		let mut visit = |d: u32, i: usize, j: usize| {
+		for (i, j) in neighbors::four(n, n, i, j) {
 			let d_new = d.saturating_add(maze[i][j]);
 			if d_new < ds[i][j] {
 				ds[i][j] = d_new;
 				queue.push(Node { i, j, d: d_new });
 			}
-		};
-
-		if i > 0 {
-			visit(d, i - 1, j);
-		}
-		if i < n - 1 {
-			visit(d, i + 1, j);
-		}
-		if j > 0 {
-			visit(d, i, j - 1);
-		}
-		if j < n - 1 {
-			visit(d, i, j + 1);
 		}
 	}
 	ds[n - 1][n - 1]
