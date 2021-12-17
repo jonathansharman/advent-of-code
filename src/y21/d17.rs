@@ -1,14 +1,14 @@
 use crate::io::read_lines;
 use itertools::Itertools;
 
-crate::test::test_part!(test1, part1, ?);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test1, part1, 5253);
+crate::test::test_part!(test2, part2, 1770);
 
 pub fn part1() -> i64 {
 	let target = read_target();
 	let mut max_vy_hit: Option<i64> = None;
-	for vy in 0..=1_000 {
-		for vx in 1..=target.x_max {
+	for vy in -1_000..=1_000 {
+		for vx in 1..=1_000 {
 			if target.hit_time(vx, vy).is_some() {
 				max_vy_hit = Some(match max_vy_hit {
 					Some(current) => current.max(vy),
@@ -22,7 +22,16 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> usize {
-	read_lines("input/2021/16.txt").count()
+	let target = read_target();
+	let mut hits = 0;
+	for vy in -1_000..=1_000 {
+		for vx in 1..=1_000 {
+			if target.hit_time(vx, vy).is_some() {
+				hits += 1;
+			}
+		}
+	}
+	hits
 }
 
 struct Target {
