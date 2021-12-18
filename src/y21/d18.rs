@@ -1,5 +1,7 @@
 use std::ops::Add;
 
+use itertools::Itertools;
+
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 3359);
@@ -14,10 +16,19 @@ pub fn part1() -> u64 {
 		.magnitude()
 }
 
-pub fn part2() -> usize {
-	read_lines("input/2021/18.txt").count()
+pub fn part2() -> u64 {
+	let numbers = read_lines("input/2021/18.txt")
+		.map(|line| -> Number { parse_number(&mut line.as_bytes()) })
+		.collect_vec();
+	numbers
+		.iter()
+		.permutations(2)
+		.map(|ns| (ns[0].clone() + ns[1].clone()).magnitude())
+		.max()
+		.unwrap()
 }
 
+#[derive(Clone)]
 enum Number {
 	Regular(u64),
 	Pair(Box<Number>, Box<Number>),
