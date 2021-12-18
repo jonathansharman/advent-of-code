@@ -5,11 +5,10 @@ use itertools::Itertools;
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 3359);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 4616);
 
 pub fn part1() -> u64 {
-	read_lines("input/2021/18.txt")
-		.map(|line| -> Number { parse_number(&mut line.as_bytes()) })
+	read_numbers()
 		.reduce(Add::add)
 		.unwrap()
 		.reduce()
@@ -17,12 +16,15 @@ pub fn part1() -> u64 {
 }
 
 pub fn part2() -> u64 {
-	read_lines("input/2021/18.txt")
-		.map(|line| -> Number { parse_number(&mut line.as_bytes()) })
+	read_numbers()
 		.permutations(2)
 		.map(|ns| (ns[0].clone() + ns[1].clone()).magnitude())
 		.max()
 		.unwrap()
+}
+
+fn read_numbers() -> impl Iterator<Item = Number> {
+	read_lines("input/2021/18.txt").map(|line| -> Number { parse_number(&mut line.as_bytes()) })
 }
 
 #[derive(Clone)]
