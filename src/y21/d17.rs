@@ -6,32 +6,17 @@ crate::test::test_part!(test2, part2, 1770);
 
 pub fn part1() -> i64 {
 	let target = read_target();
-	let mut max_vy_hit: Option<i64> = None;
-	for vy in -1_000..=1_000 {
-		for vx in 1..=1_000 {
-			if target.hit_time(vx, vy).is_some() {
-				max_vy_hit = Some(match max_vy_hit {
-					Some(current) => current.max(vy),
-					None => vy,
-				})
-			}
-		}
-	}
-	let vy = max_vy_hit.unwrap();
+	let vy = target
+		.intersecting_trajectories()
+		.into_iter()
+		.map(|trajectory| trajectory.vy)
+		.max()
+		.unwrap();
 	vy * (vy + 1) / 2
 }
 
 pub fn part2() -> usize {
-	let target = read_target();
-	let mut hits = 0;
-	for vy in -1_000..=1_000 {
-		for vx in 1..=1_000 {
-			if target.hit_time(vx, vy).is_some() {
-				hits += 1;
-			}
-		}
-	}
-	hits
+	read_target().intersecting_trajectories().len()
 }
 
 struct Target {
@@ -46,11 +31,54 @@ impl Target {
 		self.x_min <= x && x <= self.x_max && self.y_min <= y && y <= self.y_max
 	}
 
-	fn hit_time(&self, mut vx: i64, mut vy: i64) -> Option<u32> {
+	fn intersecting_trajectories(&self) -> Vec<Trajectory> {
+		let critical_vxs = [
+			self.x_min,
+			self.x_max,
+			vx_to_reach(self.x_min),
+			vx_to_reach(self.x_max),
+		];
+		let vx_min = critical_vxs.into_iter().min().unwrap();
+		let vx_max = critical_vxs.into_iter().max().unwrap();
+		// Any faster downward than this, and the trajectory immediately
+		// overshoots downward.
+		let vy_min = self.y_min;
+		// Not sure if this is correct in general. The idea is to avoid
+		// overshooting either y limit of the target.
+		let vy_max = self.y_min.abs().max(self.y_max);
+
+		let mut trajectories = Vec::new();
+		for vx in vx_min..=vx_max {
+			for vy in vy_min..=vy_max {
+				let trajectory = Trajectory { vx, vy };
+				if trajectory.hits(self) {
+					trajectories.push(trajectory);
+				}
+			}
+		}
+		trajectories
+	}
+}
+
+/// The smallest intitial `vx` needed for a trajectory to reach `x`.
+///
+/// This is derived from the triangular number formula and the quadratic
+/// formula, to determine a `vx` that accumulates to at least `x`.
+fn vx_to_reach(x: i64) -> i64 {
+	let sign = if x.is_negative() { -1 } else { 1 };
+	sign * ((1 + 8 * x.abs()) as f64).sqrt() as i64 / 2
+}
+
+struct Trajectory {
+	vx: i64,
+	vy: i64,
+}
+
+impl Trajectory {
+	fn hits(&self, target: &Target) -> bool {
+		let (mut vx, mut vy) = (self.vx, self.vy);
 		let (mut x, mut y) = (0, 0);
-		let mut t = 0;
-		while vy >= 0 || y >= self.y_min {
-			t += 1;
+		while vy >= 0 || y >= target.y_min {
 			// Apply velocity.
 			x += vx;
 			y += vy;
@@ -62,11 +90,11 @@ impl Target {
 			}
 			vy -= 1;
 			// Check containment.
-			if self.contains(x, y) {
-				return Some(t);
+			if target.contains(x, y) {
+				return true;
 			}
 		}
-		None
+		false
 	}
 }
 
