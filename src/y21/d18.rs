@@ -17,11 +17,8 @@ pub fn part1() -> u64 {
 }
 
 pub fn part2() -> u64 {
-	let numbers = read_lines("input/2021/18.txt")
+	read_lines("input/2021/18.txt")
 		.map(|line| -> Number { parse_number(&mut line.as_bytes()) })
-		.collect_vec();
-	numbers
-		.iter()
 		.permutations(2)
 		.map(|ns| (ns[0].clone() + ns[1].clone()).magnitude())
 		.max()
