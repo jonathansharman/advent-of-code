@@ -8,11 +8,7 @@ crate::test::test_part!(test1, part1, 3359);
 crate::test::test_part!(test2, part2, 4616);
 
 pub fn part1() -> u64 {
-	read_numbers()
-		.reduce(Add::add)
-		.unwrap()
-		.reduce()
-		.magnitude()
+	read_numbers().reduce(Add::add).unwrap().magnitude()
 }
 
 pub fn part2() -> u64 {
@@ -34,86 +30,60 @@ enum Number {
 }
 
 impl Number {
-	fn reduce(self) -> Number {
-		match self.explode(0) {
-			Ok((_, exploded, _)) => exploded.reduce(),
-			Err(original) => match original.split() {
-				Ok(split) => split.reduce(),
-				Err(original) => original,
-			},
-		}
+	fn reduce(&mut self) {
+		while self.explode(0).is_some() || self.split() {}
 	}
 
-	fn explode(self, depth: usize) -> Result<(u64, Number, u64), Number> {
-		match self {
-			Number::Pair(pair) => {
-				if depth == 4 {
-					let first = if let Number::Regular(first) = pair.0 {
-						first
-					} else {
-						panic!("irregular exploded pair");
-					};
-					let second = if let Number::Regular(second) = pair.1 {
-						second
-					} else {
-						panic!("irregular exploded pair");
-					};
-					Ok((first, Number::Regular(0), second))
-				} else {
-					match pair.0.explode(depth + 1) {
-						Ok((left, first, right)) => Ok((
-							left,
-							Number::Pair(Box::new((first, pair.1.add_left(right)))),
-							0,
-						)),
-						Err(first) => match pair.1.explode(depth + 1) {
-							Ok((left, second, right)) => Ok((
-								0,
-								Number::Pair(Box::new((first.add_right(left), second))),
-								right,
-							)),
-							Err(second) => Err(Number::Pair(Box::new((first, second)))),
-						},
-					}
+	fn explode(&mut self, depth: usize) -> Option<(u64, u64)> {
+		if let Number::Pair(pair) = self {
+			if depth == 4 {
+				if let (Number::Regular(first), Number::Regular(second)) = **pair {
+					*self = Number::Regular(0);
+					return Some((first, second));
+				}
+				panic!("irregular exploded pair");
+			} else {
+				if let Some((left, right)) = pair.0.explode(depth + 1) {
+					pair.1.add_left(right);
+					return Some((left, 0));
+				}
+				if let Some((left, right)) = pair.1.explode(depth + 1) {
+					pair.0.add_right(left);
+					return Some((0, right));
 				}
 			}
-			regular => Err(regular),
 		}
+		None
 	}
 
-	fn add_left(self, amount: u64) -> Number {
+	fn add_left(&mut self, amount: u64) {
 		match self {
-			Number::Regular(n) => Number::Regular(n + amount),
-			Number::Pair(pair) => Number::Pair(Box::new((pair.0.add_left(amount), pair.1))),
+			Number::Regular(n) => *n += amount,
+			Number::Pair(pair) => pair.0.add_left(amount),
 		}
 	}
 
-	fn add_right(self, amount: u64) -> Number {
+	fn add_right(&mut self, amount: u64) {
 		match self {
-			Number::Regular(n) => Number::Regular(n + amount),
-			Number::Pair(pair) => Number::Pair(Box::new((pair.0, pair.1.add_right(amount)))),
+			Number::Regular(n) => *n += amount,
+			Number::Pair(pair) => pair.1.add_right(amount),
 		}
 	}
 
-	fn split(self) -> Result<Number, Number> {
+	fn split(&mut self) -> bool {
 		match self {
 			Number::Regular(n) => {
-				if n >= 10 {
-					Ok(Number::Pair(Box::new((
-						Number::Regular(n / 2),
-						Number::Regular(n / 2 + n % 2),
-					))))
+				if *n >= 10 {
+					*self = Number::Pair(Box::new((
+						Number::Regular(*n / 2),
+						Number::Regular(*n / 2 + *n % 2),
+					)));
+					true
 				} else {
-					Err(Number::Regular(n))
+					false
 				}
 			}
-			Number::Pair(pair) => match pair.0.split() {
-				Ok(first) => Ok(Number::Pair(Box::new((first, pair.1)))),
-				Err(first) => match pair.1.split() {
-					Ok(second) => Ok(Number::Pair(Box::new((first, second)))),
-					Err(second) => Err(Number::Pair(Box::new((first, second)))),
-				},
-			},
+			Number::Pair(pair) => pair.0.split() || pair.1.split(),
 		}
 	}
 
@@ -129,7 +99,9 @@ impl Add for Number {
 	type Output = Number;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		Number::Pair(Box::new((self, rhs))).reduce()
+		let mut sum = Number::Pair(Box::new((self, rhs)));
+		sum.reduce();
+		sum
 	}
 }
 
