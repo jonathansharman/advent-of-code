@@ -1,5 +1,5 @@
 use crate::io::read_lines;
-use itertools::{Itertools, MinMaxResult};
+use itertools::Itertools;
 use std::{collections::HashSet, hash::Hash, ops::Index};
 
 crate::test::test_part!(test1, part1, 357);
@@ -62,16 +62,6 @@ struct Scanner {
 }
 
 impl Scanner {
-	fn bounding_box(&self) -> [(i32, i32); 3] {
-		[0, 1, 2].map(
-			|axis| match self.readings.iter().map(|p| p[axis]).minmax() {
-				MinMaxResult::NoElements => (0, 0),
-				MinMaxResult::OneElement(only) => (only, only),
-				MinMaxResult::MinMax(min, max) => (min, max),
-			},
-		)
-	}
-
 	/// Projects the readings to a single `axis` and then maps them using `f`.
 	fn project_map_readings<T, F>(&self, axis: usize, f: F) -> HashSet<T>
 	where
@@ -82,31 +72,31 @@ impl Scanner {
 	}
 
 	fn merge(&self, other: &Scanner) -> Option<Scanner> {
-		let self_bounds = self.bounding_box();
-
 		use Heading::*;
 		for heading in [PlusX, MinusX, PlusY, MinusY, PlusZ, MinusZ] {
 			use Rotation::*;
 			for rotation in [Zero, Quarter, Half, ThreeQuarters] {
 				let other = other.reorient(Orientation { rotation, heading });
-				let other_bounds = other.bounding_box();
 
-				let translation_ranges = [0, 1, 2].map(|axis| {
-					(
-						self_bounds[axis].0 - other_bounds[axis].1,
-						self_bounds[axis].1 - other_bounds[axis].0,
-					)
+				let translation_sets = [0, 1, 2].map(|axis| {
+					let mut coords = HashSet::new();
+					for self_reading in self.readings.iter() {
+						for other_reading in other.readings.iter() {
+							coords.insert(self_reading[axis] - other_reading[axis]);
+						}
+					}
+					coords
 				});
 
 				let axis_alignment = |axis: usize| {
-					for translation in translation_ranges[axis].0..=translation_ranges[axis].1 {
-						let self_coords = self.project_map_readings(axis, |x| x);
+					let self_coords = self.project_map_readings(axis, |x| x);
+					for translation in translation_sets[axis].iter() {
 						let other_coords = other.project_map_readings(axis, |x| x + translation);
 
 						let total_coords = self_coords.len() + other_coords.len();
 						let common_coords = self_coords.union(&other_coords).count();
 						if total_coords - common_coords >= 12 {
-							return Some(translation);
+							return Some(*translation);
 						}
 					}
 					None
