@@ -2,15 +2,23 @@ use crate::io::read_lines;
 use itertools::Itertools;
 use std::collections::HashMap;
 
-crate::test::test_part!(test1, part1, ?);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test1, part1, 5359);
+crate::test::test_part!(test2, part2, 12333);
 
 pub fn part1() -> usize {
+	enhance(2)
+}
+
+pub fn part2() -> usize {
+	enhance(50)
+}
+
+fn enhance(iter_count: u32) -> usize {
 	let mut lines = read_lines("input/2021/20.txt");
 	let algo = read_algo(&mut lines);
 	lines.next();
 	let mut image = read_image(&mut lines);
-	for iter in 0..2 {
+	for iter in 0..iter_count {
 		// If the image enhancement algorithm maps 0 to on, then every other
 		// image has an infinite number of light pixels. These must be
 		// represented implicitly, based on the current iteration. If the
@@ -41,11 +49,6 @@ pub fn part1() -> usize {
 		image = next_image;
 	}
 	image.into_values().filter(|&x| x).count()
-}
-
-pub fn part2() -> usize {
-	let lines = read_lines("input/2021/20.txt");
-	lines.count()
 }
 
 fn read_algo(lines: &mut impl Iterator<Item = String>) -> [bool; 512] {
