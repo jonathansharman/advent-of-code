@@ -3,7 +3,7 @@ use itertools::Itertools;
 use std::{collections::HashSet, hash::Hash, ops::Index};
 
 crate::test::test_part!(test1, part1, 357);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 12317);
 
 pub fn part1() -> usize {
 	let mut scanners = read_scanners();
@@ -11,7 +11,7 @@ pub fn part1() -> usize {
 		let n = scanners.len();
 		for i in 0..n - 1 {
 			for j in i + 1..n {
-				if let Some(merged_scanner) = scanners[i].merge(&scanners[j]) {
+				if let Some((merged_scanner, _)) = scanners[i].merge(&scanners[j]) {
 					scanners[i] = merged_scanner;
 					scanners.swap_remove(j);
 					continue 'merge_loop;
@@ -20,11 +20,37 @@ pub fn part1() -> usize {
 		}
 		break;
 	}
+	println!("scanner count: {}", scanners.len());
 	scanners.iter().map(|scanner| scanner.readings.len()).sum()
 }
 
-pub fn part2() -> usize {
-	0
+pub fn part2() -> i32 {
+	let scanners = read_scanners();
+	let mut merging_scanners = scanners.clone();
+	'merge_loop: loop {
+		let n = merging_scanners.len();
+		for i in 0..n - 1 {
+			for j in i + 1..n {
+				if let Some((merged_scanner, _)) = merging_scanners[i].merge(&merging_scanners[j]) {
+					merging_scanners[i] = merged_scanner;
+					merging_scanners.swap_remove(j);
+					continue 'merge_loop;
+				}
+			}
+		}
+		break;
+	}
+	scanners
+		.iter()
+		.map(|scanner| merging_scanners[0].merge(scanner).unwrap().1)
+		.combinations(2)
+		.map(|translations| {
+			(0..3)
+				.map(|i| (translations[0][i] - translations[1][i]).abs())
+				.sum()
+		})
+		.max()
+		.unwrap()
 }
 
 fn read_scanners() -> Vec<Scanner> {
@@ -57,6 +83,7 @@ fn read_scanner(lines: &mut impl Iterator<Item = String>) -> Scanner {
 	}
 }
 
+#[derive(Clone)]
 struct Scanner {
 	readings: HashSet<Point>,
 }
@@ -71,7 +98,9 @@ impl Scanner {
 		self.readings.iter().map(|p| f(p[axis])).collect()
 	}
 
-	fn merge(&self, other: &Scanner) -> Option<Scanner> {
+	/// If the scanners can be merged, returns the merged scanner and the
+	/// translation from the second to the first.
+	fn merge(&self, other: &Scanner) -> Option<(Scanner, [i32; 3])> {
 		use Heading::*;
 		for heading in [PlusX, MinusX, PlusY, MinusY, PlusZ, MinusZ] {
 			use Rotation::*;
@@ -101,14 +130,20 @@ impl Scanner {
 					}
 					None
 				};
-				if let Some(x_translation) = axis_alignment(0) {
-					if let Some(y_translation) = axis_alignment(1) {
-						if let Some(z_translation) = axis_alignment(2) {
-							let translation = [x_translation, y_translation, z_translation];
-							let other = other.translate(translation);
-							return Some(Scanner {
-								readings: self.readings.union(&other.readings).cloned().collect(),
-							});
+				if let Some(x) = axis_alignment(0) {
+					if let Some(y) = axis_alignment(1) {
+						if let Some(z) = axis_alignment(2) {
+							let other = other.translate(x, y, z);
+							return Some((
+								Scanner {
+									readings: self
+										.readings
+										.union(&other.readings)
+										.cloned()
+										.collect(),
+								},
+								[x, y, z],
+							));
 						}
 					}
 				}
@@ -127,18 +162,12 @@ impl Scanner {
 		}
 	}
 
-	fn translate(&self, translation: [i32; 3]) -> Scanner {
+	fn translate(&self, x: i32, y: i32, z: i32) -> Scanner {
 		Scanner {
 			readings: self
 				.readings
 				.iter()
-				.map(|p| {
-					Point([
-						p[0] + translation[0],
-						p[1] + translation[1],
-						p[2] + translation[2],
-					])
-				})
+				.map(|p| Point([p[0] + x, p[1] + y, p[2] + z]))
 				.collect(),
 		}
 	}
