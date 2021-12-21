@@ -76,28 +76,29 @@ impl State {
 		player: usize,
 		rolls: u32,
 	) -> [u64; 2] {
-		let mut wins = [0, 0];
-		if rolls == 0 {
-			if let Some(wins) = cache.get(&(self.clone(), player)) {
-				return *wins;
-			}
-			let mut next = self.clone();
-			next.scores[player] += next.spaces[player];
-			if next.scores[player] >= 21 {
-				wins[player] += 1;
-			} else {
-				let next_wins = next.wins(cache, 1 - player, 3);
-				wins[0] += next_wins[0];
-				wins[1] += next_wins[1];
-			}
-			cache.insert((self.clone(), player), wins);
-		} else {
-			for roll in 1..=3 {
-				let next_wins = self.roll(player, roll).wins(cache, player, rolls - 1);
-				wins[0] += next_wins[0];
-				wins[1] += next_wins[1];
-			}
+		if rolls > 0 {
+			return (1..=3)
+				.map(|roll| self.roll(player, roll).wins(cache, player, rolls - 1))
+				.fold([0, 0], |acc, wins| [acc[0] + wins[0], acc[1] + wins[1]]);
 		}
+
+		if let Some(wins) = cache.get(&(self.clone(), player)) {
+			return *wins;
+		}
+
+		let mut next = self.clone();
+		next.scores[player] += next.spaces[player];
+		let wins = if next.scores[player] >= 21 {
+			if player == 0 {
+				[1, 0]
+			} else {
+				[0, 1]
+			}
+		} else {
+			next.wins(cache, 1 - player, 3)
+		};
+
+		cache.insert((self.clone(), player), wins);
 		wins
 	}
 }
