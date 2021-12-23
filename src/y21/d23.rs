@@ -1,7 +1,7 @@
 use crate::io::read_lines;
 use std::collections::HashMap;
 
-crate::test::test_part!(test1, part1, ?);
+crate::test::test_part!(test1, part1, 11608);
 crate::test::test_part!(test2, part2, ?);
 
 pub fn part1() -> u32 {
@@ -47,7 +47,7 @@ impl TryFrom<u8> for Amphipod {
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 struct State {
-	hall: [Option<Amphipod>; 7],
+	hall: [Option<Amphipod>; 11],
 	outer: [Option<Amphipod>; 4],
 	inner: [Option<Amphipod>; 4],
 }
@@ -61,7 +61,7 @@ impl State {
 				return energy;
 			}
 			let energy = self
-				.possible_next_states()
+				.possible_next_state_energies()
 				.into_iter()
 				.map(|(state, energy)| energy.saturating_add(state.min_energy_to_solve(cache)))
 				.fold(u32::MAX, |acc, energy| acc.min(energy));
@@ -84,62 +84,52 @@ impl State {
 		(state, energy)
 	}
 
-	fn possible_next_states(&self) -> Vec<(State, u32)> {
-		let mut states = Vec::new();
-		for h in 0..7 {
-			for i in 0..4 {
+	fn possible_next_state_energies(&self) -> Vec<(State, u32)> {
+		let mut state_energies = Vec::new();
+		// Skip room openings.
+		for h in [0, 1, 3, 5, 7, 9, 10] {
+			for r in 0..4 {
+				if !self.hall_is_clear_between(h, r) {
+					continue;
+				}
 				// Outer
-				match (self.outer[i], self.inner[i], self.hall[h]) {
+				match (self.outer[r], self.inner[r], self.hall[h]) {
 					// Outgoing
 					(Some(amphipod), Some(neighbor), None) => {
-						if (amphipod != neighbor || !belongs(amphipod, i))
-							&& self.hall_is_clear_between(h, i)
-						{
-							states.push(self.swap_outer(h, i, amphipod));
+						if amphipod != neighbor || !belongs(amphipod, r) {
+							state_energies.push(self.swap_outer(h, r, amphipod));
 						}
 					}
 					// Incoming
 					(None, Some(neighbor), Some(amphipod)) => {
-						if neighbor == amphipod
-							&& belongs(amphipod, i) && self.hall_is_clear_between(h, i)
-						{
-							states.push(self.swap_outer(h, i, amphipod));
+						if neighbor == amphipod && belongs(amphipod, r) {
+							state_energies.push(self.swap_outer(h, r, amphipod));
 						}
 					}
 					_ => (),
 				}
 				// Inner
-				match (self.outer[i], self.inner[i], self.hall[h]) {
+				match (self.outer[r], self.inner[r], self.hall[h]) {
 					// Outgoing
 					(None, Some(amphipod), None) => {
-						if !belongs(amphipod, i) && self.hall_is_clear_between(h, i) {
-							states.push(self.swap_inner(h, i, amphipod));
+						if !belongs(amphipod, r) {
+							state_energies.push(self.swap_inner(h, r, amphipod));
 						}
 					}
 					// Incoming
 					(None, None, Some(amphipod)) => {
-						if belongs(amphipod, i) && self.hall_is_clear_between(h, i) {
-							states.push(self.swap_inner(h, i, amphipod));
+						if belongs(amphipod, r) {
+							state_energies.push(self.swap_inner(h, r, amphipod));
 						}
 					}
 					_ => (),
 				}
 			}
 		}
-		states
+		state_energies
 	}
 
 	fn hall_is_clear_between(&self, hall_idx: usize, room_idx: usize) -> bool {
-		let hall_pos = match hall_idx {
-			0 => 0,
-			1 => 1,
-			2 => 3,
-			3 => 5,
-			4 => 7,
-			5 => 9,
-			6 => 10,
-			_ => panic!("hall_idx out of bounds"),
-		};
 		let room_pos = match room_idx {
 			0 => 2,
 			1 => 4,
@@ -147,9 +137,9 @@ impl State {
 			3 => 8,
 			_ => panic!("room_idx out of bounds"),
 		};
-		let min = hall_pos.min(room_pos);
-		let max = hall_pos.max(room_pos);
-		(min + 1..max).all(|i| self.hall[i / 2 + 1].is_none())
+		let min = hall_idx.min(room_pos) + 1;
+		let max = hall_idx.max(room_pos);
+		self.hall[min..max].iter().all(Option::is_none)
 	}
 
 	fn solved(&self) -> bool {
@@ -171,16 +161,6 @@ fn belongs(amphipod: Amphipod, room_idx: usize) -> bool {
 }
 
 fn steps_between(hall_idx: usize, room_idx: usize) -> u32 {
-	let hall_pos = match hall_idx {
-		0 => 0,
-		1 => 1,
-		2 => 3,
-		3 => 5,
-		4 => 7,
-		5 => 9,
-		6 => 10,
-		_ => panic!("hall_idx out of bounds"),
-	};
 	let room_pos = match room_idx {
 		0 => 2,
 		1 => 4,
@@ -188,7 +168,7 @@ fn steps_between(hall_idx: usize, room_idx: usize) -> u32 {
 		3 => 8,
 		_ => panic!("room_idx out of bounds"),
 	};
-	hall_pos.max(room_pos) - hall_pos.min(room_pos) + 1
+	(hall_idx.max(room_pos) - hall_idx.min(room_pos) + 1) as u32
 }
 
 fn read_state() -> State {
@@ -198,7 +178,7 @@ fn read_state() -> State {
 	let outer = lines.next().unwrap();
 	let inner = lines.next().unwrap();
 	State {
-		hall: [None; 7],
+		hall: [None; 11],
 		outer: [outer[3], outer[5], outer[7], outer[9]]
 			.map(TryInto::try_into)
 			.map(Result::ok),
