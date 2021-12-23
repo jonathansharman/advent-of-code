@@ -1,17 +1,18 @@
 use crate::io::read_lines;
+use std::collections::HashMap;
 
 crate::test::test_part!(test1, part1, ?);
 crate::test::test_part!(test2, part2, ?);
 
 pub fn part1() -> u32 {
-	read_state().min_energy_to_solve()
+	read_state().min_energy_to_solve(&mut HashMap::new())
 }
 
 pub fn part2() -> u32 {
-	read_state().min_energy_to_solve()
+	read_state().min_energy_to_solve(&mut HashMap::new())
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 enum Amphipod {
 	A,
 	B,
@@ -44,41 +45,46 @@ impl TryFrom<u8> for Amphipod {
 	}
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 struct State {
-	energy: u32,
 	hall: [Option<Amphipod>; 7],
 	outer: [Option<Amphipod>; 4],
 	inner: [Option<Amphipod>; 4],
 }
 
 impl State {
-	fn min_energy_to_solve(&self) -> u32 {
+	fn min_energy_to_solve(self, cache: &mut HashMap<State, u32>) -> u32 {
 		if self.solved() {
-			self.energy
+			0
 		} else {
-			self.possible_next_states()
-				.iter()
-				.map(State::min_energy_to_solve)
-				.fold(u32::MAX, |acc, energy| acc.min(energy))
+			if let Some(&energy) = cache.get(&self) {
+				return energy;
+			}
+			let energy = self
+				.possible_next_states()
+				.into_iter()
+				.map(|(state, energy)| energy.saturating_add(state.min_energy_to_solve(cache)))
+				.fold(u32::MAX, |acc, energy| acc.min(energy));
+			cache.insert(self, energy);
+			energy
 		}
 	}
 
-	fn swap_outer(&self, hall_idx: usize, room_idx: usize, amphipod: Amphipod) -> State {
-		let mut result = self.clone();
-		result.energy += steps_between(hall_idx, room_idx) * amphipod.energy_per_step();
-		std::mem::swap(&mut result.outer[room_idx], &mut result.hall[hall_idx]);
-		result
+	fn swap_outer(&self, hall_idx: usize, room_idx: usize, amphipod: Amphipod) -> (State, u32) {
+		let mut state = self.clone();
+		let energy = steps_between(hall_idx, room_idx) * amphipod.energy_per_step();
+		std::mem::swap(&mut state.outer[room_idx], &mut state.hall[hall_idx]);
+		(state, energy)
 	}
 
-	fn swap_inner(&self, hall_idx: usize, room_idx: usize, amphipod: Amphipod) -> State {
-		let mut result = self.clone();
-		result.energy += (1 + steps_between(hall_idx, room_idx)) * amphipod.energy_per_step();
-		std::mem::swap(&mut result.inner[room_idx], &mut result.hall[hall_idx]);
-		result
+	fn swap_inner(&self, hall_idx: usize, room_idx: usize, amphipod: Amphipod) -> (State, u32) {
+		let mut state = self.clone();
+		let energy = (1 + steps_between(hall_idx, room_idx)) * amphipod.energy_per_step();
+		std::mem::swap(&mut state.inner[room_idx], &mut state.hall[hall_idx]);
+		(state, energy)
 	}
 
-	fn possible_next_states(&self) -> Vec<State> {
+	fn possible_next_states(&self) -> Vec<(State, u32)> {
 		let mut states = Vec::new();
 		for h in 0..7 {
 			for i in 0..4 {
@@ -192,7 +198,6 @@ fn read_state() -> State {
 	let outer = lines.next().unwrap();
 	let inner = lines.next().unwrap();
 	State {
-		energy: 0,
 		hall: [None; 7],
 		outer: [outer[3], outer[5], outer[7], outer[9]]
 			.map(TryInto::try_into)
