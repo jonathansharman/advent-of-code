@@ -2,32 +2,34 @@ use crate::io::read_lines;
 use std::collections::HashMap;
 
 crate::test::test_part!(test1, part1, 11608);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 46754);
 
 pub fn part1() -> u32 {
 	read_state().min_energy_to_solve(&mut HashMap::new())
 }
 
 pub fn part2() -> u32 {
-	read_state().min_energy_to_solve(&mut HashMap::new())
+	let a = Some(Amphipod { home: 0 });
+	let b = Some(Amphipod { home: 1 });
+	let c = Some(Amphipod { home: 2 });
+	let d = Some(Amphipod { home: 3 });
+
+	let mut state = read_state();
+	state.rooms[0].splice(1..1, [d, d]);
+	state.rooms[1].splice(1..1, [c, b]);
+	state.rooms[2].splice(1..1, [b, a]);
+	state.rooms[3].splice(1..1, [a, c]);
+	state.min_energy_to_solve(&mut HashMap::new())
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-enum Amphipod {
-	A,
-	B,
-	C,
-	D,
+struct Amphipod {
+	home: usize,
 }
 
 impl Amphipod {
 	fn energy_per_step(self) -> u32 {
-		match self {
-			Amphipod::A => 1,
-			Amphipod::B => 10,
-			Amphipod::C => 100,
-			Amphipod::D => 1000,
-		}
+		u32::pow(10, self.home as u32)
 	}
 }
 
@@ -36,10 +38,10 @@ impl TryFrom<u8> for Amphipod {
 
 	fn try_from(c: u8) -> Result<Self, ()> {
 		match c {
-			b'A' => Ok(Amphipod::A),
-			b'B' => Ok(Amphipod::B),
-			b'C' => Ok(Amphipod::C),
-			b'D' => Ok(Amphipod::D),
+			b'A' => Ok(Amphipod { home: 0 }),
+			b'B' => Ok(Amphipod { home: 1 }),
+			b'C' => Ok(Amphipod { home: 2 }),
+			b'D' => Ok(Amphipod { home: 3 }),
 			_ => Err(()),
 		}
 	}
@@ -48,8 +50,8 @@ impl TryFrom<u8> for Amphipod {
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 struct State {
 	hall: [Option<Amphipod>; 11],
-	outer: [Option<Amphipod>; 4],
-	inner: [Option<Amphipod>; 4],
+	/// Room spaces indexed by room then by increasing distance from the hall
+	rooms: [Vec<Option<Amphipod>>; 4],
 }
 
 impl State {
@@ -70,17 +72,20 @@ impl State {
 		}
 	}
 
-	fn swap_outer(&self, hall_idx: usize, room_idx: usize, amphipod: Amphipod) -> (State, u32) {
+	fn swap(
+		&self,
+		hall_idx: usize,
+		room_idx: usize,
+		distance: usize,
+		amphipod: Amphipod,
+	) -> (State, u32) {
 		let mut state = self.clone();
-		let energy = steps_between(hall_idx, room_idx) * amphipod.energy_per_step();
-		std::mem::swap(&mut state.outer[room_idx], &mut state.hall[hall_idx]);
-		(state, energy)
-	}
-
-	fn swap_inner(&self, hall_idx: usize, room_idx: usize, amphipod: Amphipod) -> (State, u32) {
-		let mut state = self.clone();
-		let energy = (1 + steps_between(hall_idx, room_idx)) * amphipod.energy_per_step();
-		std::mem::swap(&mut state.inner[room_idx], &mut state.hall[hall_idx]);
+		std::mem::swap(
+			&mut state.rooms[room_idx][distance],
+			&mut state.hall[hall_idx],
+		);
+		let steps = steps_between(hall_idx, room_idx) + distance as u32;
+		let energy = steps * amphipod.energy_per_step();
 		(state, energy)
 	}
 
@@ -92,37 +97,46 @@ impl State {
 				if !self.hall_is_clear_between(h, r) {
 					continue;
 				}
-				// Outer
-				match (self.outer[r], self.inner[r], self.hall[h]) {
-					// Outgoing
-					(Some(amphipod), Some(neighbor), None) => {
-						if amphipod != neighbor || !belongs(amphipod, r) {
-							state_energies.push(self.swap_outer(h, r, amphipod));
+				for d in 0..self.rooms[r].len() {
+					match (self.hall[h], self.rooms[r][d]) {
+						// Incoming
+						(Some(hall_amphipod), None) => {
+							let mut can_enter = hall_amphipod.home == r;
+							for d2 in d + 1..self.rooms[r].len() {
+								match self.rooms[r][d2] {
+									Some(Amphipod { home }) => {
+										if home != r {
+											can_enter = false;
+											break;
+										}
+									}
+									None => {
+										can_enter = false;
+										break;
+									}
+								}
+							}
+							if can_enter {
+								state_energies.push(self.swap(h, r, d, hall_amphipod));
+								break;
+							}
 						}
-					}
-					// Incoming
-					(None, Some(neighbor), Some(amphipod)) => {
-						if neighbor == amphipod && belongs(amphipod, r) {
-							state_energies.push(self.swap_outer(h, r, amphipod));
+						// Outgoing
+						(None, Some(room_amphipod)) => {
+							let mut can_leave = room_amphipod.home != r;
+							for d2 in d + 1..self.rooms[r].len() {
+								if self.rooms[r][d2].unwrap().home != r {
+									can_leave = true;
+									break;
+								}
+							}
+							if can_leave {
+								state_energies.push(self.swap(h, r, d, room_amphipod));
+								break;
+							}
 						}
+						_ => (),
 					}
-					_ => (),
-				}
-				// Inner
-				match (self.outer[r], self.inner[r], self.hall[h]) {
-					// Outgoing
-					(None, Some(amphipod), None) => {
-						if !belongs(amphipod, r) {
-							state_energies.push(self.swap_inner(h, r, amphipod));
-						}
-					}
-					// Incoming
-					(None, None, Some(amphipod)) => {
-						if belongs(amphipod, r) {
-							state_energies.push(self.swap_inner(h, r, amphipod));
-						}
-					}
-					_ => (),
 				}
 			}
 		}
@@ -143,21 +157,11 @@ impl State {
 	}
 
 	fn solved(&self) -> bool {
-		let sorted = [
-			Some(Amphipod::A),
-			Some(Amphipod::B),
-			Some(Amphipod::C),
-			Some(Amphipod::D),
-		];
-		self.outer == sorted && self.inner == sorted
+		self.rooms.iter().enumerate().all(|(room_idx, room)| {
+			room.iter()
+				.all(|amphipod| amphipod.map(|a| a.home) == Some(room_idx))
+		})
 	}
-}
-
-fn belongs(amphipod: Amphipod, room_idx: usize) -> bool {
-	matches!(
-		(amphipod, room_idx),
-		(Amphipod::A, 0) | (Amphipod::B, 1) | (Amphipod::C, 2) | (Amphipod::D, 3)
-	)
 }
 
 fn steps_between(hall_idx: usize, room_idx: usize) -> u32 {
@@ -175,15 +179,15 @@ fn read_state() -> State {
 	let mut lines = read_lines("input/2021/23.txt")
 		.map(String::into_bytes)
 		.skip(2);
-	let outer = lines.next().unwrap();
-	let inner = lines.next().unwrap();
+	let depth0 = lines.next().unwrap();
+	let depth1 = lines.next().unwrap();
 	State {
 		hall: [None; 11],
-		outer: [outer[3], outer[5], outer[7], outer[9]]
-			.map(TryInto::try_into)
-			.map(Result::ok),
-		inner: [inner[3], inner[5], inner[7], inner[9]]
-			.map(TryInto::try_into)
-			.map(Result::ok),
+		rooms: [
+			vec![depth0[3].try_into().ok(), depth1[3].try_into().ok()],
+			vec![depth0[5].try_into().ok(), depth1[5].try_into().ok()],
+			vec![depth0[7].try_into().ok(), depth1[7].try_into().ok()],
+			vec![depth0[9].try_into().ok(), depth1[9].try_into().ok()],
+		],
 	}
 }
