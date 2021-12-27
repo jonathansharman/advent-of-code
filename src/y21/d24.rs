@@ -133,7 +133,7 @@ fn increment(input: &mut [i64; 14]) {
 
 #[allow(clippy::many_single_char_names)]
 fn monad(i: [i64; 14]) -> i64 {
-	let mut w = 0;
+	let mut w;
 	let mut x = 0;
 	let mut y = 0;
 	let mut z = 0;
