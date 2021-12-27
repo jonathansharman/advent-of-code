@@ -1,7 +1,6 @@
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 513);
-crate::test::test_part!(test2, part2, ?);
 
 pub fn part1() -> i64 {
 	let mut region = read_region();
@@ -42,10 +41,6 @@ pub fn part1() -> i64 {
 		iters += 1;
 	}
 	iters
-}
-
-pub fn part2() -> u32 {
-	0
 }
 
 fn read_region() -> Vec<Vec<u8>> {
