@@ -1,7 +1,10 @@
+use itertools::Itertools;
+
 use crate::io::read_lines;
+use std::collections::BTreeSet;
 
 crate::test::test_part!(test1, part1, 904);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 669);
 
 pub fn part1() -> u32 {
 	read_lines("input/2020/05.txt")
@@ -10,8 +13,17 @@ pub fn part1() -> u32 {
 		.unwrap_or_default()
 }
 
-pub fn part2() -> usize {
-	read_lines("input/2020/05.txt").count()
+pub fn part2() -> u32 {
+	let seat_ids: BTreeSet<_> = read_lines("input/2020/05.txt")
+		.map(|line| Pass::from(line.as_bytes()).seat_id())
+		.collect();
+	for (current, next) in seat_ids.into_iter().tuple_windows() {
+		let expected_next = current + 1;
+		if next != expected_next {
+			return expected_next;
+		}
+	}
+	0
 }
 
 struct Pass {
