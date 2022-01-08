@@ -26,7 +26,7 @@ pub fn eight(row_count: usize, col_count: usize, i: usize, j: usize) -> Vec<(usi
 		if 0 < j && j < col_count {
 			result.push((i - 1, j - 1));
 		}
-		if j < row_count - 1 {
+		if j < col_count - 1 {
 			result.push((i - 1, j + 1));
 		}
 	}
@@ -35,14 +35,14 @@ pub fn eight(row_count: usize, col_count: usize, i: usize, j: usize) -> Vec<(usi
 		if 0 < j && j < col_count {
 			result.push((i + 1, j - 1));
 		}
-		if j < row_count - 1 {
+		if j < col_count - 1 {
 			result.push((i + 1, j + 1));
 		}
 	}
 	if 0 < j && j < col_count {
 		result.push((i, j - 1));
 	}
-	if j < row_count - 1 {
+	if j < col_count - 1 {
 		result.push((i, j + 1));
 	}
 	result
