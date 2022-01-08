@@ -9,6 +9,15 @@ where
 	BufReader::new(file).lines().map(Result::unwrap)
 }
 
+pub fn parse_lines<P, Item>(path: P) -> impl Iterator<Item = Item>
+where
+	P: AsRef<Path>,
+	Item: std::str::FromStr,
+	<Item as std::str::FromStr>::Err: std::fmt::Debug,
+{
+	read_lines(path).map(|line| line.parse().unwrap())
+}
+
 pub fn read_integer_lines<P>(path: P) -> impl Iterator<Item = i64>
 where
 	P: AsRef<Path>,
