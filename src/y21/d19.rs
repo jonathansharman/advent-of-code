@@ -20,7 +20,6 @@ pub fn part1() -> usize {
 		}
 		break;
 	}
-	println!("scanner count: {}", scanners.len());
 	scanners.iter().map(|scanner| scanner.readings.len()).sum()
 }
 

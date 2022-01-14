@@ -23,7 +23,7 @@ pub fn part1() -> i64 {
 				"forward" => (depth, latitude + distance),
 				"down" => (depth + distance, latitude),
 				"up" => (depth - distance, latitude),
-				_ => panic!("unexpected direction: {}", direction),
+				_ => panic!("unexpected direction: {direction}"),
 			},
 		);
 	depth * latitude
@@ -47,7 +47,7 @@ pub fn part2() -> i64 {
 				"forward" => (depth + aim * distance, latitude + distance, aim),
 				"down" => (depth, latitude, aim + distance),
 				"up" => (depth, latitude, aim - distance),
-				_ => panic!("unexpected direction: {}", direction),
+				_ => panic!("unexpected direction: {direction}"),
 			},
 		);
 	depth * latitude

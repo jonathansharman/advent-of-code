@@ -16,7 +16,7 @@ pub fn part1() -> i64 {
 						.into_iter()
 						.reduce(|acc, digit| 10 * acc + digit)
 						.unwrap();
-					println!("Found an answer: {}", answer);
+					println!("Found an answer: {answer}");
 					return answer;
 				}
 				decrement(&mut input);
@@ -30,9 +30,10 @@ pub fn part1() -> i64 {
 		.into_iter()
 		.map(|thread| thread.join().unwrap())
 		.collect_vec();
-	println!("Finished searching in {} s", start.elapsed().as_secs_f64());
+	let search_duration = start.elapsed().as_secs_f64();
+	println!("Finished searching in {search_duration} s");
 	for (i, answer) in answers.iter().enumerate() {
-		println!("From thread {}: {}", i, answer);
+		println!("From thread {i}: {answer}");
 	}
 	answers.into_iter().max().unwrap()
 }
@@ -61,15 +62,13 @@ fn benchmark_part1() {
 		.collect_vec();
 	let total_iters = threads.len() as u128 * iters;
 	for (t, thread) in threads.into_iter().enumerate() {
-		println!("{}: {}", t, thread.join().unwrap());
+		let output = thread.join().unwrap();
+		println!("{t}: {output}");
 	}
 	let elapsed = start.elapsed();
-	println!(
-		"{} checks in {} ms ({} ns / check)",
-		total_iters,
-		elapsed.as_millis(),
-		elapsed.as_nanos() / total_iters,
-	);
+	let elapsed_ms = elapsed.as_millis();
+	let throughput = elapsed.as_nanos() / total_iters;
+	println!("{total_iters} checks in {elapsed_ms} ms ({throughput} ns / check)");
 }
 
 // Note: I know from finding 19917929934996 in part 1 that it's an upper bound,
@@ -86,7 +85,7 @@ pub fn part2() -> i64 {
 						.into_iter()
 						.reduce(|acc, digit| 10 * acc + digit)
 						.unwrap();
-					println!("Found an answer: {}", answer);
+					println!("Found an answer: {answer}");
 					return answer;
 				}
 				increment(&mut input);
@@ -100,9 +99,10 @@ pub fn part2() -> i64 {
 		.into_iter()
 		.map(|thread| thread.join().unwrap())
 		.collect_vec();
-	println!("Finished searching in {} s", start.elapsed().as_secs_f64());
+	let search_duration = start.elapsed().as_secs_f64();
+	println!("Finished searching in {search_duration} s");
 	for (i, answer) in answers.iter().enumerate() {
-		println!("From thread {}: {}", i, answer);
+		println!("From thread {i}: {answer}");
 	}
 	answers.into_iter().max().unwrap()
 }

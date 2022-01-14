@@ -108,7 +108,7 @@ impl Add for Number {
 impl std::fmt::Display for Number {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Number::Regular(n) => write!(f, "{}", n),
+			Number::Regular(n) => write!(f, "{n}"),
 			Number::Pair(pair) => write!(f, "[{},{}]", pair.0, pair.1),
 		}
 	}
