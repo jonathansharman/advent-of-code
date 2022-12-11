@@ -16,7 +16,7 @@ enum Op {
 
 #[derive(Debug)]
 struct Monkey {
-	items: VecDeque<Vec<u64>>,
+	items: VecDeque<usize>,
 	op: Op,
 	divisor: u64,
 	if_true: usize,
@@ -31,19 +31,24 @@ where
 	line.split_whitespace().last().unwrap().parse().unwrap()
 }
 
-fn read_monkeys() -> Vec<Monkey> {
+fn read_monkeys_and_worries() -> (Vec<Monkey>, Vec<u64>) {
 	let mut monkeys = Vec::new();
+	let mut worries: Vec<u64> = Vec::new();
 	let mut lines =
 		read_lines("input/2022/11.txt").filter(|line| !line.is_empty());
 	while lines.next().is_some() {
-		let items = lines
-			.next()
-			.unwrap()
-			.strip_prefix("  Starting items: ")
-			.unwrap()
-			.split(", ")
-			.map(|x| vec![x.parse().unwrap()])
-			.collect();
+		let n = worries.len();
+		worries.append(
+			&mut lines
+				.next()
+				.unwrap()
+				.strip_prefix("  Starting items: ")
+				.unwrap()
+				.split(", ")
+				.map(|worry| worry.parse().unwrap())
+				.collect(),
+		);
+		let items = (n..worries.len()).collect();
 		let op_line = lines.next().unwrap();
 		let op = if op_line.ends_with("old") {
 			Op::Square
@@ -64,77 +69,56 @@ fn read_monkeys() -> Vec<Monkey> {
 			inspections: 0,
 		});
 	}
-	monkeys
+	(monkeys, worries)
 }
 
 pub fn part1() -> u64 {
-	let mut monkeys = read_monkeys();
-	for _round in 0..20 {
-		for idx in 0..monkeys.len() {
-			while !monkeys[idx].items.is_empty() {
-				monkeys[idx].inspections += 1;
-				let mut item = monkeys[idx].items.pop_front().unwrap();
-				match monkeys[idx].op {
-					Op::Plus(n) => item[0] += n,
-					Op::Times(n) => item[0] *= n,
-					Op::Square => item[0] *= item[0],
-				}
-				item[0] /= 3;
-				let target = if item[0] % monkeys[idx].divisor == 0 {
-					monkeys[idx].if_true
-				} else {
-					monkeys[idx].if_false
-				};
-				monkeys[target].items.push_back(item);
-			}
-		}
-	}
-	monkeys.sort_by(|m1, m2| m2.inspections.cmp(&m1.inspections));
-	monkeys[0].inspections * monkeys[1].inspections
+	solve(true)
 }
 
 pub fn part2() -> u64 {
-	let mut monkeys = read_monkeys();
-	let divisors = monkeys.iter().map(|monkey| monkey.divisor).collect_vec();
-	for monkey in monkeys.iter_mut() {
-		for item in monkey.items.iter_mut() {
-			*item = divisors.iter().map(|d| item[0] % d).collect();
-		}
-	}
-	for _round in 0..10_000 {
-		for idx in 0..monkeys.len() {
-			while !monkeys[idx].items.is_empty() {
-				monkeys[idx].inspections += 1;
-				let mut item = monkeys[idx].items.pop_front().unwrap();
-				match monkeys[idx].op {
-					Op::Plus(n) => apply_op(&divisors, &mut item, |x| {
-						x.checked_add(n).unwrap()
-					}),
-					Op::Times(n) => apply_op(&divisors, &mut item, |x| {
-						x.checked_mul(n).unwrap()
-					}),
-					Op::Square => apply_op(&divisors, &mut item, |x| {
-						x.checked_mul(x).unwrap()
-					}),
+	solve(false)
+}
+
+fn solve(part1: bool) -> u64 {
+	let (mut monkeys, worries) = read_monkeys_and_worries();
+	// (worry, modulus) pairs
+	let mut worry_map = worries
+		.into_iter()
+		.map(|worry| {
+			monkeys
+				.iter()
+				.map(|monkey| (worry, monkey.divisor))
+				.collect_vec()
+		})
+		.collect_vec();
+	let rounds = if part1 { 20 } else { 10_000 };
+	for _ in 0..rounds {
+		for m in 0..monkeys.len() {
+			while !monkeys[m].items.is_empty() {
+				monkeys[m].inspections += 1;
+				let i = monkeys[m].items.pop_front().unwrap();
+				for (worry, modulus) in worry_map[i].iter_mut() {
+					match monkeys[m].op {
+						Op::Plus(n) => *worry += n,
+						Op::Times(n) => *worry *= n,
+						Op::Square => *worry *= *worry,
+					}
+					if part1 {
+						*worry /= 3;
+					} else {
+						*worry %= *modulus;
+					}
 				}
-				let target = if item[idx] % monkeys[idx].divisor == 0 {
-					monkeys[idx].if_true
+				let target = if worry_map[i][m].0 % monkeys[m].divisor == 0 {
+					monkeys[m].if_true
 				} else {
-					monkeys[idx].if_false
+					monkeys[m].if_false
 				};
-				monkeys[target].items.push_back(item);
+				monkeys[target].items.push_back(i);
 			}
 		}
 	}
 	monkeys.sort_by(|m1, m2| m2.inspections.cmp(&m1.inspections));
 	monkeys[0].inspections * monkeys[1].inspections
-}
-
-fn apply_op<F>(divisors: &[u64], item: &mut [u64], op: F)
-where
-	F: Fn(u64) -> u64,
-{
-	for (i, value) in item.iter_mut().enumerate() {
-		*value = op(*value) % divisors[i];
-	}
 }
