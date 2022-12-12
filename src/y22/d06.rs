@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use itertools::Itertools;
 
 crate::test::test_part!(test1, part1, 1538);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 2315);
 
 pub fn part1() -> usize {
 	let input = std::fs::read_to_string("input/2022/06.txt").unwrap();
@@ -14,6 +16,30 @@ pub fn part1() -> usize {
 	panic!()
 }
 
+const START_LEN: usize = 14;
+
 pub fn part2() -> usize {
-	0
+	let input = std::fs::read_to_string("input/2022/06.txt").unwrap();
+	let mut counts: HashMap<char, usize> =
+		input
+			.chars()
+			.take(START_LEN)
+			.fold(HashMap::new(), |mut counts, c| {
+				*counts.entry(c).or_default() += 1;
+				counts
+			});
+	for (i, (c_out, c_in)) in
+		input.chars().zip(input.chars().skip(START_LEN)).enumerate()
+	{
+		if counts.len() == START_LEN {
+			return i + START_LEN;
+		}
+		*counts.entry(c_in).or_default() += 1;
+		let count_out = counts.entry(c_out).or_default();
+		*count_out -= 1;
+		if *count_out == 0 {
+			counts.remove(&c_out);
+		}
+	}
+	panic!()
 }
