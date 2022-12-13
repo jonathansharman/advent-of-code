@@ -28,10 +28,18 @@ impl PartialOrd for Value {
 			(Value::Number(l), Value::Number(r)) => l.partial_cmp(r),
 			(Value::List(l), Value::List(r)) => l.partial_cmp(r),
 			(Value::List(l), r @ Value::Number(_)) => {
-				l.partial_cmp(&vec![r.clone()])
+				if l.is_empty() {
+					Some(Ordering::Less)
+				} else {
+					l[0].partial_cmp(r)
+				}
 			}
 			(l @ Value::Number(_), Value::List(r)) => {
-				vec![l.clone()].partial_cmp(r)
+				if r.is_empty() {
+					Some(Ordering::Greater)
+				} else {
+					l.partial_cmp(&r[0])
+				}
 			}
 		}
 	}
@@ -73,7 +81,7 @@ fn parse_list(input: &mut &[u8]) -> Option<Value> {
 fn parse_number(input: &mut &[u8]) -> Option<Value> {
 	let idx = input.iter().position(|c| !c.is_ascii_digit())?;
 	let value = std::str::from_utf8(&input[..idx]).ok()?.parse().ok()?;
-	*input = &(*input)[1..];
+	*input = &(*input)[idx..];
 	Some(Value::Number(value))
 }
 
