@@ -28,18 +28,10 @@ impl PartialOrd for Value {
 			(Value::Number(l), Value::Number(r)) => l.partial_cmp(r),
 			(Value::List(l), Value::List(r)) => l.partial_cmp(r),
 			(Value::List(l), r @ Value::Number(_)) => {
-				if l.is_empty() {
-					Some(Ordering::Less)
-				} else {
-					l[0].partial_cmp(r)
-				}
+				l.partial_cmp(&vec![r.clone()])
 			}
 			(l @ Value::Number(_), Value::List(r)) => {
-				if r.is_empty() {
-					Some(Ordering::Greater)
-				} else {
-					l.partial_cmp(&r[0])
-				}
+				vec![l.clone()].partial_cmp(r)
 			}
 		}
 	}
@@ -94,6 +86,7 @@ pub fn part1() -> usize {
 		.map(|(i, pair)| {
 			let pair = pair.collect_vec();
 			if pair[0] < pair[1] {
+				println!("{}: {:?} < {:?}", i + 1, pair[0], pair[1]);
 				i + 1
 			} else {
 				0
