@@ -4,10 +4,10 @@ use itertools::Itertools;
 
 use crate::io::read_lines;
 
-crate::test::test_part!(test1, part1, ?);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test1, part1, 5208);
+crate::test::test_part!(test2, part2, 25792);
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 enum Value {
 	Number(i32),
 	List(Vec<Value>),
@@ -22,18 +22,20 @@ impl Debug for Value {
 	}
 }
 
+impl Ord for Value {
+	fn cmp(&self, other: &Self) -> Ordering {
+		match (self, other) {
+			(Value::Number(l), Value::Number(r)) => l.cmp(r),
+			(Value::List(l), Value::List(r)) => l.cmp(r),
+			(Value::List(l), r @ Value::Number(_)) => l.cmp(&vec![r.clone()]),
+			(l @ Value::Number(_), Value::List(r)) => vec![l.clone()].cmp(r),
+		}
+	}
+}
+
 impl PartialOrd for Value {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-		match (self, other) {
-			(Value::Number(l), Value::Number(r)) => l.partial_cmp(r),
-			(Value::List(l), Value::List(r)) => l.partial_cmp(r),
-			(Value::List(l), r @ Value::Number(_)) => {
-				l.partial_cmp(&vec![r.clone()])
-			}
-			(l @ Value::Number(_), Value::List(r)) => {
-				vec![l.clone()].partial_cmp(r)
-			}
-		}
+		Some(self.cmp(other))
 	}
 }
 
@@ -95,5 +97,15 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let mut packets = read_lines("input/2022/13.txt")
+		.filter_map(|line| parse_value(&mut line.as_bytes()))
+		.collect_vec();
+	let div1 = parse_value(&mut "[[2]]".as_bytes()).unwrap();
+	let div2 = parse_value(&mut "[[6]]".as_bytes()).unwrap();
+	packets.push(div1.clone());
+	packets.push(div2.clone());
+	packets.sort();
+	let idx1 = packets.iter().position(|p| p == &div1).unwrap();
+	let idx2 = packets.iter().position(|p| p == &div2).unwrap();
+	(idx1 + 1) * (idx2 + 1)
 }
