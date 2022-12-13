@@ -86,7 +86,6 @@ pub fn part1() -> usize {
 		.map(|(i, pair)| {
 			let pair = pair.collect_vec();
 			if pair[0] < pair[1] {
-				println!("{}: {:?} < {:?}", i + 1, pair[0], pair[1]);
 				i + 1
 			} else {
 				0
