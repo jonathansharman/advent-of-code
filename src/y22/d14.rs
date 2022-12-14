@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::io::read_lines;
 
-crate::test::test_part!(test1, part1, ?);
+crate::test::test_part!(test1, part1, 592);
 crate::test::test_part!(test2, part2, ?);
 
 fn merge(
