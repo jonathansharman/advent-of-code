@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use crate::io::read_lines;
 
-crate::test::test_part!(test1, part1, ?);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test1, part1, 1315285);
+crate::test::test_part!(test2, part2, 9847279);
 
 #[derive(Debug)]
 enum Node {
@@ -11,7 +11,7 @@ enum Node {
 	Directory(Vec<String>),
 }
 
-pub fn part1() -> usize {
+fn build_nodes() -> HashMap<Vec<String>, Node> {
 	let mut nodes = HashMap::new();
 	nodes.insert(Vec::new(), Node::Directory(Vec::new()));
 	let mut wd = Vec::new();
@@ -42,8 +42,7 @@ pub fn part1() -> usize {
 			}
 		}
 	}
-	let mut cache = HashMap::new();
-	sum_no_more_than_100_000(&nodes, &mut cache, Vec::new())
+	nodes
 }
 
 fn sum_no_more_than_100_000(
@@ -92,6 +91,32 @@ fn get_size(
 	}
 }
 
+pub fn part1() -> usize {
+	let nodes = build_nodes();
+	let mut cache = HashMap::new();
+	sum_no_more_than_100_000(&nodes, &mut cache, Vec::new())
+}
+
 pub fn part2() -> usize {
-	0
+	let nodes = build_nodes();
+	let mut cache = HashMap::new();
+	let used = get_size(&nodes, &mut cache, Vec::new());
+	const TOTAL_SIZE: usize = 70_000_000;
+	const REQUIRED: usize = 30_000_000;
+	let min_delete = used + REQUIRED - TOTAL_SIZE;
+	cache
+		.iter()
+		.filter_map(|(path, &size)| {
+			if let Node::Directory(_) = nodes.get(path).unwrap() {
+				if size >= min_delete {
+					Some(size)
+				} else {
+					None
+				}
+			} else {
+				None
+			}
+		})
+		.min()
+		.unwrap()
 }
