@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::io::read_lines;
 
-crate::test::test_part!(test1, part1, ?);
+crate::test::test_part!(test1, part1, 4748135);
 crate::test::test_part!(test2, part2, ?);
 
 const Y: i32 = 2_000_000;
