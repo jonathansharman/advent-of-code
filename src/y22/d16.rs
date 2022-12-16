@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 use itertools::Itertools;
 
@@ -7,7 +7,8 @@ use crate::io::read_lines;
 crate::test::test_part!(test1, part1, ?);
 crate::test::test_part!(test2, part2, ?);
 
-pub fn part1() -> usize {
+fn get_tunnels_and_rates(
+) -> (HashMap<String, Vec<String>>, HashMap<String, i32>) {
 	let mut tunnels = HashMap::new();
 	let mut rates = HashMap::new();
 	for line in read_lines("input/2022/16.txt") {
@@ -23,8 +24,42 @@ pub fn part1() -> usize {
 		}
 		tunnels.insert(valve, exits);
 	}
+	(tunnels, rates)
+}
+
+fn get_one_distances(
+	tunnels: &HashMap<String, Vec<String>>,
+	v: &str,
+) -> HashMap<String, i32> {
+	let mut distances = HashMap::from([(v.to_owned(), 0)]);
+	let mut queue = VecDeque::from([v]);
+	while let Some(current) = queue.pop_front() {
+		let current_distance = distances[current];
+		for neighbor in tunnels.get(current).unwrap() {
+			distances.entry(neighbor.clone()).or_insert_with(|| {
+				queue.push_back(neighbor);
+				current_distance + 1
+			});
+		}
+	}
+	distances
+}
+
+fn get_all_distances(
+	tunnels: &HashMap<String, Vec<String>>,
+) -> HashMap<String, HashMap<String, i32>> {
+	tunnels
+		.keys()
+		.map(|v| (v.clone(), get_one_distances(tunnels, v)))
+		.collect()
+}
+
+pub fn part1() -> usize {
+	let (tunnels, rates) = get_tunnels_and_rates();
+	let distances = get_all_distances(&tunnels);
 	println!("Tunnels: {tunnels:?}");
 	println!("Rates: {rates:?}");
+	println!("Distances: {distances:?}");
 	// Guaranteed optimal: try every permutation of non-zero valves. Requires at
 	// least O(n!) time.
 	//
