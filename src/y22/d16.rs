@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::io::read_lines;
 
-crate::test::test_part!(test1, part1, ?);
+crate::test::test_part!(test1, part1, 1944);
 crate::test::test_part!(test2, part2, ?);
 
 fn get_tunnels_and_rates(
