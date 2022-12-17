@@ -54,26 +54,35 @@ fn get_all_distances(
 		.collect()
 }
 
-pub fn part1() -> usize {
+const TIME_LIMIT: i32 = 30;
+
+pub fn part1() -> i32 {
 	let (tunnels, rates) = get_tunnels_and_rates();
 	let distances = get_all_distances(&tunnels);
-	println!("Tunnels: {tunnels:?}");
-	println!("Rates: {rates:?}");
-	println!("Distances: {distances:?}");
-	// Guaranteed optimal: try every permutation of non-zero valves. Requires at
-	// least O(n!) time.
-	//
-	// Decent heuristic that's not guaranteed optimal: greedily always choose
-	// the next valve based on which one will reduce the most total pressure,
-	// factoring in travel time.
-	//
-	// Note: This is suboptimal for instance when two nearby valves are each
-	// almost as good as the greedy choice. Essentially it doesn't account for
-	// the value of subsequent moves. The real input is long enough that this
-	// might be a real problem.
-	//
-	// Going to try exhaustive search with some pruning.
-	0
+	rates
+		.keys()
+		.permutations(rates.len())
+		.map(|mut visit_order| {
+			let mut pressure = 0;
+			let mut total_rate = 0;
+			let mut time = 0;
+			let mut location = "AA";
+			loop {
+				let Some(next) = visit_order.pop() else { break };
+				let distance = distances[location][next];
+				let dt = distance + 1;
+				if time + dt > TIME_LIMIT {
+					break;
+				}
+				time += dt;
+				pressure += dt * total_rate;
+				location = next;
+				total_rate += rates[location];
+			}
+			pressure + (TIME_LIMIT - time) * total_rate
+		})
+		.max()
+		.unwrap_or_default()
 }
 
 pub fn part2() -> usize {
