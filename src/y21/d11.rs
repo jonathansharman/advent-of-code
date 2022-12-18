@@ -68,7 +68,7 @@ pub fn part2() -> i64 {
 }
 
 fn process(
-	grid: &mut Vec<Vec<u32>>,
+	grid: &mut [Vec<u32>],
 	queue: &mut Vec<(usize, usize)>,
 	flashes: &mut usize,
 	i: usize,
