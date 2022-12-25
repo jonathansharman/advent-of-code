@@ -7,7 +7,6 @@ use std::{
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, "2=2-1-010==-0-1-=--2");
-crate::test::test_part!(test2, part2, ?);
 
 /// Little-endian representation of SNAFU numbers.
 struct Snafu {
@@ -106,8 +105,4 @@ pub fn part1() -> String {
 		.reduce(|a, b| a + b)
 		.unwrap()
 		.to_string()
-}
-
-pub fn part2() -> usize {
-	0
 }
