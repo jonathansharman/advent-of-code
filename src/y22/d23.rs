@@ -1,14 +1,11 @@
-use std::{
-	collections::{HashMap, HashSet},
-	ops::Range,
-};
+use std::collections::{HashMap, HashSet};
 
 use itertools::{Itertools, MinMaxResult};
 
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 4068);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 968);
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Coords {
@@ -129,14 +126,16 @@ fn is_open_to(
 	}
 }
 
-fn simulate(elves: &mut HashSet<Coords>, rounds: Range<usize>) {
+// Returns the 0-based final round simulated.
+fn simulate(elves: &mut HashSet<Coords>, rounds: Option<usize>) -> usize {
 	let directions = [
 		Direction::North,
 		Direction::South,
 		Direction::West,
 		Direction::East,
 	];
-	for round in rounds {
+	let mut round = 0;
+	loop {
 		let mut proposals = HashMap::new();
 		let mut stable = true;
 		for &coords in elves.iter() {
@@ -167,8 +166,14 @@ fn simulate(elves: &mut HashSet<Coords>, rounds: Range<usize>) {
 			}
 		}
 		get_empty_count(elves);
+		round += 1;
 		if stable {
-			return;
+			return round;
+		}
+		if let Some(rounds) = rounds {
+			if round == rounds {
+				return round;
+			}
 		}
 	}
 }
@@ -197,10 +202,11 @@ fn get_empty_count(elves: &HashSet<Coords>) -> usize {
 
 pub fn part1() -> usize {
 	let mut elves = get_elves();
-	simulate(&mut elves, 0..10);
+	simulate(&mut elves, Some(10));
 	get_empty_count(&elves)
 }
 
 pub fn part2() -> usize {
-	0
+	let mut elves = get_elves();
+	simulate(&mut elves, None)
 }
