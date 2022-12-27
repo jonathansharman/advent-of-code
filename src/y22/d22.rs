@@ -1,7 +1,7 @@
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 77318);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 126017);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -99,7 +99,7 @@ fn facing(dir: [i32; 2]) -> i32 {
 	}
 }
 
-fn neighbor(map: &Map, coords: [i32; 2], dir: [i32; 2]) -> [i32; 2] {
+fn map_neighbor(map: &Map, coords: [i32; 2], dir: [i32; 2]) -> [i32; 2] {
 	let mut n = coords;
 	loop {
 		n[0] = (n[0] + dir[0] + map.height) % map.height;
@@ -119,7 +119,7 @@ pub fn part1() -> i32 {
 		match action {
 			Action::Walk(count) => {
 				for _ in 0..count {
-					let n = neighbor(&map, coords, dir);
+					let n = map_neighbor(&map, coords, dir);
 					if map.tiles[n[0] as usize][n[1] as usize] != Tile::Wall {
 						coords = n;
 					}
@@ -132,6 +132,130 @@ pub fn part1() -> i32 {
 	1000 * (coords[0] + 1) + 4 * (coords[1] + 1) + facing(dir)
 }
 
-pub fn part2() -> usize {
-	0
+// Assumed cube net:
+//                 0        1
+//            a────────b────────c
+//            │        │        │
+//           2│        │        │3
+//            │        │        │
+//            d────────┼────────e
+//            │        │   4
+//           5│        │6
+//        7   │        │
+//   d────────┼────────e
+//   │        │        │
+//  8│        │        │9
+//   │        │        │
+//   a────────┼────────c
+//   │        │   10
+// 11│        │12
+//   │        │
+//   b────────c
+//       13
+fn cube_neighbor(coords: [i32; 2], mut dir: [i32; 2]) -> ([i32; 2], [i32; 2]) {
+	let mut n = [coords[0] + dir[0], coords[1] + dir[1]];
+	match n[0] {
+		-1 => {
+			if n[1] < 100 {
+				// 0 -> 11
+				n = [100 + n[1], 0];
+				dir = [0, 1];
+			} else {
+				// 1 -> 13
+				n = [199, n[1] - 100];
+			}
+		}
+		0..=49 => match n[1] {
+			49 => {
+				// 2 -> 8
+				n = [149 - n[0], 0];
+				dir = [0, 1];
+			}
+			150 => {
+				// 3 -> 9
+				n = [149 - n[0], 99];
+				dir = [0, -1];
+			}
+			_ => {}
+		},
+		50..=99 => {
+			if n[1] >= 100 && dir == [1, 0] {
+				// 4 -> 6
+				n = [n[1] - 50, 99];
+				dir = [0, -1];
+			} else if n[1] == 49 && dir == [0, -1] {
+				// 5 -> 7
+				n = [100, n[0] - 50];
+				dir = [1, 0];
+			} else if n[1] == 100 {
+				// 6 -> 4
+				n = [49, n[0] + 50];
+				dir = [-1, 0];
+			} else if n[1] < 50 {
+				// 7 -> 5
+				n = [50 + n[1], 50];
+				dir = [0, 1];
+			}
+		}
+		100..=149 => {
+			if n[1] == -1 {
+				// 8 -> 2
+				n = [149 - n[0], 50];
+				dir = [0, 1];
+			} else if n[1] == 100 {
+				// 9 -> 3
+				n = [149 - n[0], 149];
+				dir = [0, -1];
+			}
+		}
+		150..=199 => {
+			if n[1] >= 50 {
+				if dir == [1, 0] {
+					// 10 -> 12
+					n = [n[1] + 100, 49];
+					dir = [0, -1];
+				} else {
+					// 12 -> 10
+					n = [149, n[0] - 100];
+					dir = [-1, 0];
+				}
+			} else if n[1] == -1 {
+				// 11 -> 0
+				n = [0, n[0] - 100];
+				dir = [1, 0];
+			}
+		}
+		200 => {
+			// 13 -> 1
+			n = [0, n[1] + 100];
+			dir = [1, 0];
+		}
+		_ => panic!("Out of bounds"),
+	}
+	(n, dir)
+}
+
+pub fn part2() -> i32 {
+	let map = Map::load();
+	let path = get_path();
+	let mut coords = get_starting_coords(&map);
+	let mut dir = [0, 1];
+	for action in path {
+		match action {
+			Action::Walk(count) => {
+				for _ in 0..count {
+					let (ncoords, ndir) = cube_neighbor(coords, dir);
+					if map.tiles[ncoords[0] as usize][ncoords[1] as usize]
+						!= Tile::Wall
+					{
+						coords = ncoords;
+						dir = ndir;
+					}
+				}
+			}
+			Action::Right => dir = [dir[1], -dir[0]],
+			Action::Left => dir = [-dir[1], dir[0]],
+		}
+	}
+	1000 * (coords[0] + 1) + 4 * (coords[1] + 1) + facing(dir)
 }
