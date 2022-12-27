@@ -1,7 +1,7 @@
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 1395);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 2700);
 
 const TIME_LIMIT_1: usize = 24;
 const TIME_LIMIT_2: usize = 32;
