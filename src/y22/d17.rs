@@ -133,6 +133,8 @@ fn print_state(
 	println!("+-------+");
 }
 
+const LANDED_COUNT_1: usize = 2022;
+
 pub fn part1() -> i64 {
 	let (winds, mut wind_idx) = (get_wind(), 0);
 	let (shapes, mut shape_idx) = (get_shapes(), 0);
@@ -169,7 +171,7 @@ pub fn part1() -> i64 {
 					ordered_blocks.insert(block);
 				}
 				landed_count += 1;
-				if landed_count == 2022 {
+				if landed_count == LANDED_COUNT_1 {
 					return ordered_blocks.iter().next().unwrap().y;
 				}
 				continue 'spawn;
@@ -178,15 +180,49 @@ pub fn part1() -> i64 {
 	}
 }
 
-pub fn part2() -> i64 {
+#[allow(unused)]
+fn print_state_2(blocks: &[[bool; 7]]) {
+	for row in blocks.iter().rev() {
+		print!("|");
+		for block in row {
+			if *block {
+				print!("#");
+			} else {
+				print!(".");
+			}
+		}
+		println!("|");
+	}
+	println!("+-------+");
+}
+
+fn collides2(blocks: &[[bool; 7]], rock: &HashSet<Coords>) -> bool {
+	rock.iter().any(|block| {
+		block.x < 0
+			|| block.x > 6
+			|| (block.y < blocks.len() as i64
+				&& blocks[block.y as usize][block.x as usize])
+	})
+}
+
+fn stamp_block(blocks: &mut Vec<[bool; 7]>, block: Coords) {
+	blocks.resize(blocks.len().max((block.y + 1) as usize), [false; 7]);
+	blocks[block.y as usize][block.x as usize] = true
+}
+
+const LANDED_COUNT_2: usize = 1_000_000_000_000;
+
+const WINDOW: usize = 1;
+const SKIP: usize = 10;
+
+pub fn part2() -> usize {
 	let (winds, mut wind_idx) = (get_wind(), 0);
 	let (shapes, mut shape_idx) = (get_shapes(), 0);
 	let mut landed_count: usize = 0;
-	let mut blocks: HashSet<Coords> = HashSet::new();
-	let mut ordered_blocks: BTreeSet<Coords> = BTreeSet::new();
+	let mut blocks: Vec<[bool; 7]> = Vec::new();
 	let mut rock_coords: Coords;
 	'spawn: loop {
-		let y = 4 + ordered_blocks.iter().next().map_or(0, |block| block.y);
+		let y = 3 + blocks.len() as i64;
 		rock_coords = Coords { x: 2, y };
 		let shape = &shapes[shape_idx];
 		shape_idx = (shape_idx + 1) % shapes.len();
@@ -198,7 +234,7 @@ pub fn part2() -> i64 {
 				x: rock_coords.x + wind,
 				y: rock_coords.y,
 			};
-			if !collides(&blocks, &get_rock(shape, blown)) {
+			if !collides2(&blocks, &get_rock(shape, blown)) {
 				rock_coords = blown;
 			}
 			// Fall.
@@ -206,16 +242,22 @@ pub fn part2() -> i64 {
 				x: rock_coords.x,
 				y: rock_coords.y - 1,
 			};
-			if fallen.y > 0 && !collides(&blocks, &get_rock(shape, fallen)) {
+			if fallen.y >= 0 && !collides2(&blocks, &get_rock(shape, fallen)) {
 				rock_coords = fallen;
 			} else {
 				for block in get_rock(shape, rock_coords) {
-					blocks.insert(block);
-					ordered_blocks.insert(block);
+					stamp_block(&mut blocks, block);
 				}
 				landed_count += 1;
-				if landed_count == 1_000_000_000_000 {
-					return ordered_blocks.iter().next().unwrap().y;
+				if blocks.len() >= SKIP + 2 * WINDOW
+					&& blocks[SKIP..SKIP + WINDOW]
+						== blocks[blocks.len() - WINDOW..]
+				{
+					println!("Repeat at landed count {landed_count}");
+					return 0;
+				}
+				if landed_count == LANDED_COUNT_2 {
+					return blocks.len();
 				}
 				continue 'spawn;
 			}
