@@ -1,7 +1,7 @@
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 2237);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 66681);
 
 struct Game {
 	id: usize,
@@ -13,6 +13,12 @@ struct Draw {
 	red: usize,
 	green: usize,
 	blue: usize,
+}
+
+impl Draw {
+	fn power(&self) -> usize {
+		self.red * self.green * self.blue
+	}
 }
 
 fn parse_game(line: &str) -> Game {
@@ -53,5 +59,19 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	read_lines("input/2023/02.txt")
+		.map(|line| {
+			let game = parse_game(&line);
+			let draw = game
+				.draws
+				.into_iter()
+				.reduce(|acc, next| Draw {
+					red: acc.red.max(next.red),
+					green: acc.green.max(next.green),
+					blue: acc.blue.max(next.blue),
+				})
+				.unwrap();
+			draw.power()
+		})
+		.sum()
 }
