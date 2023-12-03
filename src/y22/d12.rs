@@ -52,10 +52,7 @@ fn build_graph(map: &Map) -> Graph {
 		for c in 0..map.ncols {
 			for (nr, nc) in neighbors::four(map.nrows, map.ncols, r, c) {
 				if map.heights[nr][nc] as i32 - map.heights[r][c] as i32 <= 1 {
-					graph
-						.entry((r, c))
-						.or_insert_with(HashSet::new)
-						.insert((nr, nc));
+					graph.entry((r, c)).or_default().insert((nr, nc));
 				}
 			}
 		}
@@ -67,10 +64,7 @@ fn flip_graph(graph: Graph) -> Graph {
 	let mut flipped = Graph::new();
 	for (node, neighbors) in graph {
 		for neighbor in neighbors {
-			flipped
-				.entry(neighbor)
-				.or_insert_with(HashSet::new)
-				.insert(node);
+			flipped.entry(neighbor).or_default().insert(node);
 		}
 	}
 	flipped

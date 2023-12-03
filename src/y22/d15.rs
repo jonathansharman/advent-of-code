@@ -80,7 +80,6 @@ fn ranges_points(target_y: i64) -> (Vec<Range>, Vec<(i64, i64)>) {
 			let (sensor, beacon) = line.split_once(':').unwrap();
 			let (sx, sy) = sensor
 				.split(|c: char| c != '-' && !c.is_ascii_digit())
-				.into_iter()
 				.filter_map(|s| {
 					if s.is_empty() {
 						None
@@ -88,12 +87,10 @@ fn ranges_points(target_y: i64) -> (Vec<Range>, Vec<(i64, i64)>) {
 						Some(s.parse::<i64>().unwrap())
 					}
 				})
-				.into_iter()
 				.collect_tuple()
 				.unwrap();
 			let (bx, by) = beacon
 				.split(|c: char| c != '-' && !c.is_ascii_digit())
-				.into_iter()
 				.filter_map(|s| {
 					if s.is_empty() {
 						None
@@ -101,7 +98,6 @@ fn ranges_points(target_y: i64) -> (Vec<Range>, Vec<(i64, i64)>) {
 						Some(s.parse::<i64>().unwrap())
 					}
 				})
-				.into_iter()
 				.collect_tuple()
 				.unwrap();
 			let radius = (sx - bx).abs() + (sy - by).abs();
@@ -154,7 +150,6 @@ fn get_areas() -> Vec<Area> {
 			let (sensor, beacon) = line.split_once(':').unwrap();
 			let (sx, sy) = sensor
 				.split(|c: char| c != '-' && !c.is_ascii_digit())
-				.into_iter()
 				.filter_map(|s| {
 					if s.is_empty() {
 						None
@@ -162,12 +157,10 @@ fn get_areas() -> Vec<Area> {
 						Some(s.parse::<i64>().unwrap())
 					}
 				})
-				.into_iter()
 				.collect_tuple()
 				.unwrap();
 			let (bx, by) = beacon
 				.split(|c: char| c != '-' && !c.is_ascii_digit())
-				.into_iter()
 				.filter_map(|s| {
 					if s.is_empty() {
 						None
@@ -175,7 +168,6 @@ fn get_areas() -> Vec<Area> {
 						Some(s.parse::<i64>().unwrap())
 					}
 				})
-				.into_iter()
 				.collect_tuple()
 				.unwrap();
 			let radius = (sx - bx).abs() + (sy - by).abs();

@@ -16,7 +16,8 @@ pub fn part2() -> usize {
 }
 
 fn polymerize(steps: usize) -> usize {
-	let mut lines = read_lines("input/2021/14.txt").map(|line| line.as_bytes().to_owned());
+	let mut lines =
+		read_lines("input/2021/14.txt").map(|line| line.as_bytes().to_owned());
 	// Insert starting polymer's k-mers.
 	let mut element_counts = HashMap::new();
 	let mut kmers = HashMap::new();
@@ -31,7 +32,8 @@ fn polymerize(steps: usize) -> usize {
 	}
 	// Read the rules.
 	lines.next();
-	let rules: HashMap<(u8, u8), u8> = lines.map(|line| ((line[0], line[1]), line[6])).collect();
+	let rules: HashMap<(u8, u8), u8> =
+		lines.map(|line| ((line[0], line[1]), line[6])).collect();
 	// Apply the rules.
 	for _ in 0..steps {
 		let mut new_kmers = HashMap::new();
@@ -45,7 +47,7 @@ fn polymerize(steps: usize) -> usize {
 		kmers = new_kmers;
 	}
 	// Find the min/max counts.
-	if let MinMaxResult::MinMax(min, max) = element_counts.values().into_iter().minmax() {
+	if let MinMaxResult::MinMax(min, max) = element_counts.values().minmax() {
 		max - min
 	} else {
 		0

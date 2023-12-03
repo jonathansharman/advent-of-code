@@ -26,7 +26,7 @@ fn read_bits() -> Vec<u8> {
 			bits
 		})
 		.reduce(|mut a, b| {
-			a.extend(b.into_iter());
+			a.extend(b);
 			a
 		})
 		.unwrap()
@@ -61,7 +61,9 @@ impl Packet {
 	fn version_sum(&self) -> u64 {
 		let contents_version_sum = match &self.contents {
 			PacketContents::Literal { .. } => 0,
-			PacketContents::Operation { args, .. } => args.iter().map(Packet::version_sum).sum(),
+			PacketContents::Operation { args, .. } => {
+				args.iter().map(Packet::version_sum).sum()
+			}
 		};
 		self.version + contents_version_sum
 	}
@@ -72,9 +74,15 @@ impl Packet {
 			PacketContents::Operation { operator, args } => match operator {
 				Operator::Sum => args.iter().map(Packet::eval).sum(),
 				Operator::Product => args.iter().map(Packet::eval).product(),
-				Operator::Minimum => args.iter().map(Packet::eval).min().unwrap(),
-				Operator::Maximum => args.iter().map(Packet::eval).max().unwrap(),
-				Operator::GreaterThan => (args[0].eval() > args[1].eval()) as u64,
+				Operator::Minimum => {
+					args.iter().map(Packet::eval).min().unwrap()
+				}
+				Operator::Maximum => {
+					args.iter().map(Packet::eval).max().unwrap()
+				}
+				Operator::GreaterThan => {
+					(args[0].eval() > args[1].eval()) as u64
+				}
 				Operator::LessThan => (args[0].eval() < args[1].eval()) as u64,
 				Operator::EqualTo => (args[0].eval() == args[1].eval()) as u64,
 			},

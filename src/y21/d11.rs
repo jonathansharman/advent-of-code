@@ -17,8 +17,7 @@ pub fn part1() -> usize {
 				process(&mut grid, &mut queue, &mut flashes, i, j);
 			}
 		}
-		while !queue.is_empty() {
-			let (i, j) = queue.pop().unwrap();
+		while let Some((i, j)) = queue.pop() {
 			for (i, j) in neighbors::eight(WIDTH, WIDTH, i, j) {
 				process(&mut grid, &mut queue, &mut flashes, i, j);
 			}
@@ -48,8 +47,7 @@ pub fn part2() -> i64 {
 				process(&mut grid, &mut queue, &mut flashes, i, j);
 			}
 		}
-		while !queue.is_empty() {
-			let (i, j) = queue.pop().unwrap();
+		while let Some((i, j)) = queue.pop() {
 			for (i, j) in neighbors::eight(WIDTH, WIDTH, i, j) {
 				process(&mut grid, &mut queue, &mut flashes, i, j);
 			}
