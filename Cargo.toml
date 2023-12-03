@@ -6,4 +6,5 @@ version = "0.1.0"
 [dependencies]
 itertools = "0.10.5"
 lazy_static = "1.4.0"
+num = "0.4.1"
 regex = "1.7.0"
