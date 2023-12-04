@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 21959);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 5132675);
 
 pub fn part1() -> usize {
 	read_lines("input/2023/04.txt")
@@ -28,6 +28,39 @@ pub fn part1() -> usize {
 		.sum()
 }
 
+struct Card {
+	winners: HashSet<usize>,
+	have: Vec<usize>,
+}
+
 pub fn part2() -> usize {
-	0
+	let cards = read_lines("input/2023/04.txt")
+		.map(|line| {
+			let line = &line[line.find(':').unwrap() + 1..];
+			let (winners, have) = line.split_once('|').unwrap();
+			Card {
+				winners: HashSet::from_iter(
+					winners
+						.split_whitespace()
+						.map(|s| s.parse::<usize>().unwrap()),
+				),
+				have: have
+					.split_whitespace()
+					.map(|s| s.parse().unwrap())
+					.collect(),
+			}
+		})
+		.collect::<Vec<_>>();
+	let mut queue = (0..cards.len()).collect::<Vec<_>>();
+	let mut n_cards = 0;
+	while let Some(idx) = queue.pop() {
+		n_cards += 1;
+		let n_wins = cards[idx]
+			.have
+			.iter()
+			.filter(|n| cards[idx].winners.contains(n))
+			.count();
+		queue.extend(idx + 1..idx + 1 + n_wins);
+	}
+	n_cards
 }
