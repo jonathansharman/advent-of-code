@@ -10,12 +10,14 @@ pub fn part1() -> usize {
 		.map(|line| {
 			let line = &line[line.find(':').unwrap() + 1..];
 			let (winners, have) = line.split_once('|').unwrap();
-			let have: HashSet<usize> = HashSet::from_iter(
-				have.split_whitespace().map(|s| s.parse::<usize>().unwrap()),
+			let winners: HashSet<usize> = HashSet::from_iter(
+				winners
+					.split_whitespace()
+					.map(|s| s.parse::<usize>().unwrap()),
 			);
-			let n_wins = winners
+			let n_wins = have
 				.split_whitespace()
-				.filter(|s| have.contains(&s.parse().unwrap()))
+				.filter(|s| winners.contains(&s.parse().unwrap()))
 				.count();
 			if n_wins == 0 {
 				0
