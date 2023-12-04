@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 
 use crate::io::read_lines;
 
@@ -51,16 +51,19 @@ pub fn part2() -> usize {
 			}
 		})
 		.collect::<Vec<_>>();
-	let mut queue = (0..cards.len()).collect::<Vec<_>>();
+	let mut queue: BTreeMap<usize, usize> =
+		BTreeMap::from_iter((0..cards.len()).map(|idx| (idx, 1)));
 	let mut n_cards = 0;
-	while let Some(idx) = queue.pop() {
-		n_cards += 1;
+	while let Some((idx, count)) = queue.pop_first() {
+		n_cards += count;
 		let n_wins = cards[idx]
 			.have
 			.iter()
 			.filter(|n| cards[idx].winners.contains(n))
 			.count();
-		queue.extend(idx + 1..idx + 1 + n_wins);
+		for idx in idx + 1..idx + 1 + n_wins {
+			*queue.entry(idx).or_default() += count;
+		}
 	}
 	n_cards
 }
