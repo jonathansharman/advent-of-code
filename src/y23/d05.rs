@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 484023871);
@@ -75,9 +77,6 @@ pub fn part2() -> usize {
 		.skip(1)
 		.map(|s| s.parse().unwrap())
 		.collect::<Vec<usize>>();
-	let seeds = (seeds[0]..seeds[0] + seeds[1])
-		.chain(seeds[2]..seeds[2] + seeds[3])
-		.collect::<Vec<_>>();
 	lines.next();
 	// source → (destination, length)
 	let mut maps = Vec::new();
@@ -99,8 +98,11 @@ pub fn part2() -> usize {
 		}
 		maps.push(map);
 	}
+
 	seeds
 		.into_iter()
+		.tuples()
+		.flat_map(|(seed, len)| (seed..seed + len))
 		.map(|mut src| {
 			for map in maps.iter() {
 				for range_map in map.iter() {
