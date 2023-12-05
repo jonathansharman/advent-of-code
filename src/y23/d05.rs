@@ -1,7 +1,7 @@
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 484023871);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 46294175);
 
 struct RangeMap {
 	dst: usize,
@@ -67,5 +67,51 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let mut lines = read_lines("input/2023/05.txt");
+	let seeds = lines
+		.next()
+		.unwrap()
+		.split_whitespace()
+		.skip(1)
+		.map(|s| s.parse().unwrap())
+		.collect::<Vec<usize>>();
+	let seeds = (seeds[0]..seeds[0] + seeds[1])
+		.chain(seeds[2]..seeds[2] + seeds[3])
+		.collect::<Vec<_>>();
+	lines.next();
+	// source → (destination, length)
+	let mut maps = Vec::new();
+	while lines.next().is_some() {
+		let mut map = Vec::new();
+		for line in lines.by_ref() {
+			if line.is_empty() {
+				break;
+			}
+			let numbers = line
+				.split_whitespace()
+				.map(|s| s.parse().unwrap())
+				.collect::<Vec<_>>();
+			map.push(RangeMap {
+				dst: numbers[0],
+				src: numbers[1],
+				len: numbers[2],
+			});
+		}
+		maps.push(map);
+	}
+	seeds
+		.into_iter()
+		.map(|mut src| {
+			for map in maps.iter() {
+				for range_map in map.iter() {
+					if let Some(dst) = range_map.map(src) {
+						src = dst;
+						break;
+					}
+				}
+			}
+			src
+		})
+		.min()
+		.unwrap()
 }
