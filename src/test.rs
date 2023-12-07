@@ -26,6 +26,3 @@ macro_rules! test_part {
 }
 
 pub(crate) use test_part;
-
-#[test]
-fn f() {}
