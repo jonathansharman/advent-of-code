@@ -8,6 +8,17 @@ crate::test::test_part!(test1, part1, 250474325);
 crate::test::test_part!(test2, part2, 248909434);
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+enum Type {
+	HighCard,
+	OnePair,
+	TwoPair,
+	ThreeOfAKind,
+	FullHouse,
+	FourOfAKind,
+	FiveOfAKind,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 enum Rank {
 	Two,
 	Three,
@@ -24,7 +35,7 @@ enum Rank {
 	Ace,
 }
 
-fn get_type(hand: &[Rank]) -> usize {
+fn get_type(hand: &[Rank]) -> Type {
 	let hand = hand
 		.iter()
 		.fold(HashMap::<Rank, usize>::new(), |mut acc, r| {
@@ -33,26 +44,19 @@ fn get_type(hand: &[Rank]) -> usize {
 		});
 	let counts = hand.values().copied().sorted().collect_vec();
 	if counts == vec![5] {
-		// Five of a kind
-		6
+		Type::FiveOfAKind
 	} else if counts == vec![1, 4] {
-		// Four of a kind
-		5
+		Type::FourOfAKind
 	} else if counts == vec![2, 3] {
-		// Full house
-		4
+		Type::FullHouse
 	} else if counts == vec![1, 1, 3] {
-		// Three of a kind
-		3
+		Type::ThreeOfAKind
 	} else if counts == vec![1, 2, 2] {
-		// Two pair
-		2
+		Type::TwoPair
 	} else if counts == vec![1, 1, 1, 2] {
-		// One pair
-		1
+		Type::OnePair
 	} else {
-		// High card
-		0
+		Type::HighCard
 	}
 }
 
@@ -109,7 +113,7 @@ enum Rank2 {
 	Ace,
 }
 
-fn get_type2(hand: &[Rank2]) -> usize {
+fn get_type2(hand: &[Rank2]) -> Type {
 	let hand =
 		hand.iter()
 			.fold(HashMap::<Rank2, usize>::new(), |mut acc, r| {
@@ -119,51 +123,37 @@ fn get_type2(hand: &[Rank2]) -> usize {
 	let n_jokers = *hand.get(&Rank2::Joker).unwrap_or(&0);
 	let counts = hand.values().copied().sorted().collect_vec();
 	if counts == vec![5] {
-		// Five of a kind
-		6
+		Type::FiveOfAKind
 	} else if counts == vec![1, 4] {
 		match n_jokers {
-			// Four of a kind
-			0 => 5,
-			// Five of a kind
-			_ => 6,
+			0 => Type::FourOfAKind,
+			_ => Type::FiveOfAKind,
 		}
 	} else if counts == vec![2, 3] {
 		match n_jokers {
-			// Full house
-			0 => 4,
-			// Five of a kind
-			_ => 6,
+			0 => Type::FullHouse,
+			_ => Type::FiveOfAKind,
 		}
 	} else if counts == vec![1, 1, 3] {
 		match n_jokers {
-			// Three of a kind
-			0 => 3,
-			// Four of a kind
-			_ => 5,
+			0 => Type::ThreeOfAKind,
+			_ => Type::FourOfAKind,
 		}
 	} else if counts == vec![1, 2, 2] {
 		match n_jokers {
-			// Two pair
-			0 => 2,
-			// Full house
-			1 => 4,
-			// Four of a kind
-			_ => 5,
+			0 => Type::TwoPair,
+			1 => Type::FullHouse,
+			_ => Type::FourOfAKind,
 		}
 	} else if counts == vec![1, 1, 1, 2] {
 		match n_jokers {
-			// One pair
-			0 => 1,
-			// Three of a kind
-			_ => 3,
+			0 => Type::OnePair,
+			_ => Type::ThreeOfAKind,
 		}
 	} else {
 		match n_jokers {
-			// High card
-			0 => 0,
-			// One pair
-			_ => 1,
+			0 => Type::HighCard,
+			_ => Type::OnePair,
 		}
 	}
 }
