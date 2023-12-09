@@ -1,7 +1,7 @@
 use std::collections::{BTreeSet, HashSet};
 
 crate::test::test_part!(test1, part1, 3179);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 1567723342929);
 
 fn get_wind() -> Vec<i64> {
 	std::fs::read_to_string("input/2022/17.txt")
@@ -133,7 +133,7 @@ fn print_state(
 	println!("+-------+");
 }
 
-const LANDED_COUNT_1: usize = 2022;
+const GOAL1: usize = 2022;
 
 pub fn part1() -> i64 {
 	let (winds, mut wind_idx) = (get_wind(), 0);
@@ -171,7 +171,7 @@ pub fn part1() -> i64 {
 					ordered_blocks.insert(block);
 				}
 				landed_count += 1;
-				if landed_count == LANDED_COUNT_1 {
+				if landed_count == GOAL1 {
 					return ordered_blocks.iter().next().unwrap().y;
 				}
 				continue 'spawn;
@@ -210,16 +210,14 @@ fn stamp_block(blocks: &mut Vec<[bool; 7]>, block: Coords) {
 	blocks[block.y as usize][block.x as usize] = true
 }
 
-const LANDED_COUNT_2: usize = 1_000_000_000_000;
-
-const WINDOW: usize = 1;
-const SKIP: usize = 10;
+const GOAL2: usize = 1_000_000_000_000;
 
 pub fn part2() -> usize {
 	let (winds, mut wind_idx) = (get_wind(), 0);
 	let (shapes, mut shape_idx) = (get_shapes(), 0);
 	let mut landed_count: usize = 0;
 	let mut blocks: Vec<[bool; 7]> = Vec::new();
+	let mut skipped = 0;
 	let mut rock_coords: Coords;
 	'spawn: loop {
 		let y = 3 + blocks.len() as i64;
@@ -249,15 +247,21 @@ pub fn part2() -> usize {
 					stamp_block(&mut blocks, block);
 				}
 				landed_count += 1;
-				if blocks.len() >= SKIP + 2 * WINDOW
-					&& blocks[SKIP..SKIP + WINDOW]
-						== blocks[blocks.len() - WINDOW..]
-				{
-					println!("Repeat at landed count {landed_count}");
-					return 0;
+				// Empirically, my puzzle input eventually generates 2,720
+				// blocks of height every 347th "-" block (every 1,735th block
+				// overall). After an arbitrary initialization period of 10,000
+				// blocks, skip a bunch of iterations to get close to the goal
+				// and then continue simulating.
+				const BLOCKS_PER_CYCLE: usize = 1_735;
+				const HEIGHT_PER_CYCLE: usize = 2_720;
+				if landed_count == 10_000 {
+					let remaining_blocks = GOAL2 - landed_count;
+					let full_cycles_left = remaining_blocks / 1_735;
+					landed_count += BLOCKS_PER_CYCLE * full_cycles_left;
+					skipped += HEIGHT_PER_CYCLE * full_cycles_left;
 				}
-				if landed_count == LANDED_COUNT_2 {
-					return blocks.len();
+				if landed_count == GOAL2 {
+					return blocks.len() + skipped;
 				}
 				continue 'spawn;
 			}
