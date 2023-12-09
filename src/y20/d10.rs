@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 use itertools::Itertools;
 
 use crate::io::parse_lines;
 
 crate::test::test_part!(test1, part1, 2592);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 198428693313536);
 
 pub fn part1() -> usize {
 	let mut adapters = parse_lines("input/2020/10.txt")
@@ -23,6 +25,39 @@ pub fn part1() -> usize {
 	diff1s * diff3s
 }
 
+fn valid_arrangements(
+	adapters: &[usize],
+	i: usize,
+	cache: &mut HashMap<usize, usize>,
+) -> usize {
+	if let Some(n) = cache.get(&i) {
+		return *n;
+	}
+	let n = adapters
+		.iter()
+		.enumerate()
+		.skip(i + 1)
+		.take(3)
+		.filter_map(|(j, other)| {
+			if other - adapters[i] <= 3 {
+				Some(valid_arrangements(adapters, j, cache))
+			} else {
+				None
+			}
+		})
+		.sum();
+	cache.insert(i, n);
+	n
+}
+
 pub fn part2() -> usize {
-	0
+	// Note that due to part 1, we already know the end is reachable from any
+	// index.
+	let mut adapters = parse_lines("input/2020/10.txt")
+		.sorted()
+		.collect::<Vec<usize>>();
+	adapters.insert(0, 0);
+	let mut cache = HashMap::new();
+	cache.insert(adapters.len() - 1, 1);
+	valid_arrangements(&adapters, 0, &mut cache)
 }
