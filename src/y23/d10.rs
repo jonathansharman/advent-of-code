@@ -1,7 +1,9 @@
+use std::collections::HashSet;
+
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 6875);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 471);
 
 #[derive(Debug)]
 enum Pipe {
@@ -120,5 +122,83 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let mut pipes = read_lines("input/2023/10.txt")
+		.map(|line| line.chars().map(|c| c.into()).collect::<Vec<Pipe>>())
+		.collect::<Vec<_>>();
+	let mut s = (0, 0);
+	for (i, row) in pipes.iter().enumerate() {
+		for (j, pipe) in row.iter().enumerate() {
+			if let Pipe::Start = pipe {
+				s = (i, j);
+			}
+		}
+	}
+	let north = s.0 > 0 && pipes[s.0 - 1][s.1].south_open();
+	let south = s.0 < pipes.len() - 1 && pipes[s.0 + 1][s.1].north_open();
+	let east = s.1 < pipes[s.0].len() - 1 && pipes[s.0][s.1 + 1].west_open();
+	let west = s.1 > 0 && pipes[s.0][s.1 - 1].east_open();
+	pipes[s.0][s.1] = match (north, south, east, west) {
+		(true, true, false, false) => Pipe::NorthSouth,
+		(true, false, true, false) => Pipe::NorthEast,
+		(true, false, false, true) => Pipe::NorthWest,
+		(false, true, true, false) => Pipe::SouthEast,
+		(false, true, false, true) => Pipe::SouthWest,
+		(false, false, true, true) => Pipe::EastWest,
+		_ => panic!("invalid pipe network"),
+	};
+	// Move in an arbitrary direction, to start.
+	let mut loop_tiles = HashSet::from([s]);
+	let mut coords = pipes[s.0][s.1].neighbors(s)[0];
+	// Move in the unvisited direction until returning to the start.
+	while coords != s {
+		let [n1, n2] = pipes[coords.0][coords.1].neighbors(coords);
+		if loop_tiles.contains(&n1) {
+			coords = n2;
+		} else {
+			coords = n1;
+		}
+		loop_tiles.insert(coords);
+	}
+	// For each non-loop tile, count the number of loop crossings between it and
+	// an edge of the pipe tiles. The tile is interior if and only if that
+	// number is odd.
+	let mut n_interior = 0;
+	for (i, row) in pipes.iter().enumerate() {
+		for j in 0..row.len() {
+			if loop_tiles.contains(&(i, j)) {
+				continue;
+			}
+			let mut intersections = 0;
+			// Keep track of whether the most recently intersected Eastward turn
+			// included a North or South exit in order to distinguish between
+			// traveling tangent to the loop and crossing over an inflection
+			// point.
+			let mut north = false;
+			for jj in 0..j {
+				if loop_tiles.contains(&(i, jj)) {
+					match pipes[i][jj] {
+						Pipe::NorthSouth => intersections += 1,
+						Pipe::NorthEast => north = true,
+						Pipe::NorthWest => {
+							if !north {
+								intersections += 1;
+							}
+							north = false;
+						}
+						Pipe::SouthWest => {
+							if north {
+								intersections += 1;
+							}
+							north = false;
+						}
+						_ => {}
+					}
+				}
+			}
+			if intersections % 2 == 1 {
+				n_interior += 1;
+			}
+		}
+	}
+	n_interior
 }
