@@ -18,15 +18,19 @@ where
 	read_lines(path).map(|line| line.parse().unwrap())
 }
 
-pub fn read_comma_separated_integers<P>(path: P) -> impl Iterator<Item = i64>
+pub fn read_comma_separated_integers<P, Item>(
+	path: P,
+) -> impl Iterator<Item = Item>
 where
 	P: AsRef<Path>,
+	Item: std::str::FromStr,
+	<Item as std::str::FromStr>::Err: std::fmt::Debug,
 {
 	let file = std::fs::File::open(path).unwrap();
 	BufReader::new(file).split(b',').map(|s| {
 		std::str::from_utf8(&s.unwrap())
 			.unwrap()
-			.parse::<i64>()
+			.parse::<Item>()
 			.unwrap()
 	})
 }
