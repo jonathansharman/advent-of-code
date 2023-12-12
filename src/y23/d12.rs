@@ -1,10 +1,11 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, collections::HashMap};
 
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 7718);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 128741994134728);
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Spring {
 	Operational,
 	Damaged,
@@ -37,46 +38,103 @@ pub fn part1() -> usize {
 				.split(',')
 				.map(|n| n.parse::<usize>().unwrap())
 				.collect::<Vec<_>>();
-			println!("Sum: {}", arrangements(&springs, &groups));
-			arrangements(&springs, &groups)
+			arrangements(&mut HashMap::new(), 0, 0, &springs, &groups)
 		})
 		.sum()
 }
 
-fn arrangements(springs: &[Spring], groups: &[usize]) -> usize {
-	if groups.is_empty() {
-		// All of the remaining springs must be operational.
-		return springs.iter().all(Spring::operational) as usize;
+fn arrangements(
+	cache: &mut HashMap<(usize, usize), usize>,
+	i: usize,
+	j: usize,
+	springs: &[Spring],
+	groups: &[usize],
+) -> usize {
+	let s = &springs[i..];
+	let g = &groups[j..];
+	let key = (springs.len() - i, groups.len() - j);
+	if let Some(result) = cache.get(&key) {
+		return *result;
 	}
-	match springs.len().cmp(&groups[0]) {
+	if g.is_empty() {
+		// All of the remaining springs must be operational.
+		let result = s.iter().all(Spring::operational) as usize;
+		cache.insert(key, result);
+		return result;
+	}
+	if s.len() < g.iter().sum::<usize>() + g.len() - 1 {
+		// The groups definitely don't fit.
+		cache.insert(key, 0);
+		return 0;
+	}
+	match s.len().cmp(&g[0]) {
 		// Can't fit the next group into the remaining springs.
-		Ordering::Less => 0,
+		Ordering::Less => {
+			cache.insert(key, 0);
+			0
+		}
 		// All springs must be damaged, and there must be exactly one group.
 		Ordering::Equal => {
-			(springs.iter().all(Spring::damaged) && groups.len() == 1) as usize
+			let result =
+				(s.iter().all(Spring::damaged) && g.len() == 1) as usize;
+			cache.insert(key, result);
+			result
 		}
 		Ordering::Greater => {
-			let mut sum = 0;
+			let mut result = 0;
 			// Add arrangements with first group at the start.
-			let group_fits = springs[..groups[0]].iter().all(Spring::damaged);
-			let gap_after_group = springs[groups[0]].operational();
+			let group_fits = s[..g[0]].iter().all(Spring::damaged);
+			let gap_after_group = s[g[0]].operational();
 			if group_fits && gap_after_group {
 				// Add the arrangements of the remaining springs and groups.
 				let rest =
-					arrangements(&springs[groups[0] + 1..], &groups[1..]);
+					arrangements(cache, i + g[0] + 1, j + 1, springs, groups);
 				if rest > 0 {
-					sum += rest;
+					result += rest;
 				}
 			}
 			// Add arrangements with first group after the start.
-			if springs[0].operational() {
-				sum += arrangements(&springs[1..], groups);
+			if s[0].operational() {
+				result += arrangements(cache, i + 1, j, springs, groups);
 			}
-			sum
+			cache.insert(key, result);
+			result
 		}
 	}
 }
 
 pub fn part2() -> usize {
-	0
+	read_lines("input/2023/12.txt")
+		.map(|line| {
+			let (springs, groups) = line.split_once(' ').unwrap();
+			let springs = springs
+				.chars()
+				.map(|c| match c {
+					'.' => Spring::Operational,
+					'#' => Spring::Damaged,
+					_ => Spring::Unknown,
+				})
+				.collect::<Vec<_>>();
+			let mut unfolded_springs = springs.clone();
+			for _ in 0..4 {
+				unfolded_springs.push(Spring::Unknown);
+				unfolded_springs.extend(springs.iter());
+			}
+			let groups = groups
+				.split(',')
+				.map(|n| n.parse::<usize>().unwrap())
+				.collect::<Vec<_>>();
+			let mut unfolded_groups = groups.clone();
+			for _ in 0..4 {
+				unfolded_groups.extend(groups.iter());
+			}
+			arrangements(
+				&mut HashMap::new(),
+				0,
+				0,
+				&unfolded_springs,
+				&unfolded_groups,
+			)
+		})
+		.sum()
 }
