@@ -31,7 +31,7 @@ fn solve(expansion: usize) -> usize {
 		.filter_map(|(i, row)| row.iter().all(|tile| !tile).then_some(i))
 		.collect::<Vec<_>>();
 	let empty_cols = (0..map[0].len())
-		.filter_map(|j| map.iter().all(|row| !row[j]).then_some(j))
+		.filter(|&j| map.iter().all(|row| !row[j]))
 		.collect::<Vec<_>>();
 	let mut sum = 0;
 	for (i, g1) in galaxies.iter().enumerate() {
