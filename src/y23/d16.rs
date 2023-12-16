@@ -19,11 +19,16 @@ impl BeamSet {
 
 struct Cave(Vec<Vec<char>>);
 
-enum Side {
-	Top,
-	Bottom,
+enum Direction {
+	Up,
+	Down,
 	Left,
 	Right,
+}
+
+struct BeamFront {
+	direction: Direction,
+	coords: (usize, usize),
 }
 
 impl Cave {
@@ -35,136 +40,215 @@ impl Cave {
 		self.0[0].len()
 	}
 
-	fn get(&self, i: usize, j: usize) -> char {
-		self.0[i][j]
+	fn get(&self, coords: (usize, usize)) -> char {
+		self.0[coords.0][coords.1]
 	}
 
-	fn count_energized(&self, side: Side, idx: usize) -> usize {
+	fn energy(&self, beam_front: BeamFront) -> usize {
 		let mut beam_sets =
 			vec![vec![BeamSet::default(); self.width()]; self.height()];
-		match side {
-			Side::Top => match self.get(0, idx) {
-				'.' | '|' => beam_sets[0][idx].d = true,
-				'-' => {
-					beam_sets[0][idx].l = true;
-					beam_sets[0][idx].r = true;
-				}
-				'\\' => beam_sets[0][idx].r = true,
-				'/' => beam_sets[0][idx].l = true,
-				_ => {}
-			},
-			Side::Bottom => match self.get(self.height() - 1, idx) {
-				'.' | '|' => beam_sets[self.height() - 1][idx].u = true,
-				'-' => {
-					beam_sets[self.height() - 1][idx].l = true;
-					beam_sets[self.height() - 1][idx].r = true;
-				}
-				'\\' => beam_sets[self.height() - 1][idx].l = true,
-				'/' => beam_sets[self.height() - 1][idx].r = true,
-				_ => {}
-			},
-			Side::Left => match self.get(idx, 0) {
-				'.' | '-' => beam_sets[idx][0].r = true,
-				'|' => {
-					beam_sets[idx][0].u = true;
-					beam_sets[idx][0].d = true;
-				}
-				'\\' => beam_sets[idx][0].d = true,
-				'/' => beam_sets[idx][0].u = true,
-				_ => {}
-			},
-			Side::Right => match self.get(idx, self.width() - 1) {
-				'.' | '-' => beam_sets[idx][self.width() - 1].l = true,
-				'|' => {
-					beam_sets[idx][self.width() - 1].u = true;
-					beam_sets[idx][self.width() - 1].d = true;
-				}
-				'\\' => beam_sets[idx][self.width() - 1].u = true,
-				'/' => beam_sets[idx][self.width() - 1].d = true,
-				_ => {}
-			},
-		}
-		loop {
-			let mut unchanged = true;
-			let mut set = |dest: &mut bool| {
-				if !*dest {
-					unchanged = false;
-				}
-				*dest = true;
-			};
-			for i in 1..self.height() {
-				for j in 0..self.width() {
-					if beam_sets[i - 1][j].d {
-						match self.get(i, j) {
-							'.' | '|' => set(&mut beam_sets[i][j].d),
+		let mut beam_fronts = vec![beam_front];
+		while !beam_fronts.is_empty() {
+			let mut next_beam_fronts = Vec::new();
+			for beam_front in beam_fronts {
+				let c = beam_front.coords;
+				match beam_front.direction {
+					Direction::Up => {
+						if beam_sets[c.0][c.1].u {
+							continue;
+						}
+						beam_sets[c.0][c.1].u = true;
+						match self.get(c) {
+							'.' | '|' => {
+								if c.0 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Up,
+										coords: (c.0 - 1, c.1),
+									});
+								}
+							}
 							'-' => {
-								set(&mut beam_sets[i][j].l);
-								set(&mut beam_sets[i][j].r);
+								if c.1 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Left,
+										coords: (c.0, c.1 - 1),
+									});
+								}
+								if c.1 < self.width() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Right,
+										coords: (c.0, c.1 + 1),
+									});
+								}
 							}
-							'\\' => set(&mut beam_sets[i][j].r),
-							'/' => set(&mut beam_sets[i][j].l),
+							'\\' => {
+								if c.1 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Left,
+										coords: (c.0, c.1 - 1),
+									});
+								}
+							}
+							'/' => {
+								if c.1 < self.width() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Right,
+										coords: (c.0, c.1 + 1),
+									});
+								}
+							}
 							_ => {}
 						}
 					}
-				}
-			}
-			for i in 0..self.height() - 1 {
-				for j in 0..self.width() {
-					if beam_sets[i + 1][j].u {
-						match self.get(i, j) {
-							'.' | '|' => set(&mut beam_sets[i][j].u),
+					Direction::Down => {
+						if beam_sets[c.0][c.1].d {
+							continue;
+						}
+						beam_sets[c.0][c.1].d = true;
+						match self.get(c) {
+							'.' | '|' => {
+								if c.0 < self.height() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Down,
+										coords: (c.0 + 1, c.1),
+									});
+								}
+							}
 							'-' => {
-								set(&mut beam_sets[i][j].l);
-								set(&mut beam_sets[i][j].r);
+								if c.1 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Left,
+										coords: (c.0, c.1 - 1),
+									});
+								}
+								if c.1 < self.width() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Right,
+										coords: (c.0, c.1 + 1),
+									});
+								}
 							}
-							'\\' => set(&mut beam_sets[i][j].l),
-							'/' => set(&mut beam_sets[i][j].r),
+							'\\' => {
+								if c.1 < self.width() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Right,
+										coords: (c.0, c.1 + 1),
+									});
+								}
+							}
+							'/' => {
+								if c.1 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Left,
+										coords: (c.0, c.1 - 1),
+									});
+								}
+							}
 							_ => {}
 						}
 					}
-				}
-			}
-			for i in 0..self.height() {
-				for j in 1..self.width() {
-					if beam_sets[i][j - 1].r {
-						match self.get(i, j) {
-							'.' | '-' => set(&mut beam_sets[i][j].r),
+					Direction::Left => {
+						if beam_sets[c.0][c.1].l {
+							continue;
+						}
+						beam_sets[c.0][c.1].l = true;
+						match self.get(c) {
+							'.' | '-' => {
+								if c.1 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Left,
+										coords: (c.0, c.1 - 1),
+									});
+								}
+							}
 							'|' => {
-								set(&mut beam_sets[i][j].u);
-								set(&mut beam_sets[i][j].d);
+								if c.0 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Up,
+										coords: (c.0 - 1, c.1),
+									});
+								}
+								if c.0 < self.height() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Down,
+										coords: (c.0 + 1, c.1),
+									});
+								}
 							}
-							'\\' => set(&mut beam_sets[i][j].d),
-							'/' => set(&mut beam_sets[i][j].u),
+							'\\' => {
+								if c.0 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Up,
+										coords: (c.0 - 1, c.1),
+									});
+								}
+							}
+							'/' => {
+								if c.0 < self.height() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Down,
+										coords: (c.0 + 1, c.1),
+									});
+								}
+							}
 							_ => {}
 						}
 					}
-				}
-			}
-			for i in 0..self.height() {
-				for j in 0..self.width() - 1 {
-					if beam_sets[i][j + 1].l {
-						match self.get(i, j) {
-							'.' | '-' => set(&mut beam_sets[i][j].l),
+					Direction::Right => {
+						if beam_sets[c.0][c.1].r {
+							continue;
+						}
+						beam_sets[c.0][c.1].r = true;
+						match self.get(c) {
+							'.' | '-' => {
+								if c.1 < self.width() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Right,
+										coords: (c.0, c.1 + 1),
+									});
+								}
+							}
 							'|' => {
-								set(&mut beam_sets[i][j].u);
-								set(&mut beam_sets[i][j].d);
+								if c.0 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Up,
+										coords: (c.0 - 1, c.1),
+									});
+								}
+								if c.0 < self.height() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Down,
+										coords: (c.0 + 1, c.1),
+									});
+								}
 							}
-							'\\' => set(&mut beam_sets[i][j].u),
-							'/' => set(&mut beam_sets[i][j].d),
+							'\\' => {
+								if c.0 < self.height() - 1 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Down,
+										coords: (c.0 + 1, c.1),
+									});
+								}
+							}
+							'/' => {
+								if c.0 > 0 {
+									next_beam_fronts.push(BeamFront {
+										direction: Direction::Up,
+										coords: (c.0 - 1, c.1),
+									});
+								}
+							}
 							_ => {}
 						}
 					}
 				}
 			}
-			if unchanged {
-				return beam_sets
-					.into_iter()
-					.map(|row| {
-						row.into_iter().filter(BeamSet::energized).count()
-					})
-					.sum();
-			}
+			beam_fronts = next_beam_fronts;
 		}
+		beam_sets
+			.into_iter()
+			.map(|row| row.into_iter().filter(BeamSet::energized).count())
+			.sum()
 	}
 }
 
@@ -177,26 +261,41 @@ fn read_cave() -> Cave {
 }
 
 pub fn part1() -> usize {
-	read_cave().count_energized(Side::Left, 0)
+	read_cave().energy(BeamFront {
+		direction: Direction::Right,
+		coords: (0, 0),
+	})
 }
 
 pub fn part2() -> usize {
 	let cave = read_cave();
-	let (n, m) = (cave.height(), cave.width());
-	(0..n)
+	let ud = (0..cave.width())
 		.map(|i| {
-			cave.count_energized(Side::Left, i)
-				.max(cave.count_energized(Side::Right, i))
+			let u = cave.energy(BeamFront {
+				direction: Direction::Up,
+				coords: (cave.height() - 1, i),
+			});
+			let d = cave.energy(BeamFront {
+				direction: Direction::Down,
+				coords: (0, i),
+			});
+			u.max(d)
 		})
 		.max()
-		.unwrap()
-		.max(
-			(0..m)
-				.map(|j| {
-					cave.count_energized(Side::Top, j)
-						.max(cave.count_energized(Side::Bottom, j))
-				})
-				.max()
-				.unwrap(),
-		)
+		.unwrap();
+	let lr = (0..cave.height())
+		.map(|i| {
+			let l = cave.energy(BeamFront {
+				direction: Direction::Left,
+				coords: (i, cave.width() - 1),
+			});
+			let r = cave.energy(BeamFront {
+				direction: Direction::Right,
+				coords: (i, 0),
+			});
+			l.max(r)
+		})
+		.max()
+		.unwrap();
+	ud.max(lr)
 }
