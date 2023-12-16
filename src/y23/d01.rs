@@ -19,38 +19,79 @@ pub fn part1() -> usize {
 
 pub fn part2() -> usize {
 	read_lines("input/2023/01.txt")
-		.map(|line| {
-			let regex = regex::Regex::new(
-				"[1-9]|one|two|three|four|five|six|seven|eight|nine|zero",
-			)
-			.unwrap();
-			let first = value(regex.find(&line).unwrap().as_str());
-
-			let rev_regex = regex::Regex::new(
-				"[1-9]|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin|orez",
-			)
-			.unwrap();
-			let rev_line = line.chars().rev().collect::<String>();
-			let rev_last_match = rev_regex.find(&rev_line).unwrap().as_str();
-			let last_match = rev_last_match.chars().rev().collect::<String>();
-			let last = value(&last_match);
-
-			10 * first + last
-		})
+		.map(|line| 10 * first(line.as_bytes()) + last(line.as_bytes()))
 		.sum()
 }
 
-fn value(s: &str) -> usize {
-	match s {
-		"1" | "one" => 1,
-		"2" | "two" => 2,
-		"3" | "three" => 3,
-		"4" | "four" => 4,
-		"5" | "five" => 5,
-		"6" | "six" => 6,
-		"7" | "seven" => 7,
-		"8" | "eight" => 8,
-		"9" | "nine" => 9,
-		_ => panic!(),
+fn first(mut s: &[u8]) -> usize {
+	loop {
+		if (b'1'..=b'9').contains(&s[0]) {
+			return (s[0] - b'0') as usize;
+		}
+		if s.starts_with("one".as_bytes()) {
+			return 1;
+		}
+		if s.starts_with("two".as_bytes()) {
+			return 2;
+		}
+		if s.starts_with("three".as_bytes()) {
+			return 3;
+		}
+		if s.starts_with("four".as_bytes()) {
+			return 4;
+		}
+		if s.starts_with("five".as_bytes()) {
+			return 5;
+		}
+		if s.starts_with("six".as_bytes()) {
+			return 6;
+		}
+		if s.starts_with("seven".as_bytes()) {
+			return 7;
+		}
+		if s.starts_with("eight".as_bytes()) {
+			return 8;
+		}
+		if s.starts_with("nine".as_bytes()) {
+			return 9;
+		}
+		s = &s[1..];
+	}
+}
+
+fn last(mut s: &[u8]) -> usize {
+	loop {
+		let last_b = s.last().unwrap();
+		if (b'1'..=b'9').contains(last_b) {
+			return (last_b - b'0') as usize;
+		}
+		if s.ends_with("one".as_bytes()) {
+			return 1;
+		}
+		if s.ends_with("two".as_bytes()) {
+			return 2;
+		}
+		if s.ends_with("three".as_bytes()) {
+			return 3;
+		}
+		if s.ends_with("four".as_bytes()) {
+			return 4;
+		}
+		if s.ends_with("five".as_bytes()) {
+			return 5;
+		}
+		if s.ends_with("six".as_bytes()) {
+			return 6;
+		}
+		if s.ends_with("seven".as_bytes()) {
+			return 7;
+		}
+		if s.ends_with("eight".as_bytes()) {
+			return 8;
+		}
+		if s.ends_with("nine".as_bytes()) {
+			return 9;
+		}
+		s = &s[..s.len() - 1];
 	}
 }
