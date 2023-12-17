@@ -3,7 +3,7 @@ use std::collections::{BinaryHeap, HashMap};
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 970);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 1149);
 
 type Coords = (usize, usize, usize);
 
@@ -103,5 +103,47 @@ fn shortest_path(
 }
 
 pub fn part2() -> usize {
-	0
+	let costs: Vec<Vec<usize>> = read_lines("input/2023/17.txt")
+		.map(|line| line.bytes().map(|b| (b - b'0') as usize).collect())
+		.collect();
+	let (n, m) = (costs.len(), costs[0].len());
+	// Model the graph as two planes. Each move must move 1-3 spaces vertically
+	// or horizontally (depending on the current plane) and move to the other
+	// plane, to force alternating horizontal and vertical move sequences.
+	let mut adj: HashMap<Coords, Vec<(Coords, usize)>> = HashMap::new();
+	for i in 0..n {
+		for j in 0..m {
+			let adj0 = adj.entry((i, j, 0)).or_default();
+			let mut cost = 0;
+			for ii in (i.saturating_sub(10)..i).rev() {
+				cost += costs[ii][j];
+				if i.abs_diff(ii) >= 4 {
+					adj0.push(((ii, j, 1), cost));
+				}
+			}
+			let mut cost = 0;
+			for ii in i + 1..=(i + 10).min(n - 1) {
+				cost += costs[ii][j];
+				if i.abs_diff(ii) >= 4 {
+					adj0.push(((ii, j, 1), cost));
+				}
+			}
+			let adj1 = adj.entry((i, j, 1)).or_default();
+			let mut cost = 0;
+			for jj in (j.saturating_sub(10)..j).rev() {
+				cost += costs[i][jj];
+				if j.abs_diff(jj) >= 4 {
+					adj1.push(((i, jj, 0), cost));
+				}
+			}
+			let mut cost = 0;
+			for jj in j + 1..=(j + 10).min(m - 1) {
+				cost += costs[i][jj];
+				if j.abs_diff(jj) >= 4 {
+					adj1.push(((i, jj, 0), cost));
+				}
+			}
+		}
+	}
+	shortest_path(&costs, &adj, 0).min(shortest_path(&costs, &adj, 1))
 }
