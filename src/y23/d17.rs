@@ -31,9 +31,10 @@ fn get_adjacencies(
 	max: usize,
 ) -> HashMap<Coords, Vec<(Coords, usize)>> {
 	let (n, m) = (costs.len(), costs[0].len());
-	// Model the graph as two planes. Each move must move 1-3 spaces vertically
-	// or horizontally (depending on the current plane) and move to the other
-	// plane, to force alternating horizontal and vertical move sequences.
+	// Model the graph as two planes. Each move must move between min and max
+	// spaces vertically or horizontally (depending on the current plane) and
+	// move to the other plane, to force alternating horizontal and vertical
+	// move sequences.
 	let mut adj: HashMap<Coords, Vec<(Coords, usize)>> = HashMap::new();
 	for i in 0..n {
 		for j in 0..m {
@@ -46,8 +47,8 @@ fn get_adjacencies(
 				}
 			}
 			let mut cost = 0;
-			for ii in i + 1..=(i + max).min(n - 1) {
-				cost += costs[ii][j];
+			for (ii, c) in costs.iter().enumerate().skip(i + 1).take(max) {
+				cost += c[j];
 				if i.abs_diff(ii) >= min {
 					adj0.push(((ii, j, 1), cost));
 				}
