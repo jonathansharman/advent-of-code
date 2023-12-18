@@ -5,17 +5,16 @@ use itertools::Itertools;
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 36679);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 88007104020978);
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 struct Instruction {
-	dir: (i32, i32),
-	len: i32,
-	_color: String,
+	dir: (i64, i64),
+	len: i64,
 }
 
 impl Instruction {
-	fn parse(s: String) -> Instruction {
+	fn parse1(s: String) -> Instruction {
 		let parts = s.split_whitespace().collect::<Vec<_>>();
 		let dir = match parts[0] {
 			"U" => (0, 1),
@@ -25,38 +24,34 @@ impl Instruction {
 			_ => panic!("invalid direction"),
 		};
 		let len = parts[1].parse().unwrap();
-		let _color = parts[2][2..parts[2].len() - 1].to_owned();
-		Instruction { dir, len, _color }
+		Instruction { dir, len }
 	}
-}
 
-#[allow(unused)]
-fn print_holes(holes: &HashSet<(i32, i32)>) {
-	let min_x = *holes.iter().map(|(x, _)| x).min().unwrap();
-	let max_x = *holes.iter().map(|(x, _)| x).max().unwrap();
-	let min_y = *holes.iter().map(|(_, y)| y).min().unwrap();
-	let max_y = *holes.iter().map(|(_, y)| y).max().unwrap();
-	let width = max_x - min_x + 1;
-	let height = max_y - min_y + 1;
-	for y in (min_y..=max_y).rev() {
-		for x in min_x..=max_x {
-			if holes.contains(&(x, y)) {
-				print!("#");
-			} else {
-				print!(".");
-			}
-		}
-		println!();
+	fn parse2(s: String) -> Instruction {
+		let start = s.find('#').unwrap() + 1;
+		let len = i64::from_str_radix(
+			&s.chars().skip(start).take(5).collect::<String>(),
+			16,
+		)
+		.unwrap();
+		let dir = match s.chars().nth(start + 5).unwrap() {
+			'0' => (1, 0),
+			'1' => (0, -1),
+			'2' => (-1, 0),
+			'3' => (0, 1),
+			_ => panic!("invalid direction"),
+		};
+		Instruction { dir, len }
 	}
 }
 
 pub fn part1() -> usize {
 	let instructions = read_lines("input/2023/18.txt")
-		.map(Instruction::parse)
+		.map(Instruction::parse1)
 		.collect::<Vec<_>>();
 	// Compute 4 times the winding number (+/-1 since the close of the loop is
 	// not included) to tell which side interior points are on.
-	let winding: i32 = instructions
+	let winding: i64 = instructions
 		.iter()
 		.tuple_windows()
 		.map(|(a, b)| a.dir.0 * b.dir.1 - a.dir.1 * b.dir.0)
@@ -89,6 +84,74 @@ pub fn part1() -> usize {
 	holes.len()
 }
 
-pub fn part2() -> usize {
-	0
+pub fn part2() -> i64 {
+	let instructions = read_lines("input/2023/18.txt")
+		.map(Instruction::parse2)
+		.collect::<Vec<_>>();
+	// Use the winding number to tell whether the loop is counter-clockwise.
+	let winding_ccw = instructions
+		.iter()
+		.tuple_windows()
+		.map(|(a, b)| a.dir.0 * b.dir.1 - a.dir.1 * b.dir.0)
+		.sum::<i64>()
+		> 0;
+	let mut coords = (0, 0);
+	let mut vertices = Vec::new();
+	// Find the vertices of the exterior.
+	for (i, a) in instructions.iter().copied().enumerate() {
+		let b = instructions[(i + 1) % instructions.len()];
+		let turn_ccw = (a.dir.0 * b.dir.1 - a.dir.1 * b.dir.0) > 0;
+		coords.0 += a.len * a.dir.0;
+		coords.1 += a.len * a.dir.1;
+		let (x, y) = coords;
+		// TODO: Find an expression to unify all these cases.
+		let v = match (a.dir, winding_ccw, turn_ccw) {
+			// Right, CW loop, right turn
+			((1, 0), false, false) => (x + 1, y + 1),
+			// Right, CW loop, left turn
+			((1, 0), false, true) => (x, y + 1),
+			// Right, CCW loop, right turn
+			((1, 0), true, false) => (x, y),
+			// Right, CCW loop, left turn
+			((1, 0), true, true) => (x + 1, y),
+
+			// Left, CW loop, right turn
+			((-1, 0), false, false) => (x, y),
+			// Left, CW loop, left turn
+			((-1, 0), false, true) => (x + 1, y),
+			// Left, CCW loop, right turn
+			((-1, 0), true, false) => (x + 1, y + 1),
+			// Left, CCW loop, left turn
+			((-1, 0), true, true) => (x, y + 1),
+
+			// Up, CW loop, right turn
+			((0, 1), false, false) => (x, y + 1),
+			// Up, CW loop, left turn
+			((0, 1), false, true) => (x, y),
+			// Up, CCW loop, right turn
+			((0, 1), true, false) => (x + 1, y),
+			// Up, CCW loop, left turn
+			((0, 1), true, true) => (x + 1, y + 1),
+
+			// Down, CW loop, right turn
+			((0, -1), false, false) => (x + 1, y),
+			// Down, CW loop, left turn
+			((0, -1), false, true) => (x + 1, y + 1),
+			// Down, CCW loop, right turn
+			((0, -1), true, false) => (x, y + 1),
+			// Down, CCW loop, left turn
+			((0, -1), true, true) => (x, y),
+
+			_ => unreachable!(),
+		};
+		vertices.push(v);
+	}
+	vertices.push(vertices[0]);
+	// Use the shoelace formula to find the area.
+	vertices
+		.into_iter()
+		.tuple_windows()
+		.map(|((x1, y1), (x2, y2))| (y1 + y2) * (x1 - x2))
+		.sum::<i64>()
+		.abs() / 2
 }
