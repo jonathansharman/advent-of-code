@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use itertools::Itertools;
 
 use crate::io::read_lines;
@@ -45,49 +43,21 @@ impl Instruction {
 	}
 }
 
-pub fn part1() -> usize {
+pub fn part1() -> i64 {
 	let instructions = read_lines("input/2023/18.txt")
 		.map(Instruction::parse1)
 		.collect::<Vec<_>>();
-	// Compute 4 times the winding number (+/-1 since the close of the loop is
-	// not included) to tell which side interior points are on.
-	let winding: i64 = instructions
-		.iter()
-		.tuple_windows()
-		.map(|(a, b)| a.dir.0 * b.dir.1 - a.dir.1 * b.dir.0)
-		.sum();
-	let mut coords = (0, 0);
-	let mut holes = HashSet::new();
-	let mut queue = Vec::new();
-	// Form the outline and enqueue adjacent interior points.
-	for i in instructions {
-		// Offset = segment direction rotated in the direction of the loop.
-		let offset = if winding > 0 {
-			(-i.dir.1, i.dir.0)
-		} else {
-			(i.dir.1, -i.dir.0)
-		};
-		for _ in 0..i.len {
-			coords.0 += i.dir.0;
-			coords.1 += i.dir.1;
-			holes.insert(coords);
-			queue.push((coords.0 + offset.0, coords.1 + offset.1));
-		}
-	}
-	// Fill the interior.
-	while let Some((x, y)) = queue.pop() {
-		if !holes.insert((x, y)) {
-			continue;
-		}
-		queue.extend([(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]);
-	}
-	holes.len()
+	area(&instructions)
 }
 
 pub fn part2() -> i64 {
 	let instructions = read_lines("input/2023/18.txt")
 		.map(Instruction::parse2)
 		.collect::<Vec<_>>();
+	area(&instructions)
+}
+
+fn area(instructions: &[Instruction]) -> i64 {
 	// Use the winding number to tell whether the loop is counter-clockwise.
 	let winding_ccw = instructions
 		.iter()
@@ -146,6 +116,8 @@ pub fn part2() -> i64 {
 		};
 		vertices.push(v);
 	}
+	// Add the first vertex to the end so we can use tuple windows to iterate
+	// over all edges.
 	vertices.push(vertices[0]);
 	// Use the shoelace formula to find the area.
 	vertices
