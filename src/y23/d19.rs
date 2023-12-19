@@ -1,12 +1,14 @@
-use std::{cmp::Ordering, collections::HashMap};
+use std::{collections::HashMap, ops::RangeInclusive};
 
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 532551);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 134343280273968);
 
 pub fn part1() -> usize {
-	let (rules, parts) = read_rules_and_parts();
+	let mut lines = read_lines("input/2023/d19.txt");
+	let rules = read_rules(lines.by_ref());
+	let parts = read_parts(lines);
 	let mut result = 0;
 	for part in parts {
 		let mut state = "in".to_string();
@@ -21,7 +23,7 @@ pub fn part1() -> usize {
 			}
 			for rule in &rules[&state] {
 				if let Some(cond) = &rule.cond {
-					if part.0[cond.index].cmp(&cond.rhs) == cond.ord {
+					if cond.range.contains(&part.0[cond.index]) {
 						state = rule.state.clone();
 						break;
 					}
@@ -36,48 +38,87 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let rules = read_rules(read_lines("input/2023/d19.txt").by_ref());
+	combinations("in", &rules, Parts::new())
 }
 
-fn read_rules_and_parts() -> (HashMap<String, Vec<Rule>>, Vec<Part>) {
-	let mut lines = read_lines("input/2023/d19.txt");
-	let mut rules = HashMap::new();
-	for line in lines.by_ref().take_while(|s| !s.is_empty()) {
-		let line = &line[..line.len() - 1];
-		let (source, rest) = line.split_once('{').unwrap();
-		let rest = rest.trim_end_matches('}');
-		let workflows = rest
-			.split(',')
-			.map(|s| {
-				if let Some((cond, target)) = s.split_once(':') {
-					let index = match cond.chars().next().unwrap() {
-						'x' => 0,
-						'm' => 1,
-						'a' => 2,
-						's' => 3,
-						_ => panic!("invalid category"),
-					};
-					let ord = if cond.chars().nth(1).unwrap() == '<' {
-						Ordering::Less
-					} else {
-						Ordering::Greater
-					};
-					let rhs = cond[2..].parse::<usize>().unwrap();
-					Rule {
-						cond: Some(Cond { index, ord, rhs }),
-						state: target.to_owned(),
+fn combinations(
+	state: &str,
+	rules: &HashMap<String, Vec<Rule>>,
+	mut parts: Parts,
+) -> usize {
+	match state {
+		"A" => parts.0.into_iter().map(|range| range.count()).product(),
+		"R" => 0,
+		_ => {
+			let mut result = 0;
+			for rule in &rules[state] {
+				if let Some(cond) = &rule.cond {
+					let (matched, unmatched) =
+						parts.split(cond.index, &cond.range);
+					if let Some(matched) = matched {
+						result += combinations(&rule.state, rules, matched);
+					}
+					match unmatched {
+						Some(unmatched) => parts = unmatched,
+						None => {
+							return result;
+						}
 					}
 				} else {
-					Rule {
-						cond: None,
-						state: s.to_owned(),
-					}
+					return result + combinations(&rule.state, rules, parts);
 				}
-			})
-			.collect();
-		rules.insert(source.to_owned(), workflows);
+			}
+			panic!("no matches");
+		}
 	}
-	let parts = lines
+}
+
+fn read_rules(
+	lines: &mut impl Iterator<Item = String>,
+) -> HashMap<String, Vec<Rule>> {
+	lines
+		.take_while(|s| !s.is_empty())
+		.map(|line| {
+			let line = &line[..line.len() - 1];
+			let (source, rest) = line.split_once('{').unwrap();
+			let rest = rest.trim_end_matches('}');
+			let workflows = rest
+				.split(',')
+				.map(|s| {
+					if let Some((cond, target)) = s.split_once(':') {
+						let index = match cond.chars().next().unwrap() {
+							'x' => 0,
+							'm' => 1,
+							'a' => 2,
+							's' => 3,
+							_ => panic!("invalid category"),
+						};
+						let rhs = cond[2..].parse::<usize>().unwrap();
+						let range = if cond.chars().nth(1).unwrap() == '<' {
+							1..=rhs - 1
+						} else {
+							rhs + 1..=4000
+						};
+						Rule {
+							cond: Some(Cond { index, range }),
+							state: target.to_owned(),
+						}
+					} else {
+						Rule {
+							cond: None,
+							state: s.to_owned(),
+						}
+					}
+				})
+				.collect();
+			(source.to_owned(), workflows)
+		})
+		.collect()
+}
+
+fn read_parts(lines: impl Iterator<Item = String>) -> Vec<Part> {
+	lines
 		.map(|line| {
 			let line = line.trim_matches(&['{', '}'] as &[_]);
 			let ratings = line
@@ -86,8 +127,7 @@ fn read_rules_and_parts() -> (HashMap<String, Vec<Rule>>, Vec<Part>) {
 				.collect::<Vec<usize>>();
 			Part(ratings.try_into().unwrap())
 		})
-		.collect();
-	(rules, parts)
+		.collect()
 }
 
 #[derive(Debug)]
@@ -99,8 +139,55 @@ struct Rule {
 #[derive(Debug)]
 struct Cond {
 	index: usize,
-	ord: Ordering,
-	rhs: usize,
+	range: RangeInclusive<usize>,
 }
 
 struct Part([usize; 4]);
+
+#[derive(Clone)]
+struct Parts([RangeInclusive<usize>; 4]);
+
+impl Parts {
+	fn new() -> Parts {
+		Parts(std::array::from_fn(|_| (1..=4000)))
+	}
+
+	fn replace(mut self, index: usize, range: RangeInclusive<usize>) -> Parts {
+		self.0[index] = range;
+		self
+	}
+
+	fn split(
+		&self,
+		index: usize,
+		splitter: &RangeInclusive<usize>,
+	) -> (Option<Parts>, Option<Parts>) {
+		let range = &self.0[index];
+		let matched = intersection(range, splitter)
+			.map(|range| self.clone().replace(index, range));
+		let unmatched = intersection(range, &complement(splitter))
+			.map(|range| self.clone().replace(index, range));
+		(matched, unmatched)
+	}
+}
+
+fn complement(range: &RangeInclusive<usize>) -> RangeInclusive<usize> {
+	if *range.start() == 1 {
+		range.end() + 1..=4000
+	} else {
+		1..=range.start() - 1
+	}
+}
+
+fn intersection(
+	range1: &RangeInclusive<usize>,
+	range2: &RangeInclusive<usize>,
+) -> Option<RangeInclusive<usize>> {
+	let start = *range1.start().max(range2.start());
+	let end = *range1.end().min(range2.end());
+	if start <= end {
+		Some(start..=end)
+	} else {
+		None
+	}
+}
