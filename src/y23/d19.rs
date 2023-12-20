@@ -6,7 +6,7 @@ crate::test::test_part!(test1, part1, 532551);
 crate::test::test_part!(test2, part2, 134343280273968);
 
 pub fn part1() -> usize {
-	let mut lines = read_lines("input/2023/d19.txt");
+	let mut lines = read_lines("input/2023/19.txt");
 	let rules = read_rules(lines.by_ref());
 	let parts = read_parts(lines);
 	let mut result = 0;
@@ -38,7 +38,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let rules = read_rules(read_lines("input/2023/d19.txt").by_ref());
+	let rules = read_rules(read_lines("input/2023/19.txt").by_ref());
 	combinations("in", &rules, Parts::new())
 }
 
