@@ -3,7 +3,7 @@ use std::collections::{HashMap, VecDeque};
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 1020211150);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 238815727638557);
 
 pub fn part1() -> usize {
 	let mut modules = read_modules();
@@ -62,7 +62,37 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let modules = read_modules();
+	let Module { dsts, .. } = &modules["broadcaster"];
+	dsts.iter()
+		.cloned()
+		.map(|dst| period(&modules, dst))
+		.product()
+}
+
+fn period(modules: &HashMap<String, Module>, mut name: String) -> usize {
+	let mut result = 0;
+	for pow in 0.. {
+		let mut bit = 0;
+		let module = &modules[&name];
+		let mut found_next = false;
+		for dst in &module.dsts {
+			let module = &modules[dst];
+			match module.module_type {
+				ModuleType::FlipFlop { .. } => {
+					found_next = true;
+					name = dst.clone()
+				}
+				ModuleType::Conjunction { .. } => bit = 1,
+				_ => {}
+			}
+		}
+		result += bit << pow;
+		if !found_next {
+			break;
+		}
+	}
+	result
 }
 
 fn read_modules() -> HashMap<String, Module> {
@@ -108,6 +138,7 @@ fn read_modules() -> HashMap<String, Module> {
 	modules
 }
 
+// TODO: Split module_type and dsts.
 struct Module {
 	module_type: ModuleType,
 	dsts: Vec<String>,

@@ -1,0 +1,93 @@
+digraph modules {
+	node [shape=box style=filled color=black fillcolor=white]
+
+	broadcaster -> "\%rz", "\%fp", "\%kv", "\%fd"
+
+	subgraph cluster_gl {
+		style=filled
+		color=lightcyan
+
+		"\%rz" -> "\%vm", "&gl"
+		"\%vm" -> "&gl", "\%xn"
+		"\%xn" -> "\%xg"
+		"\%xg" -> "&gl", "\%mz"
+		"\%mz" -> "\%dd"
+		"\%dd" -> "\%sp"
+		"\%sp" -> "\%mj"
+		"\%mj" -> "\%ms"
+		"\%ms" -> "&gl", "\%hx"
+		"\%hx" -> "&gl", "\%zg"
+		"\%zg" -> "\%ls", "&gl"
+		"\%ls" -> "&gl"
+	}
+
+	subgraph cluster_hr {
+		style=filled
+		color=lemonchiffon
+
+		"\%kv" -> "\%xr", "&hr"
+		"\%xr" -> "\%qq", "&hr"
+		"\%qq" -> "\%dh"
+		"\%dh" -> "&hr", "\%nm"
+		"\%nm" -> "\%rb", "&hr"
+		"\%rb" -> "\%xl", "&hr"
+		"\%xl" -> "\%jd"
+		"\%jd" -> "&hr", "\%bm"
+		"\%bm" -> "&hr", "\%fj"
+		"\%fj" -> "\%pt", "&hr"
+		"\%pt" -> "\%lg", "&hr"
+		"\%lg" -> "&hr"
+	}
+
+	subgraph cluster_nr {
+		style=filled
+		color=palegreen1
+
+		"\%fd" -> "&nr", "\%df"
+		"\%df" -> "&nr", "\%nv"
+		"\%nv" -> "\%tf", "&nr"
+		"\%tf" -> "\%cb"
+		"\%cb" -> "\%xc"
+		"\%xc" -> "\%vq"
+		"\%vq" -> "\%gr"
+		"\%gr" -> "\%jh"
+		"\%jh" -> "&nr", "\%kd"
+		"\%kd" -> "\%cm", "&nr"
+		"\%cm" -> "&nr", "\%cf"
+		"\%cf" -> "&nr"
+	}
+
+	subgraph cluster_gk {
+		style=filled
+		color=plum1
+
+		"\%fp" -> "\%cc", "&gk"
+		"\%cc" -> "&gk", "\%tp"
+		"\%tp" -> "\%hq"
+		"\%hq" -> "\%ql"
+		"\%ql" -> "\%bn"
+		"\%bn" -> "\%rj", "&gk"
+		"\%rj" -> "\%jk"
+		"\%jk" -> "&gk", "\%dg"
+		"\%dg" -> "&gk", "\%mp"
+		"\%mp" -> "&gk", "\%kj"
+		"\%kj" -> "\%fl", "&gk"
+		"\%fl" -> "&gk"
+	}
+
+	subgraph cluster_rx {
+		style=filled
+		color=lightgray
+
+		"&gl" -> "&fh", "\%xn", "\%sp", "\%mz", "\%rz", "\%mj", "\%dd"
+		"&hr" -> "&hh", "\%kv", "\%xl", "\%qq"
+		"&nr" -> "\%fd", "\%gr", "&fn", "\%cb", "\%tf", "\%xc", "\%vq"
+		"&gk" -> "&lk", "\%tp", "\%fp", "\%ql", "\%hq", "\%rj"
+
+		"&hh" -> "&nc"
+		"&fh" -> "&nc"
+		"&lk" -> "&nc"
+		"&fn" -> "&nc"
+		"&nc" -> rx
+	}
+}
