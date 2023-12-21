@@ -21,12 +21,11 @@ pub fn part1() -> usize {
 			} else {
 				low_pulses += 1;
 			}
-			let Some(Module { module_type, dsts }) = modules.get_mut(&dst)
-			else {
+			let Some((module, dsts)) = modules.get_mut(&dst) else {
 				continue;
 			};
-			match module_type {
-				ModuleType::FlipFlop { on } => {
+			match module {
+				Module::FlipFlop { on } => {
 					if !high {
 						*on = !*on;
 						let src = dst;
@@ -37,7 +36,7 @@ pub fn part1() -> usize {
 						}));
 					}
 				}
-				ModuleType::Conjunction { memory } => {
+				Module::Conjunction { memory } => {
 					memory.insert(src, high);
 					let src = dst;
 					let high = !memory.values().all(|high| *high);
@@ -47,7 +46,7 @@ pub fn part1() -> usize {
 						high,
 					}));
 				}
-				ModuleType::Broadcaster => {
+				Module::Broadcaster => {
 					let src = dst;
 					queue.extend(dsts.iter().cloned().map(|dst| Pulse {
 						src: src.clone(),
@@ -63,27 +62,31 @@ pub fn part1() -> usize {
 
 pub fn part2() -> usize {
 	let modules = read_modules();
-	let Module { dsts, .. } = &modules["broadcaster"];
-	dsts.iter()
+	modules["broadcaster"]
+		.1
+		.iter()
 		.cloned()
 		.map(|dst| period(&modules, dst))
 		.product()
 }
 
-fn period(modules: &HashMap<String, Module>, mut name: String) -> usize {
+fn period(
+	modules: &HashMap<String, (Module, Vec<String>)>,
+	mut name: String,
+) -> usize {
 	let mut result = 0;
 	for pow in 0.. {
 		let mut bit = 0;
-		let module = &modules[&name];
+		let dsts = &modules[&name].1;
 		let mut found_next = false;
-		for dst in &module.dsts {
-			let module = &modules[dst];
-			match module.module_type {
-				ModuleType::FlipFlop { .. } => {
+		for dst in dsts {
+			let module = &modules[dst].0;
+			match module {
+				Module::FlipFlop { .. } => {
 					found_next = true;
 					name = dst.clone()
 				}
-				ModuleType::Conjunction { .. } => bit = 1,
+				Module::Conjunction { .. } => bit = 1,
 				_ => {}
 			}
 		}
@@ -95,31 +98,32 @@ fn period(modules: &HashMap<String, Module>, mut name: String) -> usize {
 	result
 }
 
-fn read_modules() -> HashMap<String, Module> {
+/// module name -> (module, destination module names)
+fn read_modules() -> HashMap<String, (Module, Vec<String>)> {
 	let mut modules = HashMap::new();
 	for line in read_lines("input/2023/20.txt") {
 		let (lhs, rhs) = line.split_once(" -> ").unwrap();
 		let dsts: Vec<String> = rhs.split(", ").map(str::to_owned).collect();
-		let (name, module_type) = if lhs == "broadcaster" {
-			(lhs.to_owned(), ModuleType::Broadcaster)
+		let (name, module) = if lhs == "broadcaster" {
+			(lhs.to_owned(), Module::Broadcaster)
 		} else {
 			let (symbol, name) = lhs.split_at(1);
 			if symbol == "%" {
-				(name.to_owned(), ModuleType::FlipFlop { on: false })
+				(name.to_owned(), Module::FlipFlop { on: false })
 			} else {
 				(
 					name.to_owned(),
-					ModuleType::Conjunction {
+					Module::Conjunction {
 						memory: HashMap::new(),
 					},
 				)
 			}
 		};
-		modules.insert(name, Module { module_type, dsts });
+		modules.insert(name, (module, dsts));
 	}
 	let mut inputs_by_dst: HashMap<String, Vec<String>> = HashMap::new();
-	for (input, module) in &modules {
-		for dst in &module.dsts {
+	for (input, (_, dsts)) in &modules {
+		for dst in dsts {
 			inputs_by_dst
 				.entry(dst.clone())
 				.or_default()
@@ -127,10 +131,7 @@ fn read_modules() -> HashMap<String, Module> {
 		}
 	}
 	for (dst, i) in inputs_by_dst {
-		if let Some(Module {
-			module_type: ModuleType::Conjunction { memory },
-			..
-		}) = modules.get_mut(&dst)
+		if let Some((Module::Conjunction { memory }, _)) = modules.get_mut(&dst)
 		{
 			*memory = i.into_iter().map(|input| (input, false)).collect();
 		}
@@ -138,13 +139,7 @@ fn read_modules() -> HashMap<String, Module> {
 	modules
 }
 
-// TODO: Split module_type and dsts.
-struct Module {
-	module_type: ModuleType,
-	dsts: Vec<String>,
-}
-
-enum ModuleType {
+enum Module {
 	FlipFlop { on: bool },
 	Conjunction { memory: HashMap<String, bool> },
 	Broadcaster,
