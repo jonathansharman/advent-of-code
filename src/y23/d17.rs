@@ -1,7 +1,4 @@
-use crate::{
-	graph::{Edge, Graph},
-	io::read_lines,
-};
+use crate::{graph::Graph, io::read_lines};
 
 crate::test::test_part!(test1, part1, 970);
 crate::test::test_part!(test2, part2, 1149);
@@ -43,34 +40,36 @@ fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Graph<Coords> {
 	let mut graph = Graph::new();
 	for i in 0..n {
 		for j in 0..m {
-			let edges0 = graph.edges((i, j, 0)).or_default();
+			let n0 = (i, j, 0);
+			graph.insert_node(n0);
 			let mut cost = 0;
 			for ii in (i.saturating_sub(max)..i).rev() {
 				cost += costs[ii][j];
 				if i.abs_diff(ii) >= min {
-					edges0.push(Edge::new((ii, j, 1), cost));
+					graph.insert_edge(n0, (ii, j, 1), cost);
 				}
 			}
 			let mut cost = 0;
 			for (ii, c) in costs.iter().enumerate().skip(i + 1).take(max) {
 				cost += c[j];
 				if i.abs_diff(ii) >= min {
-					edges0.push(Edge::new((ii, j, 1), cost));
+					graph.insert_edge(n0, (ii, j, 1), cost);
 				}
 			}
-			let edges1 = graph.edges((i, j, 1)).or_default();
+			let n1 = (i, j, 1);
+			graph.insert_node(n1);
 			let mut cost = 0;
 			for jj in (j.saturating_sub(max)..j).rev() {
 				cost += costs[i][jj];
 				if j.abs_diff(jj) >= min {
-					edges1.push(Edge::new((i, jj, 0), cost));
+					graph.insert_edge(n1, (i, jj, 0), cost);
 				}
 			}
 			let mut cost = 0;
 			for jj in j + 1..=(j + max).min(m - 1) {
 				cost += costs[i][jj];
 				if j.abs_diff(jj) >= min {
-					edges1.push(Edge::new((i, jj, 0), cost));
+					graph.insert_edge(n1, (i, jj, 0), cost);
 				}
 			}
 		}
