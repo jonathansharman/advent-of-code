@@ -8,7 +8,7 @@ use itertools::Itertools;
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 454);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 74287);
 
 struct Point {
 	x: usize,
@@ -59,8 +59,7 @@ fn parse_point(s: &str) -> Point {
 	Point { x, y, z }
 }
 
-pub fn part1() -> usize {
-	let mut bricks = read_bricks();
+fn settle(bricks: &mut [Brick]) {
 	// Process bricks from low to high.
 	bricks.sort_by_key(|brick| brick.start.z);
 	// (x, y) -> (brick index, z)
@@ -90,21 +89,61 @@ pub fn part1() -> usize {
 			height_map.insert((cube.x, cube.y), (i, cube.z));
 		}
 	}
-	let total = bricks.len();
-	let required = bricks
-		.into_iter()
+}
+
+fn required_bricks(bricks: &[Brick]) -> HashSet<usize> {
+	bricks
+		.iter()
 		.filter_map(|brick| {
 			if brick.resting_on.len() == 1 {
-				Some(brick.resting_on.into_iter().next().unwrap())
+				Some(*brick.resting_on.iter().next().unwrap())
 			} else {
 				None
 			}
 		})
 		.collect::<HashSet<_>>()
-		.len();
-	total - required
+}
+
+pub fn part1() -> usize {
+	let mut bricks = read_bricks();
+	settle(&mut bricks);
+	let required = required_bricks(&bricks).len();
+	bricks.len() - required
+}
+
+fn drops(
+	bricks: &[Brick],
+	supporting: &HashMap<usize, HashSet<usize>>,
+	i: usize,
+) -> usize {
+	let mut queue = vec![i];
+	let mut removed = HashSet::new();
+	while let Some(i) = queue.pop() {
+		removed.insert(i);
+		if let Some(supporting) = supporting.get(&i) {
+			for &j in supporting {
+				if bricks[j].resting_on.is_subset(&removed) {
+					queue.push(j);
+				}
+			}
+		}
+	}
+	removed.len() - 1
 }
 
 pub fn part2() -> usize {
-	0
+	let mut bricks = read_bricks();
+	settle(&mut bricks);
+	let supporting = bricks.iter().enumerate().fold(
+		HashMap::<usize, HashSet<usize>>::new(),
+		|mut acc, (i, brick)| {
+			for &j in &brick.resting_on {
+				acc.entry(j).or_default().insert(i);
+			}
+			acc
+		},
+	);
+	(0..bricks.len())
+		.map(|i| drops(&bricks, &supporting, i))
+		.sum()
 }
