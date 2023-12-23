@@ -8,14 +8,11 @@ use itertools::Itertools;
 use crate::{io::read_lines, neighbors};
 
 crate::test::test_part!(test1, part1, 3733);
-// 617689228309913 is too low
-// 617688476124552 is my current answer, which is still too low
-// 702322399865956 is an upper bound (no walls)
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 617729401414635);
 
 fn read_grid() -> Vec<Vec<bool>> {
 	read_lines("input/2023/21.txt")
-		.map(|line| line.chars().map(|c| c == '.').collect())
+		.map(|line| line.chars().map(|c| c == '.' || c == 'S').collect())
 		.collect()
 }
 
