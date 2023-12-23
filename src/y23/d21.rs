@@ -92,14 +92,13 @@ pub fn part2() -> usize {
 					count += (n + 1 + correct_parity as usize) / 2;
 				}
 				2 => {
-					// TODO: Calculable analytically, without a loop.
-
-					// Parity alternates per diagonal row of tiles.
-					for tile_distance in 0..=n {
-						let tile_parity = tile_distance % 2 == 0;
-						if correct_parity == tile_parity {
-							count += tile_distance + 1;
-						}
+					// Parity alternates per diagonal row of tiles, starting
+					// with the correct parity if the point in the first zone
+					// does. These summations work because of mathematics. 🧠
+					if correct_parity {
+						count += (n / 2 + 1).pow(2);
+					} else {
+						count += ((n + 1) / 2) * ((n + 1) / 2 + 1);
 					}
 				}
 				_ => unreachable!(),
