@@ -1,4 +1,7 @@
-use std::collections::{hash_map::Entry, HashMap, HashSet, VecDeque};
+use std::{
+	cmp::Ordering,
+	collections::{hash_map::Entry, HashMap, HashSet, VecDeque},
+};
 
 use itertools::Itertools;
 
@@ -6,6 +9,7 @@ use crate::{io::read_lines, neighbors};
 
 crate::test::test_part!(test1, part1, 3733);
 // 617689228309913 is too low
+// 617688476124552 is my current answer, which is still too low
 // 702322399865956 is an upper bound (no walls)
 crate::test::test_part!(test2, part2, ?);
 
@@ -66,53 +70,38 @@ pub fn part2() -> usize {
 	let mut count = 0;
 	for p in critical_points {
 		for d in p.distances.into_values() {
-			let remaining = TOTAL_STEPS_2
-				.saturating_sub(d)
-				.saturating_sub(p.zone_distance);
-			// n = tile distance to farthest reachable tile.
+			let remaining = match TOTAL_STEPS_2.cmp(&(d + p.zone_distance)) {
+				Ordering::Less => continue,
+				Ordering::Equal => 0,
+				Ordering::Greater => TOTAL_STEPS_2 - d - p.zone_distance,
+			};
+			// Compute the tile distance from the first tile in this critical
+			// point's zone to farthest reachable tile.
 			let n = remaining / diameter;
-			let d_parity = d % 2;
+			// Check whether this point has correct parity in the first tile.
+			let correct_parity = (p.zone_distance + d) % 2 == PARITY_2;
 			match p.degrees_of_freedom {
 				0 => {
-					if d_parity == PARITY_2 {
+					if correct_parity {
 						count += 1;
 					}
 				}
 				1 => {
-					if diameter % 2 == 0 {
-						// When the diameter is even, the parity of every tile
-						// is the same as the primary tile.
-						if d_parity == PARITY_2 {
-							count += n;
-						}
-					} else {
-						// When the diameter is odd, parity alternates, and
-						// approximately half the reachable tiles will have the
-						// correct parity. If d has the incorrect parity in the
-						// primary tile, then it will start on the correct
-						// parity when extending out, in which case we need to
-						// round up instead of down if the number of reachable
-						// tiles is odd.
-						let round_up = (d_parity != PARITY_2) as usize;
-						count += (n + round_up) / 2;
-					}
+					// Assuming the tile diameter is odd, parity alternates per
+					// tile, and approximately half the reachable tiles will
+					// have the correct parity. If the total distance to the
+					// point in the first zone has correct parity, round up
+					// instead of down if the number of reachable tiles is odd.
+					count += (n + 1 + correct_parity as usize) / 2;
 				}
 				2 => {
-					// The relevant tiles are those between 2 and n tiles away.
-					// (The remaining tiles are covered by other zones.)
-					if diameter % 2 == 0 {
-						// Parity is the same across all tiles.
-						if d_parity == PARITY_2 {
-							// Triangular number of tiles.
-							count += (n - 1) * n / 2;
-						}
-					} else {
-						// TODO: Calculable analytically, without a loop.
+					// TODO: Calculable analytically, without a loop.
 
-						// Parity alternates per diagonal row of tiles, starting
-						// with the same parity as the primary tile.
-						for tile_distance in (2 + d_parity..=n).step_by(2) {
-							count += tile_distance - 1;
+					// Parity alternates per diagonal row of tiles.
+					for tile_distance in 0..=n {
+						let tile_parity = tile_distance % 2 == 0;
+						if correct_parity == tile_parity {
+							count += tile_distance + 1;
 						}
 					}
 				}
