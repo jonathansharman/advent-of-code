@@ -106,9 +106,8 @@ pub fn part2() -> usize {
 	// singleton possibility sets remain.
 	let mut queue: Vec<String> = possible_fields
 		.iter()
-		.filter_map(|fields| {
-			(fields.len() == 1).then(|| fields.iter().next().unwrap().clone())
-		})
+		.filter(|&fields| (fields.len() == 1))
+		.map(|fields| fields.iter().next().unwrap().clone())
 		.collect();
 	while let Some(singleton) = queue.pop() {
 		for fields in possible_fields.iter_mut() {
