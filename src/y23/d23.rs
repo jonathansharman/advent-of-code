@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use rayon::prelude::*;
+
 use crate::{graph::Graph, io::read_lines, neighbors};
 
 crate::test::test_part!(test1, part1, 2414);
@@ -180,7 +182,7 @@ fn longest_walk(
 	visited.insert(from);
 	graph
 		.edges_from(&from)
-		.iter()
+		.par_iter()
 		.filter(|(n, _)| !visited.contains(n))
 		.map(|(&n, weight)| {
 			longest_walk(graph, visited.clone(), n, to, steps + 1 + weight)
