@@ -38,22 +38,27 @@ impl<T: Node> Graph<T> {
 		}
 	}
 
-	/// Inserts the given `node` with an empty adjency set, if the node doesn't
-	/// already exist.
-	pub fn insert_node(&mut self, node: T) {
-		self.edges.entry(node).or_default();
-	}
-
-	/// Calls [`insert_node`] with each item of `nodes`.
-	pub fn extend_nodes<I: IntoIterator<Item = T>>(&mut self, nodes: I) {
-		for node in nodes {
-			self.insert_node(node);
-		}
-	}
-
 	/// Adds an edge from node `from` to node `to` with the given `weight`.
 	pub fn insert_edge(&mut self, from: T, to: T, weight: usize) {
-		self.edges.get_mut(&from).unwrap().insert(to, weight);
+		self.edges.entry(from).or_default().insert(to, weight);
+	}
+
+	/// A Graphviz representation of the graph.
+	pub fn graphviz(&self) -> String
+	where
+		T: std::fmt::Debug,
+	{
+		let mut output = String::new();
+		output += "digraph {\n";
+		for (node, edges) in &self.edges {
+			for (neighbor, weight) in edges {
+				output += &format!(
+					"\t\"{node:?}\" -> \"{neighbor:?}\" [label=\"{weight}\"]\n"
+				);
+			}
+		}
+		output += "}\n";
+		output
 	}
 
 	/// The shortest distance from `start` to a node that satisfies `pred` or
@@ -145,7 +150,6 @@ pub fn from_bool_grid(grid: &[Vec<bool>]) -> Graph<(usize, usize)> {
 			if !open {
 				continue;
 			}
-			graph.insert_node(node);
 			for neighbor in neighbors::four(grid.len(), grid[0].len(), i, j) {
 				if grid[neighbor.0][neighbor.1] {
 					graph.insert_edge(node, neighbor, 1);
@@ -162,7 +166,6 @@ mod tests {
 
 	fn get_test_graph() -> Graph<&'static str> {
 		let mut graph = Graph::new();
-		graph.extend_nodes(["start", "a", "b", "c", "shortcut", "goal"]);
 		graph.insert_edge("start", "a", 1);
 		graph.insert_edge("start", "shortcut", 2);
 		graph.insert_edge("a", "b", 2);

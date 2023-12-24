@@ -41,7 +41,6 @@ fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Graph<Coords> {
 	for i in 0..n {
 		for j in 0..m {
 			let n0 = (i, j, 0);
-			graph.insert_node(n0);
 			let mut cost = 0;
 			for ii in (i.saturating_sub(max)..i).rev() {
 				cost += costs[ii][j];
@@ -57,7 +56,6 @@ fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Graph<Coords> {
 				}
 			}
 			let n1 = (i, j, 1);
-			graph.insert_node(n1);
 			let mut cost = 0;
 			for jj in (j.saturating_sub(max)..j).rev() {
 				cost += costs[i][jj];
