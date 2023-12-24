@@ -8,14 +8,14 @@ crate::test::test_part!(test1, part1, 11995);
 crate::test::test_part!(test2, part2, ?);
 
 #[derive(Clone, Copy, Debug)]
-struct Vector([f64; 3]);
+struct Vector([i64; 3]);
 
 impl Vector {
-	fn x(&self) -> f64 {
+	fn x(&self) -> i64 {
 		self.0[0]
 	}
 
-	fn y(&self) -> f64 {
+	fn y(&self) -> i64 {
 		self.0[1]
 	}
 }
@@ -34,14 +34,14 @@ impl FromStr for Vector {
 }
 
 #[derive(Clone, Copy, Debug)]
-struct Point([f64; 3]);
+struct Point([i64; 3]);
 
 impl Point {
-	fn x(&self) -> f64 {
+	fn x(&self) -> i64 {
 		self.0[0]
 	}
 
-	fn y(&self) -> f64 {
+	fn y(&self) -> i64 {
 		self.0[1]
 	}
 }
@@ -79,10 +79,14 @@ pub fn part1() -> usize {
 
 					let s = (v1.x() * p2.y()
 						- v1.x() * p1.y() - v1.y() * p2.x()
-						+ v1.y() * p1.x()) / (v1.y() * v2.x()
-						- v1.x() * v2.y());
-					let t = (p2.x() + s * v2.x() - p1.x()) / v1.x();
-					let (ix, iy) = (p2.x() + s * v2.x(), p2.y() + s * v2.y());
+						+ v1.y() * p1.x()) as f64
+						/ (v1.y() * v2.x() - v1.x() * v2.y()) as f64;
+					let t = (p2.x() as f64 + s * v2.x() as f64 - p1.x() as f64)
+						/ v1.x() as f64;
+					let (ix, iy) = (
+						p2.x() as f64 + s * v2.x() as f64,
+						p2.y() as f64 + s * v2.y() as f64,
+					);
 					t >= 0.0
 						&& s >= 0.0 && (MIN..=MAX).contains(&ix)
 						&& (MIN..=MAX).contains(&iy)
