@@ -126,15 +126,16 @@ fn get_graph(tiles: &[Vec<bool>]) -> Graph<(usize, usize)> {
 		if !visited.insert(current) {
 			continue;
 		}
-		// TODO: Compute both lists in the same loop.
-		let node_neighbors = neighbors::four(n, m, current.0, current.1)
-			.into_iter()
-			.filter(|n| *n != node && nodes.contains(n))
-			.collect::<Vec<_>>();
-		let open_neighbors = neighbors::four(n, m, current.0, current.1)
-			.into_iter()
-			.filter(|n| !visited.contains(n) && tiles[n.0][n.1])
-			.collect::<Vec<_>>();
+		let mut node_neighbors = Vec::new();
+		let mut open_neighbors = Vec::new();
+		for n in neighbors::four(n, m, current.0, current.1) {
+			if n != node && nodes.contains(&n) {
+				node_neighbors.push(n);
+			}
+			if !visited.contains(&n) && tiles[n.0][n.1] {
+				open_neighbors.push(n);
+			}
+		}
 		match open_neighbors.len() {
 			0 => {
 				if node_neighbors.is_empty() {
