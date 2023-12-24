@@ -1,5 +1,7 @@
 use std::collections::{hash_map::Entry, BinaryHeap, HashMap};
 
+use itertools::Itertools;
+
 use crate::neighbors;
 
 pub trait Node: Copy + Eq + std::hash::Hash {}
@@ -43,6 +45,11 @@ impl<T: Node> Graph<T> {
 		self.edges.entry(from).or_default().insert(to, weight);
 	}
 
+	/// The set of outgoing edges (node → weight) from `from`.
+	pub fn edges_from(&self, from: &T) -> &HashMap<T, usize> {
+		&self.edges[from]
+	}
+
 	/// A Graphviz representation of the graph.
 	pub fn graphviz(&self) -> String
 	where
@@ -57,6 +64,34 @@ impl<T: Node> Graph<T> {
 				);
 			}
 		}
+		output += "}\n";
+		output
+	}
+
+	/// A Graphviz representation of the graph, treating the graph as
+	/// undirected. The results are only meaningful if all the edges (including
+	/// weights) are symmetric.
+	pub fn graphviz_undirected(&self) -> String
+	where
+		T: std::fmt::Debug + Ord,
+	{
+		let mut output = String::new();
+		output += "graph {\n";
+		self.edges
+			.iter()
+			.fold(HashMap::new(), |mut acc, (node, neighbors)| {
+				for (neighbor, weight) in neighbors {
+					let key = (node.min(neighbor), node.max(neighbor));
+					acc.insert(key, weight);
+				}
+				acc
+			})
+			.into_iter()
+			.sorted()
+			.for_each(|((a, b), weight)| {
+				output +=
+					&format!("\t\"{a:?}\" -- \"{b:?}\" [label=\"{weight}\"]\n");
+			});
 		output += "}\n";
 		output
 	}
