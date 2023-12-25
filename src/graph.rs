@@ -1,4 +1,8 @@
-use std::collections::{hash_map::Entry, BinaryHeap, HashMap};
+use std::{
+	borrow::Borrow,
+	collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
+	hash::Hash,
+};
 
 use itertools::Itertools;
 
@@ -27,7 +31,7 @@ impl<T: Node> PartialOrd for State<T> {
 }
 
 /// A directed graph.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Graph<T: Node> {
 	edges: HashMap<T, HashMap<T, usize>>,
 }
@@ -45,23 +49,71 @@ impl<T: Node> Graph<T> {
 		self.edges.entry(from).or_default().insert(to, weight);
 	}
 
+	/// Removes any edge from node `from` to node `to`.
+	pub fn remove_edge<Q: ?Sized>(&mut self, from: &Q, to: &Q)
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq,
+	{
+		if let Some(neighbors) = self.edges.get_mut(from) {
+			neighbors.remove(to);
+		}
+	}
+
 	/// The set of outgoing edges (node → weight) from `from`.
-	pub fn edges_from(&self, from: &T) -> &HashMap<T, usize> {
+	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> &HashMap<T, usize>
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq,
+	{
 		&self.edges[from]
+	}
+
+	/// The number of nodes in this graph. O(|N|+|E|).
+	pub fn node_count(&self) -> usize {
+		let mut nodes = HashSet::new();
+		for (node, edges) in self.edges.iter() {
+			nodes.insert(node.clone());
+			nodes.extend(edges.keys().cloned());
+		}
+		nodes.len()
+	}
+
+	/// Consumes the graph to produce a list of its strongly connected
+	/// components.
+	pub fn into_strongly_connected_components(mut self) -> Vec<Self> {
+		let mut components = Vec::new();
+		while !self.edges.is_empty() {
+			let mut component = Graph::new();
+			let mut queue = vec![self.edges.keys().next().unwrap().clone()];
+			while let Some(node) = queue.pop() {
+				if let Some(edges) = self.edges.remove(&node) {
+					for (neighbor, weight) in edges {
+						component.insert_edge(
+							node.clone(),
+							neighbor.clone(),
+							weight,
+						);
+						queue.push(neighbor);
+					}
+				}
+			}
+			components.push(component);
+		}
+		components
 	}
 
 	/// A Graphviz representation of the graph.
 	pub fn graphviz(&self) -> String
 	where
-		T: std::fmt::Debug,
+		T: std::fmt::Display,
 	{
 		let mut output = String::new();
 		output += "digraph {\n";
-		for (node, edges) in &self.edges {
-			for (neighbor, weight) in edges {
-				output += &format!(
-					"\t\"{node:?}\" -> \"{neighbor:?}\" [label=\"{weight}\"]\n"
-				);
+		for (a, edges) in &self.edges {
+			for (b, weight) in edges {
+				output += 
+					&format!("\t\"{a}\" -> \"{b}\" [label=\"{weight}\" tooltip=\"{a}→{b}: {weight}\"]\n");
 			}
 		}
 		output += "}\n";
@@ -73,7 +125,7 @@ impl<T: Node> Graph<T> {
 	/// weights) are symmetric.
 	pub fn graphviz_undirected(&self) -> String
 	where
-		T: std::fmt::Debug + Ord,
+		T: std::fmt::Display + Ord,
 	{
 		let mut output = String::new();
 		output += "graph {\n";
@@ -90,7 +142,7 @@ impl<T: Node> Graph<T> {
 			.sorted()
 			.for_each(|((a, b), weight)| {
 				output +=
-					&format!("\t\"{a:?}\" -- \"{b:?}\" [label=\"{weight}\"]\n");
+					&format!("\t\"{a}\" -- \"{b}\" [label=\"{weight}\" tooltip=\"{a}-{b}: {weight}\"]\n");
 			});
 		output += "}\n";
 		output
@@ -171,6 +223,15 @@ impl<T: Node> Graph<T> {
 			}
 		}
 		distances
+	}
+}
+
+impl<T: Node> std::fmt::Debug for Graph<T>
+where
+	T: std::fmt::Debug,
+{
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.debug_struct("Graph").field("edges", &self.edges).finish()
 	}
 }
 
