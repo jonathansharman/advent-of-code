@@ -32,12 +32,12 @@ impl<T: Node> PartialOrd for State<T> {
 
 /// A directed graph.
 #[derive(Clone, Default)]
-pub struct Graph<T: Node> {
+pub struct Digraph<T: Node> {
 	edges: HashMap<T, HashMap<T, usize>>,
 }
 
-impl<T: Node> Graph<T> {
-	/// Creates a new empty `Graph`.
+impl<T: Node> Digraph<T> {
+	/// Creates a new empty `Digraph`.
 	pub fn new() -> Self {
 		Self {
 			edges: HashMap::new(),
@@ -69,22 +69,24 @@ impl<T: Node> Graph<T> {
 		&self.edges[from]
 	}
 
-	/// The number of nodes in this graph. O(|N|+|E|).
-	pub fn node_count(&self) -> usize {
+	// TODO: Maybe I should track nodes eagerly to make this O(1), especially
+	// since this is used in some other methods.
+	/// The set of nodes in the digraph. O(|N|+|E|).
+	pub fn get_nodes(&self) -> HashSet<T> {
 		let mut nodes = HashSet::new();
 		for (node, edges) in self.edges.iter() {
 			nodes.insert(node.clone());
 			nodes.extend(edges.keys().cloned());
 		}
-		nodes.len()
+		nodes
 	}
 
-	/// Consumes the graph to produce a list of its strongly connected
+	/// Consumes the digraph to produce a list of its strongly connected
 	/// components.
 	pub fn into_strongly_connected_components(mut self) -> Vec<Self> {
 		let mut components = Vec::new();
 		while !self.edges.is_empty() {
-			let mut component = Graph::new();
+			let mut component = Digraph::new();
 			let mut queue = vec![self.edges.keys().next().unwrap().clone()];
 			while let Some(node) = queue.pop() {
 				if let Some(edges) = self.edges.remove(&node) {
@@ -103,46 +105,27 @@ impl<T: Node> Graph<T> {
 		components
 	}
 
-	/// A Graphviz representation of the graph.
+	/// A Graphviz representation of the digraph.
 	pub fn graphviz(&self) -> String
-	where
-		T: std::fmt::Display,
-	{
-		let mut output = String::new();
-		output += "digraph {\n";
-		for (a, edges) in &self.edges {
-			for (b, weight) in edges {
-				output += 
-					&format!("\t\"{a}\" -> \"{b}\" [label=\"{weight}\" tooltip=\"{a}→{b}: {weight}\"]\n");
-			}
-		}
-		output += "}\n";
-		output
-	}
-
-	/// A Graphviz representation of the graph, treating the graph as
-	/// undirected. The results are only meaningful if all the edges (including
-	/// weights) are symmetric.
-	pub fn graphviz_undirected(&self) -> String
 	where
 		T: std::fmt::Display + Ord,
 	{
 		let mut output = String::new();
-		output += "graph {\n";
+		output += "digraph {\n";
 		self.edges
 			.iter()
-			.fold(HashMap::new(), |mut acc, (node, neighbors)| {
-				for (neighbor, weight) in neighbors {
-					let key = (node.min(neighbor), node.max(neighbor));
-					acc.insert(key, weight);
-				}
-				acc
+			.flat_map(|(node, edges)| {
+				edges
+					.iter()
+					.map(move |(neighbor, weight)| (node, neighbor, weight))
 			})
-			.into_iter()
 			.sorted()
-			.for_each(|((a, b), weight)| {
-				output +=
-					&format!("\t\"{a}\" -- \"{b}\" [label=\"{weight}\" tooltip=\"{a}-{b}: {weight}\"]\n");
+			.for_each(|(a, b, w)| {
+				output += &format!(
+					"\t\"{a}\" -> \"{b}\" \
+					[label=\"{w}\" \
+					tooltip=\"{a}→{b}: {w}\"]\n"
+				);
 			});
 		output += "}\n";
 		output
@@ -169,15 +152,17 @@ impl<T: Node> Graph<T> {
 				// We've already reached this node by a shorter path.
 				continue;
 			}
-			for (neighbor, weight) in self.edges[&node].iter() {
-				let candidate = distance + weight;
-				let d = distances.get(neighbor);
-				if d.map_or(true, |d| candidate < *d) {
-					queue.push(State {
-						distance: candidate,
-						node: neighbor.clone(),
-					});
-					distances.insert(neighbor.clone(), candidate);
+			if let Some(edges) = self.edges.get(&node) {
+				for (neighbor, weight) in edges {
+					let candidate = distance + weight;
+					let d = distances.get(neighbor);
+					if d.map_or(true, |d| candidate < *d) {
+						queue.push(State {
+							distance: candidate,
+							node: neighbor.clone(),
+						});
+						distances.insert(neighbor.clone(), candidate);
+					}
 				}
 			}
 		}
@@ -187,20 +172,20 @@ impl<T: Node> Graph<T> {
 	/// The shortest distance from each node to each other node. Uses the
 	/// Floyd-Warshall algorithm.
 	pub fn shortest_distances(&self) -> HashMap<T, HashMap<T, usize>> {
+		let nodes = self.get_nodes();
 		let mut distances: HashMap<T, HashMap<T, usize>> = HashMap::new();
-		for (node, neighbors) in self.edges.iter() {
+		for node in &nodes {
 			let node_distances = distances.entry(node.clone()).or_default();
 			node_distances.insert(node.clone(), 0);
-			for (neighbor, &weight) in neighbors {
-				node_distances.insert(neighbor.clone(), weight);
+			if let Some(edges) = self.edges.get(node) {
+				for (neighbor, &weight) in edges {
+					node_distances.insert(neighbor.clone(), weight);
+				}
 			}
 		}
-		let mut count = 0;
-		for i in self.edges.keys() {
-			count += 1;
-			println!("{count}");
-			for j in self.edges.keys() {
-				for k in self.edges.keys() {
+		for i in &nodes {
+			for j in &nodes {
+				for k in &nodes {
 					if let Some(candidate) = distances
 						.get(i)
 						.and_then(|d| d.get(k))
@@ -226,12 +211,114 @@ impl<T: Node> Graph<T> {
 	}
 }
 
-impl<T: Node> std::fmt::Debug for Graph<T>
+impl<T: Node> std::fmt::Debug for Digraph<T>
 where
 	T: std::fmt::Debug,
 {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.debug_struct("Graph").field("edges", &self.edges).finish()
+		f.debug_struct("Digraph")
+			.field("edges", &self.edges)
+			.finish()
+	}
+}
+
+/// An undirected graph. Implemented using [`Digraph`].
+#[derive(Clone, Default)]
+pub struct Graph<T: Node>(Digraph<T>);
+
+impl<T: Node> Graph<T> {
+	/// Creates a new empty `Graph`.
+	pub fn new() -> Self {
+		Self(Digraph::new())
+	}
+
+	/// Adds an edge between nodes `a` and `b` with the given `weight`.
+	pub fn insert_edge(&mut self, a: T, b: T, weight: usize) {
+		self.0.insert_edge(a.clone(), b.clone(), weight);
+		self.0.insert_edge(b, a, weight);
+	}
+
+	/// Removes any edge between nodes `a` and `b`.
+	pub fn remove_edge<Q: ?Sized>(&mut self, a: &Q, b: &Q)
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq,
+	{
+		self.0.remove_edge(a, b);
+		self.0.remove_edge(b, a);
+	}
+
+	/// The set of edges (node → weight) from `from`.
+	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> &HashMap<T, usize>
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq,
+	{
+		self.0.edges_from(from)
+	}
+
+	/// The set of nodes in the graph. O(|N|+|E|).
+	pub fn get_nodes(&self) -> HashSet<T> {
+		self.0.get_nodes()
+	}
+
+	/// Consumes the graph to produce a list of its connected components.
+	pub fn into_connected_components(self) -> Vec<Self> {
+		self.0
+			.into_strongly_connected_components()
+			.into_iter()
+			.map(|g| Self(g))
+			.collect()
+	}
+
+	/// A Graphviz representation of the graph.
+	pub fn graphviz(&self) -> String
+	where
+		T: std::fmt::Display + Ord,
+	{
+		let mut output = String::new();
+		output += "graph {\n";
+		let mut unique_edges = HashSet::new();
+		for (node, edges) in &self.0.edges {
+			for (neighbor, weight) in edges {
+				if !unique_edges.contains(&(neighbor, node, weight)) {
+					unique_edges.insert((node, neighbor, weight));
+				}
+			}
+		}
+		unique_edges.into_iter().sorted().for_each(|(a, b, w)| {
+			output += &format!(
+				"\t\"{a}\" -- \"{b}\" \
+				[label=\"{w}\" \
+				tooltip=\"{a}-{b}: {w}\"]\n"
+			);
+		});
+		output += "}\n";
+		output
+	}
+
+	/// The shortest distance from `start` to a node that satisfies `pred` or
+	/// `None` if no such node is reachable. Uses Dijkstra's algorithm.
+	pub fn shortest_distance<F>(&self, start: T, pred: F) -> Option<usize>
+	where
+		F: Fn(&T) -> bool,
+	{
+		self.0.shortest_distance(start, pred)
+	}
+
+	/// The shortest distance from each node to each other node. Uses the
+	/// Floyd-Warshall algorithm.
+	pub fn shortest_distances(&self) -> HashMap<T, HashMap<T, usize>> {
+		self.0.shortest_distances()
+	}
+}
+
+impl<T: Node + Ord> std::fmt::Debug for Graph<T>
+where
+	T: std::fmt::Debug,
+{
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.debug_tuple("Graph").field(&self.0).finish()
 	}
 }
 
@@ -260,7 +347,18 @@ pub fn from_bool_grid(grid: &[Vec<bool>]) -> Graph<(usize, usize)> {
 mod tests {
 	use super::*;
 
-	fn get_test_graph() -> Graph<&'static str> {
+	fn new_test_digraph() -> Digraph<&'static str> {
+		let mut graph = Digraph::new();
+		graph.insert_edge("start", "a", 1);
+		graph.insert_edge("start", "shortcut", 2);
+		graph.insert_edge("a", "b", 2);
+		graph.insert_edge("b", "c", 1);
+		graph.insert_edge("c", "goal", 1);
+		graph.insert_edge("shortcut", "goal", 1);
+		graph
+	}
+
+	fn new_test_graph() -> Graph<&'static str> {
 		let mut graph = Graph::new();
 		graph.insert_edge("start", "a", 1);
 		graph.insert_edge("start", "shortcut", 2);
@@ -272,19 +370,40 @@ mod tests {
 	}
 
 	#[test]
-	fn shortest_distance() {
-		let graph = get_test_graph();
-		let d = graph.shortest_distance("start", |&n| n == "goal");
+	fn digraph_shortest_distance() {
+		let g = new_test_digraph();
+		let d = g.shortest_distance("start", |&n| n == "goal");
+		assert_eq!(d, Some(3));
+		let d = g.shortest_distance("goal", |&n| n == "start");
+		assert!(d.is_none());
+	}
+
+	#[test]
+	fn graph_shortest_distance() {
+		let g = new_test_graph();
+		let d = g.shortest_distance("start", |&n| n == "goal");
+		assert_eq!(d, Some(3));
+		let d = g.shortest_distance("goal", |&n| n == "start");
 		assert_eq!(d, Some(3));
 	}
 
 	#[test]
-	fn shortest_distances() {
-		let graph = get_test_graph();
-		let d = graph.shortest_distances();
+	fn digraph_shortest_distances() {
+		let d = new_test_digraph().shortest_distances();
 		assert_eq!(d["start"]["start"], 0);
 		assert_eq!(d["start"]["goal"], 3);
 		assert_eq!(d["a"]["c"], 3);
 		assert_eq!(d["goal"]["goal"], 0);
+		assert!(d["goal"].get("start").is_none());
+	}
+
+	#[test]
+	fn graph_shortest_distances() {
+		let d = new_test_graph().shortest_distances();
+		assert_eq!(d["start"]["start"], 0);
+		assert_eq!(d["start"]["goal"], 3);
+		assert_eq!(d["a"]["c"], 3);
+		assert_eq!(d["goal"]["goal"], 0);
+		assert_eq!(d["goal"]["start"], 3);
 	}
 }

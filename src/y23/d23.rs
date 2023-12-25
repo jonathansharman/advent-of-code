@@ -144,7 +144,6 @@ fn get_graph(tiles: &[Vec<bool>]) -> Graph<(usize, usize)> {
 					// Dead end. In practice, I think this can only be the goal.
 					nodes.insert(current);
 					graph.insert_edge(node, current, len);
-					graph.insert_edge(current, node, len);
 				}
 			}
 			1 => {
@@ -155,7 +154,6 @@ fn get_graph(tiles: &[Vec<bool>]) -> Graph<(usize, usize)> {
 				// This is a new node.
 				nodes.insert(current);
 				graph.insert_edge(node, current, len);
-				graph.insert_edge(current, node, len);
 				queue.extend(
 					open_neighbors.into_iter().map(|n| (current, n, 0)),
 				);
@@ -163,7 +161,6 @@ fn get_graph(tiles: &[Vec<bool>]) -> Graph<(usize, usize)> {
 		}
 		for n in node_neighbors {
 			graph.insert_edge(node, n, len + 1);
-			graph.insert_edge(n, node, len + 1);
 		}
 	}
 	graph

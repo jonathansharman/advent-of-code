@@ -1,4 +1,4 @@
-use crate::{graph::Graph, io::read_lines};
+use crate::{graph::Digraph, io::read_lines};
 
 crate::test::test_part!(test1, part1, 970);
 crate::test::test_part!(test2, part2, 1149);
@@ -31,13 +31,13 @@ fn read_costs() -> Vec<Vec<usize>> {
 		.collect()
 }
 
-fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Graph<Coords> {
+fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Digraph<Coords> {
 	let (n, m) = (costs.len(), costs[0].len());
 	// Model the graph as two planes. Each move must move between min and max
 	// spaces vertically or horizontally (depending on the current plane) and
 	// move to the other plane, to force alternating horizontal and vertical
 	// move sequences.
-	let mut graph = Graph::new();
+	let mut graph = Digraph::new();
 	for i in 0..n {
 		for j in 0..m {
 			let n0 = (i, j, 0);
