@@ -11,7 +11,7 @@ pub fn part1() -> usize {
 		}
 	}
 	// TODO: Find programmatically (instead of by outputting with Graphviz and
-	// eyeballing it 😅).
+	// eyeballing it 😅). Look into the Stoer-Wagner algorithm.
 	graph.remove_edge("zkv", "zxb");
 	graph.remove_edge("mtl", "pgl");
 	graph.remove_edge("lkf", "scf");
