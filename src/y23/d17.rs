@@ -16,7 +16,7 @@ type Coords = (usize, usize, usize);
 fn solve(min: usize, max: usize) -> usize {
 	let costs = read_costs();
 	let graph = get_graph(&costs, min, max);
-	let pred = |c: Coords| -> bool {
+	let pred = |c: &Coords| -> bool {
 		c.0 == costs.len() - 1 && c.1 == costs[0].len() - 1
 	};
 	graph

@@ -4,9 +4,9 @@ use itertools::Itertools;
 
 use crate::neighbors;
 
-pub trait Node: Copy + Eq + std::hash::Hash {}
+pub trait Node: Clone + Eq + std::hash::Hash {}
 
-impl<T> Node for T where T: Copy + Eq + std::hash::Hash {}
+impl<T> Node for T where T: Clone + Eq + std::hash::Hash {}
 
 #[derive(PartialEq, Eq)]
 struct State<T: Node> {
@@ -100,17 +100,17 @@ impl<T: Node> Graph<T> {
 	/// `None` if no such node is reachable. Uses Dijkstra's algorithm.
 	pub fn shortest_distance<F>(&self, start: T, pred: F) -> Option<usize>
 	where
-		F: Fn(T) -> bool,
+		F: Fn(&T) -> bool,
 	{
 		let mut distances: HashMap<T, usize> = HashMap::new();
 		let mut queue: BinaryHeap<State<T>> = BinaryHeap::new();
-		distances.insert(start, 0);
+		distances.insert(start.clone(), 0);
 		queue.push(State {
 			distance: 0,
 			node: start,
 		});
 		while let Some(State { distance, node }) = queue.pop() {
-			if pred(node) {
+			if pred(&node) {
 				return Some(distance);
 			}
 			if distance > distances[&node] {
@@ -123,9 +123,9 @@ impl<T: Node> Graph<T> {
 				if d.map_or(true, |d| candidate < *d) {
 					queue.push(State {
 						distance: candidate,
-						node: *neighbor,
+						node: neighbor.clone(),
 					});
-					distances.insert(*neighbor, candidate);
+					distances.insert(neighbor.clone(), candidate);
 				}
 			}
 		}
@@ -136,11 +136,11 @@ impl<T: Node> Graph<T> {
 	/// Floyd-Warshall algorithm.
 	pub fn shortest_distances(&self) -> HashMap<T, HashMap<T, usize>> {
 		let mut distances: HashMap<T, HashMap<T, usize>> = HashMap::new();
-		for (&node, neighbors) in self.edges.iter() {
-			let node_distances = distances.entry(node).or_default();
-			node_distances.insert(node, 0);
-			for (&neighbor, &weight) in neighbors {
-				node_distances.insert(neighbor, weight);
+		for (node, neighbors) in self.edges.iter() {
+			let node_distances = distances.entry(node.clone()).or_default();
+			node_distances.insert(node.clone(), 0);
+			for (neighbor, &weight) in neighbors {
+				node_distances.insert(neighbor.clone(), weight);
 			}
 		}
 		let mut count = 0;
@@ -158,7 +158,7 @@ impl<T: Node> Graph<T> {
 								.and_then(|d| d.get(j))
 								.map(|right| left + right)
 						}) {
-						match distances.get_mut(i).unwrap().entry(*j) {
+						match distances.get_mut(i).unwrap().entry(j.clone()) {
 							Entry::Occupied(mut entry) => {
 								entry.insert(*entry.get().min(&candidate));
 							}
@@ -213,7 +213,7 @@ mod tests {
 	#[test]
 	fn shortest_distance() {
 		let graph = get_test_graph();
-		let d = graph.shortest_distance("start", |n| n == "goal");
+		let d = graph.shortest_distance("start", |&n| n == "goal");
 		assert_eq!(d, Some(3));
 	}
 
