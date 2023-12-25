@@ -61,12 +61,12 @@ impl<T: Node> Digraph<T> {
 	}
 
 	/// The set of outgoing edges (node → weight) from `from`.
-	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> &HashMap<T, usize>
+	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> Option<&HashMap<T, usize>>
 	where
 		T: Borrow<Q>,
 		Q: Hash + Eq,
 	{
-		&self.edges[from]
+		self.edges.get(from)
 	}
 
 	// TODO: Maybe I should track nodes eagerly to make this O(1), especially
@@ -152,7 +152,7 @@ impl<T: Node> Digraph<T> {
 				// We've already reached this node by a shorter path.
 				continue;
 			}
-			if let Some(edges) = self.edges.get(&node) {
+			if let Some(edges) = self.edges_from(&node) {
 				for (neighbor, weight) in edges {
 					let candidate = distance + weight;
 					let d = distances.get(neighbor);
@@ -177,7 +177,7 @@ impl<T: Node> Digraph<T> {
 		for node in &nodes {
 			let node_distances = distances.entry(node.clone()).or_default();
 			node_distances.insert(node.clone(), 0);
-			if let Some(edges) = self.edges.get(node) {
+			if let Some(edges) = self.edges_from(node) {
 				for (neighbor, &weight) in edges {
 					node_distances.insert(neighbor.clone(), weight);
 				}
@@ -249,7 +249,7 @@ impl<T: Node> Graph<T> {
 	}
 
 	/// The set of edges (node → weight) from `from`.
-	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> &HashMap<T, usize>
+	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> Option<&HashMap<T, usize>>
 	where
 		T: Borrow<Q>,
 		Q: Hash + Eq,
@@ -278,11 +278,15 @@ impl<T: Node> Graph<T> {
 	{
 		let mut output = String::new();
 		output += "graph {\n";
+		let mut nodes = Vec::from_iter(self.get_nodes());
+		nodes.sort();
 		let mut unique_edges = HashSet::new();
-		for (node, edges) in &self.0.edges {
-			for (neighbor, weight) in edges {
-				if !unique_edges.contains(&(neighbor, node, weight)) {
-					unique_edges.insert((node, neighbor, weight));
+		for node in &nodes {
+			if let Some(edges) = self.edges_from(node) {
+				for (neighbor, weight) in edges {
+					if !unique_edges.contains(&(neighbor, node, weight)) {
+						unique_edges.insert((node, neighbor, weight));
+					}
 				}
 			}
 		}
@@ -405,5 +409,39 @@ mod tests {
 		assert_eq!(d["a"]["c"], 3);
 		assert_eq!(d["goal"]["goal"], 0);
 		assert_eq!(d["goal"]["start"], 3);
+	}
+
+	#[test]
+	fn digraph_graphviz() {
+		let graphviz = new_test_digraph().graphviz();
+		assert_eq!(
+			graphviz,
+			r#"digraph {
+	"a" -> "b" [label="2" tooltip="a→b: 2"]
+	"b" -> "c" [label="1" tooltip="b→c: 1"]
+	"c" -> "goal" [label="1" tooltip="c→goal: 1"]
+	"shortcut" -> "goal" [label="1" tooltip="shortcut→goal: 1"]
+	"start" -> "a" [label="1" tooltip="start→a: 1"]
+	"start" -> "shortcut" [label="2" tooltip="start→shortcut: 2"]
+}
+"#,
+		);
+	}
+
+	#[test]
+	fn graph_graphviz() {
+		let graphviz = new_test_graph().graphviz();
+		assert_eq!(
+			graphviz,
+			r#"graph {
+	"a" -- "b" [label="2" tooltip="a-b: 2"]
+	"a" -- "start" [label="1" tooltip="a-start: 1"]
+	"b" -- "c" [label="1" tooltip="b-c: 1"]
+	"c" -- "goal" [label="1" tooltip="c-goal: 1"]
+	"goal" -- "shortcut" [label="1" tooltip="goal-shortcut: 1"]
+	"shortcut" -- "start" [label="2" tooltip="shortcut-start: 2"]
+}
+"#,
+		);
 	}
 }

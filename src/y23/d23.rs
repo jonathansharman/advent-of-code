@@ -179,6 +179,7 @@ fn longest_walk(
 	visited.insert(from);
 	graph
 		.edges_from(&from)
+		.unwrap()
 		.par_iter()
 		.filter(|(n, _)| !visited.contains(n))
 		.map(|(&n, weight)| {
