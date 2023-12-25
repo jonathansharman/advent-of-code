@@ -62,7 +62,9 @@ fn read_algo(lines: &mut impl Iterator<Item = String>) -> [bool; 512] {
 		.unwrap()
 }
 
-fn read_image(lines: &mut impl Iterator<Item = String>) -> HashMap<(i32, i32), bool> {
+fn read_image(
+	lines: &mut impl Iterator<Item = String>,
+) -> HashMap<(i32, i32), bool> {
 	let mut image = HashMap::new();
 	for (i, line) in lines.enumerate() {
 		for (j, c) in line.chars().enumerate() {

@@ -28,7 +28,9 @@ pub fn part2() -> usize {
 		sum += group
 			.iter()
 			.map(|line| HashSet::from_iter(line.chars()))
-			.reduce(|acc: HashSet<_>, chars| acc.intersection(&chars).cloned().collect())
+			.reduce(|acc: HashSet<_>, chars| {
+				acc.intersection(&chars).cloned().collect()
+			})
 			.unwrap_or_default()
 			.len();
 		group.clear();

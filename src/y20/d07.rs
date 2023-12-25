@@ -26,7 +26,8 @@ fn contains_gold(
 		return true;
 	}
 	for inner in contained_bags.get(outer).unwrap().iter() {
-		if inner.1 == "shiny gold" || contains_gold(contained_bags, bags_containing_gold, &inner.1)
+		if inner.1 == "shiny gold"
+			|| contains_gold(contained_bags, bags_containing_gold, &inner.1)
 		{
 			bags_containing_gold.insert(outer.to_owned());
 			return true;
@@ -43,7 +44,10 @@ fn get_contained_bags() -> HashMap<String, Vec<(usize, String)>> {
 			let mut inner = Vec::new();
 			for i in (4..tokens.len()).step_by(4) {
 				if let Ok(count) = tokens[i].parse::<usize>() {
-					inner.push((count, format!("{} {}", tokens[i + 1], tokens[i + 2])));
+					inner.push((
+						count,
+						format!("{} {}", tokens[i + 1], tokens[i + 2]),
+					));
 				}
 			}
 			(outer, inner)
@@ -59,6 +63,8 @@ fn contained_bags_count(
 		.get(outer)
 		.unwrap()
 		.iter()
-		.map(|(count, bag)| count * (1 + contained_bags_count(contained_bags, bag)))
+		.map(|(count, bag)| {
+			count * (1 + contained_bags_count(contained_bags, bag))
+		})
 		.sum()
 }

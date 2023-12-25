@@ -26,7 +26,8 @@ impl Board {
 			if self.spaces[idx] == Some(n) {
 				self.spaces[idx] = None;
 				let (row_idx, col_idx) = (idx / SIDE_LENGTH, idx % SIDE_LENGTH);
-				if self.row(row_idx).all(Option::is_none) || self.col(col_idx).all(Option::is_none)
+				if self.row(row_idx).all(Option::is_none)
+					|| self.col(col_idx).all(Option::is_none)
 				{
 					self.score = Some(
 						n * self
@@ -59,7 +60,12 @@ fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
 				.skip(1)
 				.flat_map(|line| {
 					line.split_whitespace()
-						.map(|s| Some(s.parse::<i64>().expect("failed to parse board space")))
+						.map(|s| {
+							Some(
+								s.parse::<i64>()
+									.expect("failed to parse board space"),
+							)
+						})
 						.collect::<Vec<Option<i64>>>()
 				})
 				.collect::<Vec<Option<i64>>>()

@@ -20,7 +20,8 @@ pub fn part2() -> u64 {
 }
 
 fn read_numbers() -> impl Iterator<Item = Number> {
-	read_lines("input/2021/18.txt").map(|line| -> Number { parse_number(&mut line.as_bytes()) })
+	read_lines("input/2021/18.txt")
+		.map(|line| -> Number { parse_number(&mut line.as_bytes()) })
 }
 
 #[derive(Clone)]
@@ -37,7 +38,9 @@ impl Number {
 	fn explode(&mut self, depth: usize) -> Option<(u64, u64)> {
 		if let Number::Pair(pair) = self {
 			if depth == 4 {
-				if let (Number::Regular(first), Number::Regular(second)) = **pair {
+				if let (Number::Regular(first), Number::Regular(second)) =
+					**pair
+				{
 					*self = Number::Regular(0);
 					return Some((first, second));
 				}
@@ -90,7 +93,9 @@ impl Number {
 	fn magnitude(&self) -> u64 {
 		match &self {
 			Number::Regular(n) => *n,
-			Number::Pair(pair) => 3 * pair.0.magnitude() + 2 * pair.1.magnitude(),
+			Number::Pair(pair) => {
+				3 * pair.0.magnitude() + 2 * pair.1.magnitude()
+			}
 		}
 	}
 }

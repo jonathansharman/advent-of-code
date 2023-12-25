@@ -28,7 +28,8 @@ fn intersections(ignore_diagonals: bool) -> usize {
 			let points = line_str
 				.splitn(2, " -> ")
 				.map(|point_str| {
-					let coordinates = point_str.splitn(2, ',').collect::<Vec<&str>>();
+					let coordinates =
+						point_str.splitn(2, ',').collect::<Vec<&str>>();
 					Point {
 						x: coordinates[0].parse().unwrap(),
 						y: coordinates[1].parse().unwrap(),
@@ -51,7 +52,10 @@ fn intersections(ignore_diagonals: bool) -> usize {
 	let mut field = vec![vec![0; max_x + 1]; max_y + 1];
 
 	for line in lines {
-		if ignore_diagonals && line.start.x != line.end.x && line.start.y != line.end.y {
+		if ignore_diagonals
+			&& line.start.x != line.end.x
+			&& line.start.y != line.end.y
+		{
 			continue;
 		}
 		let mut p = line.start;

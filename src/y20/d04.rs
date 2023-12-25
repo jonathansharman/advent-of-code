@@ -50,9 +50,11 @@ lazy_static! {
 	static ref BYR: Regex = Regex::new(r"(^19[2-9]\d|200[0-2]$)").unwrap();
 	static ref IYR: Regex = Regex::new(r"(^20(1\d|20)$)").unwrap();
 	static ref EYR: Regex = Regex::new(r"(^20(2\d|30)$)").unwrap();
-	static ref HGT: Regex = Regex::new(r"(^(1([5-8]\d|9[0-3])cm)|((59|6\d|7[0-6])in)$)").unwrap();
+	static ref HGT: Regex =
+		Regex::new(r"(^(1([5-8]\d|9[0-3])cm)|((59|6\d|7[0-6])in)$)").unwrap();
 	static ref HCL: Regex = Regex::new(r"(^#[0-9a-f]{6}$)").unwrap();
-	static ref ECL: Regex = Regex::new(r"(^amb|blu|brn|gry|grn|hzl|oth$)").unwrap();
+	static ref ECL: Regex =
+		Regex::new(r"(^amb|blu|brn|gry|grn|hzl|oth$)").unwrap();
 	static ref PID: Regex = Regex::new(r"(^\d{9}$)").unwrap();
 }
 

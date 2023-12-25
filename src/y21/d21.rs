@@ -78,8 +78,12 @@ impl State {
 	) -> [u64; 2] {
 		if rolls > 0 {
 			return (1..=3)
-				.map(|roll| self.roll(player, roll).wins(cache, player, rolls - 1))
-				.fold([0, 0], |acc, wins| [acc[0] + wins[0], acc[1] + wins[1]]);
+				.map(|roll| {
+					self.roll(player, roll).wins(cache, player, rolls - 1)
+				})
+				.fold([0, 0], |acc, wins| {
+					[acc[0] + wins[0], acc[1] + wins[1]]
+				});
 		}
 
 		if let Some(wins) = cache.get(&(self.clone(), player)) {

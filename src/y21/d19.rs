@@ -11,7 +11,9 @@ pub fn part1() -> usize {
 		let n = scanners.len();
 		for i in 0..n - 1 {
 			for j in i + 1..n {
-				if let Some((merged_scanner, _)) = scanners[i].merge(&scanners[j]) {
+				if let Some((merged_scanner, _)) =
+					scanners[i].merge(&scanners[j])
+				{
 					scanners[i] = merged_scanner;
 					scanners.swap_remove(j);
 					continue 'merge_loop;
@@ -30,7 +32,9 @@ pub fn part2() -> i32 {
 		let n = merging_scanners.len();
 		for i in 0..n - 1 {
 			for j in i + 1..n {
-				if let Some((merged_scanner, _)) = merging_scanners[i].merge(&merging_scanners[j]) {
+				if let Some((merged_scanner, _)) =
+					merging_scanners[i].merge(&merging_scanners[j])
+				{
 					merging_scanners[i] = merged_scanner;
 					merging_scanners.swap_remove(j);
 					continue 'merge_loop;
@@ -110,7 +114,9 @@ impl Scanner {
 					let mut coords = HashSet::new();
 					for self_reading in self.readings.iter() {
 						for other_reading in other.readings.iter() {
-							coords.insert(self_reading[axis] - other_reading[axis]);
+							coords.insert(
+								self_reading[axis] - other_reading[axis],
+							);
 						}
 					}
 					coords
@@ -119,10 +125,13 @@ impl Scanner {
 				let axis_alignment = |axis: usize| {
 					let self_coords = self.project_map_readings(axis, |x| x);
 					for translation in translation_sets[axis].iter() {
-						let other_coords = other.project_map_readings(axis, |x| x + translation);
+						let other_coords = other
+							.project_map_readings(axis, |x| x + translation);
 
-						let total_coords = self_coords.len() + other_coords.len();
-						let common_coords = self_coords.union(&other_coords).count();
+						let total_coords =
+							self_coords.len() + other_coords.len();
+						let common_coords =
+							self_coords.union(&other_coords).count();
 						if total_coords - common_coords >= 12 {
 							return Some(*translation);
 						}

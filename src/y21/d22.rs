@@ -14,7 +14,9 @@ pub fn part1() -> usize {
 	for step in read_reboot_steps() {
 		for x in step.region.begin[0].max(-50)..step.region.end[0].min(51) {
 			for y in step.region.begin[1].max(-50)..step.region.end[1].min(51) {
-				for z in step.region.begin[2].max(-50)..step.region.end[2].min(51) {
+				for z in
+					step.region.begin[2].max(-50)..step.region.end[2].min(51)
+				{
 					cubes.insert([x, y, z], step.on);
 				}
 			}
@@ -82,7 +84,9 @@ impl Region {
 	}
 
 	fn abuts(&self, point: Point) -> bool {
-		(0..3).all(|axis| self.begin[axis] <= point[axis] && point[axis] <= self.end[axis])
+		(0..3).all(|axis| {
+			self.begin[axis] <= point[axis] && point[axis] <= self.end[axis]
+		})
 	}
 
 	fn split_around_point(self, point: Point) -> Vec<Region> {

@@ -6,7 +6,8 @@ crate::test::test_part!(test1, part1, 343605);
 crate::test::test_part!(test2, part2, 96744904);
 
 pub fn part1() -> i64 {
-	let crabs = read_comma_separated_integers("input/2021/07.txt").collect::<Vec<i64>>();
+	let crabs = read_comma_separated_integers("input/2021/07.txt")
+		.collect::<Vec<i64>>();
 	crabs
 		.iter()
 		.map(|crab1| {
@@ -19,7 +20,8 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let crabs = read_comma_separated_integers("input/2021/07.txt").collect::<Vec<i64>>();
+	let crabs = read_comma_separated_integers("input/2021/07.txt")
+		.collect::<Vec<i64>>();
 	let (&min, &max) = match crabs.iter().minmax() {
 		MinMaxResult::NoElements => panic!(),
 		MinMaxResult::OneElement(only) => (only, only),

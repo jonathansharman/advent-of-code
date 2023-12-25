@@ -14,7 +14,8 @@ pub fn part2() -> u64 {
 	for window_size in 2..numbers.len() {
 		for window in numbers.windows(window_size) {
 			if window.iter().sum::<u64>() == target {
-				return window.iter().min().unwrap() + window.iter().max().unwrap();
+				return window.iter().min().unwrap()
+					+ window.iter().max().unwrap();
 			}
 		}
 	}

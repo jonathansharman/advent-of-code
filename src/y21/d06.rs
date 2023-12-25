@@ -19,7 +19,11 @@ pub fn fish(days: i64) -> i64 {
 		.fold(0, |acc, timer| acc + get_count(&mut cache, timer, days))
 }
 
-fn get_count(cache: &mut HashMap<(i64, i64), i64>, timer: i64, days: i64) -> i64 {
+fn get_count(
+	cache: &mut HashMap<(i64, i64), i64>,
+	timer: i64,
+	days: i64,
+) -> i64 {
 	if days == 0 {
 		return 1;
 	}

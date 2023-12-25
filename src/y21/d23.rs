@@ -65,7 +65,9 @@ impl State {
 			let energy = self
 				.possible_next_state_energies()
 				.into_iter()
-				.map(|(state, energy)| energy.saturating_add(state.min_energy_to_solve(cache)))
+				.map(|(state, energy)| {
+					energy.saturating_add(state.min_energy_to_solve(cache))
+				})
 				.fold(u32::MAX, |acc, energy| acc.min(energy));
 			cache.insert(self, energy);
 			energy
@@ -117,7 +119,12 @@ impl State {
 								}
 							}
 							if can_enter {
-								state_energies.push(self.swap(h, r, d, hall_amphipod));
+								state_energies.push(self.swap(
+									h,
+									r,
+									d,
+									hall_amphipod,
+								));
 								break;
 							}
 						}
@@ -131,7 +138,12 @@ impl State {
 								}
 							}
 							if can_leave {
-								state_energies.push(self.swap(h, r, d, room_amphipod));
+								state_energies.push(self.swap(
+									h,
+									r,
+									d,
+									room_amphipod,
+								));
 								break;
 							}
 						}

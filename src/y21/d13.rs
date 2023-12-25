@@ -31,9 +31,10 @@ pub fn part2() -> String {
 		points = apply_fold(&points, fold);
 	}
 
-	let (max_x, max_y) = points.iter().fold((0, 0), |(max_x, max_y), (x, y)| {
-		(max_x.max(*x), max_y.max(*y))
-	});
+	let (max_x, max_y) =
+		points.iter().fold((0, 0), |(max_x, max_y), (x, y)| {
+			(max_x.max(*x), max_y.max(*y))
+		});
 
 	let mut output = String::new();
 	for y in 0..=max_y {
@@ -45,7 +46,9 @@ pub fn part2() -> String {
 	output
 }
 
-fn read_points(lines: &mut impl Iterator<Item = String>) -> HashSet<(i32, i32)> {
+fn read_points(
+	lines: &mut impl Iterator<Item = String>,
+) -> HashSet<(i32, i32)> {
 	let mut points = HashSet::new();
 	for line in lines {
 		if line.is_empty() {
@@ -61,7 +64,10 @@ fn read_points(lines: &mut impl Iterator<Item = String>) -> HashSet<(i32, i32)> 
 	points
 }
 
-fn apply_fold(points: &HashSet<(i32, i32)>, fold: String) -> HashSet<(i32, i32)> {
+fn apply_fold(
+	points: &HashSet<(i32, i32)>,
+	fold: String,
+) -> HashSet<(i32, i32)> {
 	let (axis, fold_coord) = fold
 		.trim_start_matches("fold along ")
 		.split('=')

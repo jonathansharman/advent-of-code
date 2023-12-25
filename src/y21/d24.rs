@@ -68,7 +68,9 @@ fn benchmark_part1() {
 	let elapsed = start.elapsed();
 	let elapsed_ms = elapsed.as_millis();
 	let throughput = elapsed.as_nanos() / total_iters;
-	println!("{total_iters} checks in {elapsed_ms} ms ({throughput} ns / check)");
+	println!(
+		"{total_iters} checks in {elapsed_ms} ms ({throughput} ns / check)"
+	);
 }
 
 // Note: I know from finding 19917929934996 in part 1 that it's an upper bound,

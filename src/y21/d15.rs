@@ -26,7 +26,8 @@ fn expand_maze(maze: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
 		for (j, cost) in row.into_iter().enumerate() {
 			for k in 0..5 {
 				for l in 0..5 {
-					expanded[i + n * k as usize][j + n * l as usize] = (cost + k + l - 1) % 9 + 1;
+					expanded[i + n * k as usize][j + n * l as usize] =
+						(cost + k + l - 1) % 9 + 1;
 				}
 			}
 		}

@@ -83,7 +83,12 @@ impl Graph {
 		)
 	}
 
-	fn count_paths(&self, visits: &[u32], double_used: bool, from: usize) -> i64 {
+	fn count_paths(
+		&self,
+		visits: &[u32],
+		double_used: bool,
+		from: usize,
+	) -> i64 {
 		if from == self.end_idx {
 			return 1;
 		}
@@ -93,7 +98,9 @@ impl Graph {
 			self.nodes[from]
 				.neighbors
 				.iter()
-				.map(|neighbor| self.count_paths(&visits, double_used, *neighbor))
+				.map(|neighbor| {
+					self.count_paths(&visits, double_used, *neighbor)
+				})
 				.sum()
 		} else if visits[from] == 2 && !double_used && from != self.start_idx {
 			self.nodes[from]

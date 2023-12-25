@@ -47,7 +47,8 @@ pub fn part2() -> i64 {
 fn rating(mut slice: &[String], criteria: Criteria) -> i64 {
 	let mut bit_idx = 0;
 	while slice.len() > 1 {
-		let partition = slice.partition_point(|element| element.as_bytes()[bit_idx] == b'0');
+		let partition = slice
+			.partition_point(|element| element.as_bytes()[bit_idx] == b'0');
 		let at_least_as_many_ones = partition <= slice.len() / 2;
 		slice = match (criteria, at_least_as_many_ones) {
 			(Criteria::Oxygen, true) => &slice[partition..],

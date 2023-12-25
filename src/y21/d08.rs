@@ -159,8 +159,9 @@ pub fn part2() -> i64 {
 					.clone(),
 			);
 
-			let get_digit =
-				|signals: &HashSet<char>| *digit_map.iter().find(|(_, v)| v == &signals).unwrap().0;
+			let get_digit = |signals: &HashSet<char>| {
+				*digit_map.iter().find(|(_, v)| v == &signals).unwrap().0
+			};
 			outputs
 				.iter()
 				.fold(0, |acc, signals| 10 * acc + get_digit(signals))
