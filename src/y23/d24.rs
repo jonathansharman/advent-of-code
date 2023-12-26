@@ -1,11 +1,15 @@
-use std::str::FromStr;
+use std::{num::ParseIntError, str::FromStr};
 
 use itertools::Itertools;
+use z3::{
+	ast::{Ast, Int},
+	Config, Context, Solver,
+};
 
 use crate::io::read_lines;
 
 crate::test::test_part!(test1, part1, 11995);
-crate::test::test_part!(test2, part2, ?);
+crate::test::test_part!(test2, part2, 983620716335751);
 
 #[derive(Clone, Copy, Debug)]
 struct Vector([i64; 3]);
@@ -18,18 +22,22 @@ impl Vector {
 	fn y(&self) -> i64 {
 		self.0[1]
 	}
+
+	fn z(&self) -> i64 {
+		self.0[2]
+	}
 }
 
 impl FromStr for Vector {
-	type Err = ();
+	type Err = ParseIntError;
 
 	fn from_str(s: &str) -> Result<Vector, Self::Err> {
 		let (x, y, z) = s
 			.split(", ")
-			.map(|n| n.trim().parse().unwrap())
+			.map(|n| n.trim().parse())
 			.collect_tuple()
 			.unwrap();
-		Ok(Vector([x, y, z]))
+		Ok(Vector([x?, y?, z?]))
 	}
 }
 
@@ -44,28 +52,36 @@ impl Point {
 	fn y(&self) -> i64 {
 		self.0[1]
 	}
+
+	fn z(&self) -> i64 {
+		self.0[2]
+	}
 }
 
 impl FromStr for Point {
-	type Err = ();
+	type Err = ParseIntError;
 
 	fn from_str(s: &str) -> Result<Point, Self::Err> {
 		let (x, y, z) = s
 			.split(", ")
-			.map(|n| n.trim().parse().unwrap())
+			.map(|n| n.trim().parse())
 			.collect_tuple()
 			.unwrap();
-		Ok(Point([x, y, z]))
+		Ok(Point([x?, y?, z?]))
 	}
 }
 
-pub fn part1() -> usize {
-	let hail_stones: Vec<(Point, Vector)> = read_lines("input/2023/24.txt")
+fn read_hail_stones() -> Vec<(Point, Vector)> {
+	read_lines("input/2023/24.txt")
 		.map(|line| {
 			let (p, v) = line.split_once(" @ ").unwrap();
 			(p.parse().unwrap(), v.parse().unwrap())
 		})
-		.collect();
+		.collect()
+}
+
+pub fn part1() -> usize {
+	let hail_stones = read_hail_stones();
 	hail_stones
 		.iter()
 		.enumerate()
@@ -96,6 +112,42 @@ pub fn part1() -> usize {
 		.sum()
 }
 
-pub fn part2() -> usize {
-	0
+pub fn part2() -> i64 {
+	let cfg = Config::default();
+	let ctx = Context::new(&cfg);
+	let solver = Solver::new(&ctx);
+	let spx = Int::new_const(&ctx, "spx");
+	let spy = Int::new_const(&ctx, "spy");
+	let spz = Int::new_const(&ctx, "spz");
+	let svx = Int::new_const(&ctx, "svx");
+	let svy = Int::new_const(&ctx, "svy");
+	let svz = Int::new_const(&ctx, "svz");
+	for (hp, hv) in read_hail_stones() {
+		let hpx = Int::from_i64(&ctx, hp.x());
+		let hpy = Int::from_i64(&ctx, hp.y());
+		let hpz = Int::from_i64(&ctx, hp.z());
+		let hvx = Int::from_i64(&ctx, hv.x());
+		let hvy = Int::from_i64(&ctx, hv.y());
+		let hvz = Int::from_i64(&ctx, hv.z());
+		solver.assert(
+			&((&spx - &hpx) * (&hvy - &svy))
+				._eq(&((&spy - &hpy) * (&hvx - &svx))),
+		);
+		solver.assert(
+			&((&spx - &hpx) * (&hvz - &svz))
+				._eq(&((&spz - &hpz) * (&hvx - &svx))),
+		);
+		solver.assert(
+			&((&spy - &hpy) * (&hvz - &svz))
+				._eq(&((&spz - &hpz) * (&hvy - &svy))),
+		);
+	}
+	solver.check();
+	let model = solver.get_model().unwrap();
+	let (spx, spy, spz) = (
+		model.eval(&spx, true).unwrap().as_i64().unwrap(),
+		model.eval(&spy, true).unwrap().as_i64().unwrap(),
+		model.eval(&spz, true).unwrap().as_i64().unwrap(),
+	);
+	spx + spy + spz
 }
