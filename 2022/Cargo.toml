@@ -1,0 +1,9 @@
+[package]
+edition = "2021"
+name = "aoc-2022"
+version = "0.1.0"
+
+[dependencies]
+itertools = "0.13.0"
+num = "0.4.3"
+aoc = { path = ".." }

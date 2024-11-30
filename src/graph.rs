@@ -50,10 +50,10 @@ impl<T: Node> Digraph<T> {
 	}
 
 	/// Removes any edge from node `from` to node `to`.
-	pub fn remove_edge<Q: ?Sized>(&mut self, from: &Q, to: &Q)
+	pub fn remove_edge<Q>(&mut self, from: &Q, to: &Q)
 	where
 		T: Borrow<Q>,
-		Q: Hash + Eq,
+		Q: Hash + Eq + ?Sized,
 	{
 		if let Some(neighbors) = self.edges.get_mut(from) {
 			neighbors.remove(to);
@@ -61,10 +61,10 @@ impl<T: Node> Digraph<T> {
 	}
 
 	/// The set of outgoing edges (node → weight) from `from`.
-	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> Option<&HashMap<T, usize>>
+	pub fn edges_from<Q>(&self, from: &Q) -> Option<&HashMap<T, usize>>
 	where
 		T: Borrow<Q>,
-		Q: Hash + Eq,
+		Q: Hash + Eq + ?Sized,
 	{
 		self.edges.get(from)
 	}
@@ -239,20 +239,20 @@ impl<T: Node> Graph<T> {
 	}
 
 	/// Removes any edge between nodes `a` and `b`.
-	pub fn remove_edge<Q: ?Sized>(&mut self, a: &Q, b: &Q)
+	pub fn remove_edge<Q>(&mut self, a: &Q, b: &Q)
 	where
 		T: Borrow<Q>,
-		Q: Hash + Eq,
+		Q: Hash + Eq + ?Sized,
 	{
 		self.0.remove_edge(a, b);
 		self.0.remove_edge(b, a);
 	}
 
 	/// The set of edges (node → weight) from `from`.
-	pub fn edges_from<Q: ?Sized>(&self, from: &Q) -> Option<&HashMap<T, usize>>
+	pub fn edges_from<Q>(&self, from: &Q) -> Option<&HashMap<T, usize>>
 	where
 		T: Borrow<Q>,
-		Q: Hash + Eq,
+		Q: Hash + Eq + ?Sized,
 	{
 		self.0.edges_from(from)
 	}
@@ -398,7 +398,7 @@ mod tests {
 		assert_eq!(d["start"]["goal"], 3);
 		assert_eq!(d["a"]["c"], 3);
 		assert_eq!(d["goal"]["goal"], 0);
-		assert!(d["goal"].get("start").is_none());
+		assert!(!d["goal"].contains_key("start"));
 	}
 
 	#[test]
