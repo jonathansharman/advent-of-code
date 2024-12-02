@@ -1,8 +1,8 @@
 use aoc::io::read_lines;
 use itertools::Itertools;
 
-aoc::test::test_part!(test1, part1, ?);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test1, part1, 591);
+aoc::test::test_part!(test2, part2, 621);
 
 pub fn part1() -> usize {
 	read_lines("input/02.txt")
@@ -28,19 +28,19 @@ pub fn part2() -> usize {
 				.split_whitespace()
 				.map(|level| level.parse().unwrap())
 				.collect();
-			for skipped in 0..levels.len() {
-				let mut levels = levels.clone();
-				levels.remove(skipped);
-				if levels.into_iter().tuple_windows().all(|(a, b, c)| {
-					let (d1, d2) = (b - a, c - b);
-					d1.signum() == d2.signum()
-						&& ((1..=3).contains(&d1.abs()))
-						&& ((1..=3).contains(&d2.abs()))
-				}) {
-					return true;
-				}
-			}
-			false
+			(0..levels.len()).any(|skipped| {
+				levels
+					.iter()
+					.enumerate()
+					.filter_map(|(i, level)| (i != skipped).then_some(level))
+					.tuple_windows()
+					.all(|(a, b, c)| {
+						let (d1, d2) = (b - a, c - b);
+						d1.signum() == d2.signum()
+							&& ((1..=3).contains(&d1.abs()))
+							&& ((1..=3).contains(&d2.abs()))
+					})
+			})
 		})
 		.count()
 }
