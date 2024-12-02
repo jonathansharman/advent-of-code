@@ -22,5 +22,25 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	read_lines("input/02.txt")
+		.filter(|report| {
+			let levels: Vec<i32> = report
+				.split_whitespace()
+				.map(|level| level.parse().unwrap())
+				.collect();
+			for skipped in 0..levels.len() {
+				let mut levels = levels.clone();
+				levels.remove(skipped);
+				if levels.into_iter().tuple_windows().all(|(a, b, c)| {
+					let (d1, d2) = (b - a, c - b);
+					d1.signum() == d2.signum()
+						&& ((1..=3).contains(&d1.abs()))
+						&& ((1..=3).contains(&d2.abs()))
+				}) {
+					return true;
+				}
+			}
+			false
+		})
+		.count()
 }
