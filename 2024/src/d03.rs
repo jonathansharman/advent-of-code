@@ -2,7 +2,7 @@ use aoc::io::read_lines;
 use regex::Regex;
 
 aoc::test::test_part!(test1, part1, 170068701);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 78683433);
 
 pub fn part1() -> usize {
 	let regex = Regex::new(r"mul\(([1-9]\d*),([1-9]\d*)\)").unwrap();
@@ -20,5 +20,26 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let regex =
+		Regex::new(r"do\(\)|don't\(\)|mul\(([1-9]\d*),([1-9]\d*)\)").unwrap();
+	let mut enabled = true;
+	read_lines("input/03.txt")
+		.map(|line| {
+			let mut sum = 0;
+			for m in regex.captures_iter(&line) {
+				match &m[0] {
+					"do()" => enabled = true,
+					"don't()" => enabled = false,
+					_ => {
+						if enabled {
+							let a: usize = m[1].parse().unwrap();
+							let b: usize = m[2].parse().unwrap();
+							sum += a * b;
+						}
+					}
+				}
+			}
+			sum
+		})
+		.sum()
 }
