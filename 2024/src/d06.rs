@@ -7,7 +7,9 @@ aoc::test::test_part!(test1, part1, 5067);
 aoc::test::test_part!(test2, part2, 1793);
 
 type Point = (i32, i32);
+type Dir = (i32, i32);
 type Tiles = Vec<Vec<char>>;
+type Path = HashSet<(Dir, Point)>;
 
 fn read() -> (Tiles, Point) {
 	let mut guard: Point = (0, 0);
@@ -32,48 +34,46 @@ fn read() -> (Tiles, Point) {
 
 fn escape_path(
 	tiles: &Tiles,
-	mut guard: Point,
+	mut pos: Point,
 	obstruction: Option<Point>,
-) -> Option<HashSet<Point>> {
-	let mut dir: Point = (-1, 0);
+) -> Option<Path> {
+	let mut dir = (-1, 0);
 	let mut visited = HashSet::new();
 	while let Some(tile) = tiles
-		.get(guard.0 as usize)
-		.and_then(|row| row.get(guard.1 as usize))
+		.get(pos.0 as usize)
+		.and_then(|row| row.get(pos.1 as usize))
 	{
-		if visited.contains(&(guard, dir)) {
+		if visited.contains(&(pos, dir)) {
 			// Cycle.
 			return None;
 		}
-		if *tile == '#' || obstruction == Some(guard) {
+		if *tile == '#' || obstruction == Some(pos) {
 			// Turn.
-			guard.0 -= dir.0;
-			guard.1 -= dir.1;
+			pos.0 -= dir.0;
+			pos.1 -= dir.1;
 			dir = (dir.1, -dir.0)
 		} else {
-			visited.insert((guard, dir));
+			visited.insert((pos, dir));
 		}
 		// Walk.
-		guard.0 += dir.0;
-		guard.1 += dir.1;
+		pos.0 += dir.0;
+		pos.1 += dir.1;
 	}
-	Some(
-		visited
-			.into_iter()
-			.map(|(guard, _)| guard)
-			.collect::<HashSet<_>>(),
-	)
+	Some(visited)
+}
+
+fn path_coords(path: Path) -> HashSet<Point> {
+	path.into_iter().map(|(pos, _)| pos).collect()
 }
 
 pub fn part1() -> usize {
 	let (tiles, guard) = read();
-	escape_path(&tiles, guard, None).unwrap().len()
+	path_coords(escape_path(&tiles, guard, None).unwrap()).len()
 }
 
 pub fn part2() -> usize {
 	let (tiles, guard) = read();
-	escape_path(&tiles, guard, None)
-		.unwrap()
+	path_coords(escape_path(&tiles, guard, None).unwrap())
 		.par_iter()
 		.filter(|&obstruction| {
 			tiles[obstruction.0 as usize][obstruction.1 as usize] != '#'
