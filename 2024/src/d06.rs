@@ -29,11 +29,11 @@ fn read() -> (Tiles, Point) {
 	(tiles, guard)
 }
 
-fn escape_time(
+fn escape_path(
 	tiles: &Tiles,
 	mut guard: Point,
 	obstruction: Option<Point>,
-) -> Option<usize> {
+) -> Option<HashSet<Point>> {
 	let mut dir: Point = (-1, 0);
 	let mut visited = HashSet::new();
 	while let Some(tile) = tiles
@@ -60,35 +60,24 @@ fn escape_time(
 		visited
 			.into_iter()
 			.map(|(guard, _)| guard)
-			.collect::<HashSet<_>>()
-			.len(),
+			.collect::<HashSet<_>>(),
 	)
 }
 
 pub fn part1() -> usize {
 	let (tiles, guard) = read();
-	escape_time(&tiles, guard, None).unwrap()
+	escape_path(&tiles, guard, None).unwrap().len()
 }
 
 pub fn part2() -> usize {
 	let (tiles, guard) = read();
-	tiles
-		.iter()
-		.enumerate()
-		.map(|(i, row)| {
-			row.iter()
-				.enumerate()
-				.filter(|&(j, tile)| {
-					let obstacle = (i as i32, j as i32);
-					obstacle != guard
-						&& *tile != '#' && escape_time(
-						&tiles,
-						guard,
-						Some(obstacle),
-					)
-					.is_none()
-				})
-				.count()
+	escape_path(&tiles, guard, None)
+		.unwrap()
+		.into_iter()
+		.filter(|&obstacle| {
+			tiles[obstacle.0 as usize][obstacle.1 as usize] != '#'
+				&& obstacle != guard
+				&& escape_path(&tiles, guard, Some(obstacle)).is_none()
 		})
-		.sum()
+		.count()
 }
