@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use aoc::io::read_lines;
+use rayon::prelude::*;
 
 aoc::test::test_part!(test1, part1, 5067);
 aoc::test::test_part!(test2, part2, 1793);
@@ -73,11 +74,11 @@ pub fn part2() -> usize {
 	let (tiles, guard) = read();
 	escape_path(&tiles, guard, None)
 		.unwrap()
-		.into_iter()
-		.filter(|&obstacle| {
-			tiles[obstacle.0 as usize][obstacle.1 as usize] != '#'
-				&& obstacle != guard
-				&& escape_path(&tiles, guard, Some(obstacle)).is_none()
+		.par_iter()
+		.filter(|&obstruction| {
+			tiles[obstruction.0 as usize][obstruction.1 as usize] != '#'
+				&& *obstruction != guard
+				&& escape_path(&tiles, guard, Some(*obstruction)).is_none()
 		})
 		.count()
 }
