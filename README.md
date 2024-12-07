@@ -3,8 +3,8 @@ My solutions to [Advent of Code](https://adventofcode.com/), written in Rust.
 Puzzle tests are organized into crates year, then into modules by day. Use
 `cargo test` to check solutions. I would recommend running in `--release` mode
 since some solutions are not super fast. I would also recommend `--nocapture` so
-that the test macro can print any tentative solutions. For example, to check the
-part 1 solution for day 1, 2021:
+that the test macro can print solutions and timing info. For example, to check
+the part 1 solution for day 1, 2021:
 
 ```
 cd  2021
