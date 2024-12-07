@@ -42,17 +42,15 @@ fn has_solution_2(lhs: i64, rhs: &[i64]) -> bool {
 	if rest.is_empty() {
 		lhs == last
 	} else {
-		if has_solution_2(lhs - last, rest)
+		has_solution_2(lhs - last, rest)
 			|| (lhs % last == 0 && has_solution_2(lhs / last, rest))
-		{
-			return true;
-		}
-		lhs.to_string()
-			.strip_suffix(&last.to_string())
-			.and_then(|stripped| {
-				stripped.parse().ok().map(|lhs| has_solution_2(lhs, rest))
-			})
-			.unwrap_or_default()
+			|| lhs
+				.to_string()
+				.strip_suffix(&last.to_string())
+				.and_then(|stripped| {
+					stripped.parse().ok().map(|lhs| has_solution_2(lhs, rest))
+				})
+				.unwrap_or_default()
 	}
 }
 
