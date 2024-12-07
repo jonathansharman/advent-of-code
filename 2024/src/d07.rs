@@ -3,19 +3,12 @@ use aoc::io::read_lines;
 aoc::test::test_part!(test1, part1, 882304362421);
 aoc::test::test_part!(test2, part2, 145149066755184);
 
-struct Equation {
-	lhs: i64,
-	rhs: Vec<i64>,
-}
-
-impl From<&str> for Equation {
-	fn from(value: &str) -> Self {
-		let (lhs, rhs) = value.split_once(": ").unwrap();
-		Equation {
-			lhs: lhs.parse().unwrap(),
-			rhs: rhs.split(' ').map(|n| n.parse().unwrap()).collect(),
-		}
-	}
+fn parse_equation(value: &str) -> (i64, Vec<i64>) {
+	let (lhs, rhs) = value.split_once(": ").unwrap();
+	(
+		lhs.parse().unwrap(),
+		rhs.split(' ').map(|n| n.parse().unwrap()).collect(),
+	)
 }
 
 fn has_solution(lhs: i64, rhs: &[i64]) -> bool {
@@ -31,8 +24,8 @@ fn has_solution(lhs: i64, rhs: &[i64]) -> bool {
 pub fn part1() -> i64 {
 	read_lines("input/07.txt")
 		.filter_map(|line| {
-			let equation: Equation = line.as_str().into();
-			has_solution(equation.lhs, &equation.rhs).then_some(equation.lhs)
+			let (lhs, rhs) = parse_equation(&line);
+			has_solution(lhs, &rhs).then_some(lhs)
 		})
 		.sum()
 }
@@ -57,8 +50,8 @@ fn has_solution_2(lhs: i64, rhs: &[i64]) -> bool {
 pub fn part2() -> i64 {
 	read_lines("input/07.txt")
 		.filter_map(|line| {
-			let equation: Equation = line.as_str().into();
-			has_solution_2(equation.lhs, &equation.rhs).then_some(equation.lhs)
+			let (lhs, rhs) = parse_equation(&line);
+			has_solution_2(lhs, &rhs).then_some(lhs)
 		})
 		.sum()
 }
