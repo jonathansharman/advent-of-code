@@ -30,7 +30,7 @@ macro_rules! test_part {
 				"{}::{} is {:?} ({})",
 				module_path!(),
 				stringify!($part),
-				$part(),
+				answer,
 				duration_string(elapsed)
 			);
 		}
@@ -57,7 +57,7 @@ macro_rules! test_part {
 				"{}::{} could be {:?} ({})",
 				module_path!(),
 				stringify!($part),
-				$part(),
+				answer,
 				duration_string(elapsed)
 			);
 		}
