@@ -3,84 +3,66 @@ use std::{
 	ops::RangeBounds,
 };
 
-use aoc::io::read_lines;
+use aoc::{
+	grid::{Grid, Point},
+	io::read_lines,
+};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 423);
 aoc::test::test_part!(test2, part2, 1287);
 
-type Point = (i32, i32);
-
-struct Map {
-	nodes: Vec<Vec<Option<char>>>,
-	height: i32,
-	width: i32,
-}
+type Map = Grid<Option<char>>;
 
 fn read_map() -> Map {
-	let nodes: Vec<Vec<Option<char>>> = read_lines("input/08.txt")
+	read_lines("input/08.txt")
 		.map(|line| line.chars().map(|c| (c != '.').then_some(c)).collect())
-		.collect();
-	let height = nodes.len() as i32;
-	let width = nodes[0].len() as i32;
-	Map {
-		nodes,
-		height,
-		width,
-	}
+		.collect()
 }
 
-impl Map {
-	fn node_locations(&self) -> HashMap<char, Vec<Point>> {
-		self.nodes
-			.iter()
-			.enumerate()
-			.flat_map(|(i, line)| {
-				line.iter().enumerate().filter_map(move |(j, c)| {
-					c.map(|c| (c, (i as i32, j as i32)))
-				})
-			})
-			.fold(
-				HashMap::new(),
-				|mut acc: HashMap<char, Vec<Point>>, (node, location)| {
-					acc.entry(node).or_default().push(location);
-					acc
-				},
-			)
-	}
+fn node_locations(map: &Map) -> HashMap<char, Vec<Point>> {
+	map.rows()
+		.enumerate()
+		.flat_map(|(i, row)| {
+			row.iter()
+				.enumerate()
+				.filter_map(move |(j, c)| c.map(|c| (c, Point::from((i, j)))))
+		})
+		.fold(
+			HashMap::new(),
+			|mut acc: HashMap<char, Vec<Point>>, (node, location)| {
+				acc.entry(node).or_default().push(location);
+				acc
+			},
+		)
+}
 
-	fn antinode_locations(
-		&self,
-		range: impl RangeBounds<i32> + IntoIterator<Item = i32> + Clone,
-	) -> HashSet<Point> {
-		self.node_locations()
-			.values()
-			.flat_map(|locations| {
-				locations
-					.iter()
-					.enumerate()
-					.cartesian_product(locations.iter().enumerate())
-					.filter(|((i, _), (j, _))| i != j)
-					.flat_map(|((_, p1), (_, p2))| {
-						range.clone().into_iter().map_while(|offset| {
-							let p3 = (
-								p2.0 + offset * (p2.0 - p1.0),
-								p2.1 + offset * (p2.1 - p1.1),
-							);
-							((0..self.height).contains(&p3.0)
-								&& (0..self.width).contains(&p3.1))
-							.then_some(p3)
-						})
+fn antinode_locations(
+	map: &Map,
+	range: impl RangeBounds<i64> + IntoIterator<Item = i64> + Clone,
+) -> HashSet<Point> {
+	node_locations(map)
+		.values()
+		.flat_map(|locations| {
+			locations
+				.iter()
+				.enumerate()
+				.cartesian_product(locations.iter().enumerate())
+				.filter(|((i, _), (j, _))| i != j)
+				.flat_map(|((_, &p1), (_, &p2))| {
+					range.clone().into_iter().map_while(move |offset| {
+						let p3 = p2 + offset * (p2 - p1);
+						map.contains(p3).then_some(p3)
 					})
-			})
-			.collect()
-	}
+				})
+		})
+		.collect()
 }
 
 pub fn part1() -> usize {
-	read_map().antinode_locations(1..=1).len()
+	antinode_locations(&read_map(), 1..=1).len()
 }
 
 pub fn part2() -> usize {
-	read_map().antinode_locations(0..).len()
+	antinode_locations(&read_map(), 0..).len()
 }
