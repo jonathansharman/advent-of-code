@@ -1,6 +1,6 @@
 use std::{
 	collections::{HashMap, HashSet},
-	ops::RangeInclusive,
+	ops::RangeBounds,
 };
 
 use aoc::io::read_lines;
@@ -32,57 +32,55 @@ fn read_map() -> Map {
 
 impl Map {
 	fn node_locations(&self) -> HashMap<char, Vec<Point>> {
-		let mut node_locations: HashMap<char, Vec<Point>> = HashMap::new();
-		for (i, line) in self.nodes.iter().enumerate() {
-			for (j, c) in line.iter().enumerate() {
-				if let Some(c) = c {
-					node_locations
-						.entry(*c)
-						.or_default()
-						.push((i as i32, j as i32));
-				}
-			}
-		}
-		node_locations
+		self.nodes
+			.iter()
+			.enumerate()
+			.flat_map(|(i, line)| {
+				line.iter().enumerate().filter_map(move |(j, c)| {
+					c.map(|c| (c, (i as i32, j as i32)))
+				})
+			})
+			.fold(
+				HashMap::new(),
+				|mut acc: HashMap<char, Vec<Point>>, (node, location)| {
+					acc.entry(node).or_default().push(location);
+					acc
+				},
+			)
 	}
 
 	fn antinode_locations(
 		&self,
-		offset_range: RangeInclusive<i32>,
+		range: impl RangeBounds<i32> + IntoIterator<Item = i32> + Clone,
 	) -> HashSet<Point> {
-		let mut antinode_locations = HashSet::new();
-		for locations in self.node_locations().values() {
-			locations
-				.iter()
-				.enumerate()
-				.cartesian_product(locations.iter().enumerate())
-				.for_each(|((i, p1), (j, p2))| {
-					if i == j {
-						return;
-					}
-					for offset in offset_range.clone() {
-						let p3 = (
-							p1.0 + offset * (p2.0 - p1.0),
-							p1.1 + offset * (p2.1 - p1.1),
-						);
-						if (0..self.height).contains(&p3.0)
-							&& (0..self.width).contains(&p3.1)
-						{
-							antinode_locations.insert(p3);
-						} else {
-							break;
-						}
-					}
-				});
-		}
-		antinode_locations
+		self.node_locations()
+			.values()
+			.flat_map(|locations| {
+				locations
+					.iter()
+					.enumerate()
+					.cartesian_product(locations.iter().enumerate())
+					.filter(|((i, _), (j, _))| i != j)
+					.flat_map(|((_, p1), (_, p2))| {
+						range.clone().into_iter().map_while(|offset| {
+							let p3 = (
+								p2.0 + offset * (p2.0 - p1.0),
+								p2.1 + offset * (p2.1 - p1.1),
+							);
+							((0..self.height).contains(&p3.0)
+								&& (0..self.width).contains(&p3.1))
+							.then_some(p3)
+						})
+					})
+			})
+			.collect()
 	}
 }
 
 pub fn part1() -> usize {
-	read_map().antinode_locations(2..=2).len()
+	read_map().antinode_locations(1..=1).len()
 }
 
 pub fn part2() -> usize {
-	read_map().antinode_locations(1..=i32::MAX).len()
+	read_map().antinode_locations(0..).len()
 }
