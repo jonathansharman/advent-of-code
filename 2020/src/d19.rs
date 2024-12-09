@@ -88,5 +88,16 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let mut lines = read_lines("input/19.txt");
+	let mut rule_set =
+		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
+
+	// Replace rules 8 and 11.
+	rule_set.rules.insert(8, Rule::Alt((vec![42], vec![42, 8])));
+	rule_set
+		.rules
+		.insert(11, Rule::Alt((vec![42, 31], vec![42, 11, 31])));
+
+	let rule0 = rule_set.eval(&0);
+	lines.filter(|line| rule0.contains(line)).count()
 }
