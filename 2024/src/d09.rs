@@ -1,5 +1,4 @@
 use aoc::io::read_lines;
-use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 6398608069280);
 aoc::test::test_part!(test2, part2, 6427437134372);
@@ -58,11 +57,13 @@ struct Segment {
 
 struct Disk {
 	segments: Vec<Segment>,
+	file_indices: Vec<usize>,
 }
 
 impl Disk {
 	fn read() -> Disk {
 		let mut segments = Vec::new();
+		let mut file_indices = Vec::new();
 		for (i, size) in read_lines("input/09.txt")
 			.next()
 			.unwrap()
@@ -70,12 +71,18 @@ impl Disk {
 			.map(|b| (b - b'0') as usize)
 			.enumerate()
 		{
-			segments.push(Segment {
-				id: (i % 2 == 0).then_some(i / 2),
-				size,
-			});
+			let id = if i % 2 == 0 {
+				file_indices.push(i);
+				Some(i / 2)
+			} else {
+				None
+			};
+			segments.push(Segment { id, size });
 		}
-		Disk { segments }
+		Disk {
+			segments,
+			file_indices,
+		}
 	}
 
 	fn checksum(self) -> usize {
@@ -97,18 +104,10 @@ impl Disk {
 
 pub fn part2() -> usize {
 	let mut disk = Disk::read();
-	// Both sample and real input end in a file.
-	let max_id = disk.segments.last().unwrap().id.unwrap();
 
 	// Defrag.
-	'files: for next_id in (1..=max_id).rev() {
-		let (i, &file) = disk
-			.segments
-			.iter()
-			.find_position(|segment| {
-				segment.id.map(|id| id == next_id).unwrap_or_default()
-			})
-			.unwrap();
+	'files: while let Some(i) = disk.file_indices.pop() {
+		let file = disk.segments[i];
 		for j in 1..i {
 			let space = disk.segments[j];
 			if space.id.is_none() && space.size >= file.size {
@@ -121,6 +120,12 @@ pub fn part2() -> usize {
 						size: space.size - file.size,
 					},
 				);
+				// Bump any file indices affected by the insertion.
+				for index in &mut disk.file_indices {
+					if *index > j {
+						*index += 1;
+					}
+				}
 				continue 'files;
 			}
 		}
