@@ -50,22 +50,19 @@ pub fn part1() -> usize {
 	checksum(&disk)
 }
 
-// TODO: Refactor into a struct with an optional ID.
 #[derive(Clone, Copy)]
-enum Segment {
-	Space { size: usize },
-	File { id: usize, size: usize },
+struct Segment {
+	id: Option<usize>,
+	size: usize,
 }
 
 struct Disk {
 	segments: Vec<Segment>,
-	file_count: usize,
 }
 
 impl Disk {
 	fn read() -> Disk {
 		let mut segments = Vec::new();
-		let mut file_count = 0;
 		for (i, size) in read_lines("input/09.txt")
 			.next()
 			.unwrap()
@@ -73,34 +70,26 @@ impl Disk {
 			.map(|b| (b - b'0') as usize)
 			.enumerate()
 		{
-			let segment = if i % 2 == 0 {
-				let id = i / 2;
-				file_count += 1;
-				Segment::File { id, size }
-			} else {
-				Segment::Space { size }
-			};
-			segments.push(segment);
+			segments.push(Segment {
+				id: (i % 2 == 0).then_some(i / 2),
+				size,
+			});
 		}
-		Disk {
-			segments,
-			file_count,
-		}
+		Disk { segments }
 	}
 
 	fn checksum(self) -> usize {
 		let mut checksum = 0;
 		let mut total_size = 0;
 		for segment in self.segments {
-			match segment {
-				Segment::Space { size } => total_size += size,
-				Segment::File { id, size } => {
-					for i in total_size..total_size + size {
-						checksum += id * i;
-					}
-					total_size += size;
+			if let Some(id) = segment.id {
+				// Could replace this with triangular number magic, but LLVM
+				// might be doing it anyway.
+				for i in total_size..total_size + segment.size {
+					checksum += id * i;
 				}
 			}
+			total_size += segment.size;
 		}
 		checksum
 	}
@@ -108,41 +97,31 @@ impl Disk {
 
 pub fn part2() -> usize {
 	let mut disk = Disk::read();
+	// Both sample and real input end in a file.
+	let max_id = disk.segments.last().unwrap().id.unwrap();
 
 	// Defrag.
-	'files: for next_id in (1..disk.file_count).rev() {
+	'files: for next_id in (1..=max_id).rev() {
 		let (i, &file) = disk
 			.segments
 			.iter()
 			.find_position(|segment| {
-				if let Segment::File { id, .. } = segment {
-					*id == next_id
-				} else {
-					false
-				}
+				segment.id.map(|id| id == next_id).unwrap_or_default()
 			})
 			.unwrap();
-		let Segment::File {
-			size: file_size, ..
-		} = file
-		else {
-			unreachable!(); // TODO: Refactor.
-		};
 		for j in 1..i {
-			if let Segment::Space { size } = disk.segments[j] {
-				if size >= file_size {
-					disk.segments.remove(i);
-					disk.segments.insert(i, Segment::Space { size: file_size });
-					disk.segments.remove(j);
-					disk.segments.insert(j, file);
-					disk.segments.insert(
-						j + 1,
-						Segment::Space {
-							size: size - file_size,
-						},
-					);
-					continue 'files;
-				}
+			let space = disk.segments[j];
+			if space.id.is_none() && space.size >= file.size {
+				disk.segments[i].id = None;
+				disk.segments[j] = file;
+				disk.segments.insert(
+					j + 1,
+					Segment {
+						id: None,
+						size: space.size - file.size,
+					},
+				);
+				continue 'files;
 			}
 		}
 	}
