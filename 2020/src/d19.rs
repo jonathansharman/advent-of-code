@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use aoc::io::read_lines;
 
 aoc::test::test_part!(test1, part1, 220);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 439);
 
 #[derive(Clone)]
 enum Rule {
@@ -18,10 +18,17 @@ struct RuleSet {
 }
 
 impl RuleSet {
+	fn get(&self, rule: &u8) -> &HashSet<String> {
+		&self.strings[rule]
+	}
+
 	fn eval_concat(&mut self, rules: &[u8]) -> HashSet<String> {
 		rules
 			.iter()
-			.map(|rule| self.eval(rule).clone())
+			.map(|rule| {
+				self.eval(rule);
+				self.get(rule).clone()
+			})
 			.reduce(|left, right| {
 				left.into_iter()
 					.flat_map(|s1| {
@@ -35,10 +42,7 @@ impl RuleSet {
 			.unwrap()
 	}
 
-	fn eval(&mut self, rule: &u8) -> HashSet<String> {
-		if let Some(strings) = self.strings.get(rule) {
-			return strings.clone();
-		}
+	fn eval(&mut self, rule: &u8) {
 		let strings = match self.rules[rule].clone() {
 			Rule::Literal(c) => HashSet::from([c.to_string()]),
 			Rule::Concat(rules) => self.eval_concat(&rules),
@@ -50,7 +54,6 @@ impl RuleSet {
 			}
 		};
 		self.strings.insert(*rule, strings);
-		self.strings[rule].clone()
 	}
 }
 
@@ -83,7 +86,8 @@ pub fn part1() -> usize {
 	let mut lines = read_lines("input/19.txt");
 	let mut rule_set =
 		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
-	let rule0 = rule_set.eval(&0);
+	rule_set.eval(&0);
+	let rule0 = rule_set.get(&0);
 	lines.filter(|line| rule0.contains(line)).count()
 }
 
@@ -91,13 +95,50 @@ pub fn part2() -> usize {
 	let mut lines = read_lines("input/19.txt");
 	let mut rule_set =
 		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
-
-	// Replace rules 8 and 11.
-	rule_set.rules.insert(8, Rule::Alt((vec![42], vec![42, 8])));
-	rule_set
-		.rules
-		.insert(11, Rule::Alt((vec![42, 31], vec![42, 11, 31])));
-
-	let rule0 = rule_set.eval(&0);
-	lines.filter(|line| rule0.contains(line)).count()
+	// Replacing rules 8 and 11, rule 0 is equivalent to: 0 -> 42+ 42{n} 31{n}.
+	// Therefore, there's no need to evaluate 0, 8, or 11. Just evaluate 42 and
+	// 31, and check for a valid pattern of 42s followed by 31s.
+	rule_set.eval(&42);
+	rule_set.eval(&31);
+	let rule42 = rule_set.get(&42);
+	let rule31 = rule_set.get(&31);
+	lines
+		.filter(|line| {
+			let mut l = line.as_str();
+			// Count the number of leading 42s.
+			let mut n = 0;
+			loop {
+				let mut found = false;
+				for pattern in rule42 {
+					if let Some(rest) = l.strip_prefix(pattern) {
+						l = rest;
+						n += 1;
+						found = true;
+					}
+				}
+				if !found {
+					if n == 0 {
+						return false;
+					} else {
+						break;
+					}
+				}
+			}
+			// Now look for 31s: at least one but no more than n - 1.
+			let mut m = 0;
+			loop {
+				let mut found = false;
+				for pattern in rule31 {
+					if let Some(rest) = l.strip_prefix(pattern) {
+						l = rest;
+						m += 1;
+						found = true;
+					}
+				}
+				if !found {
+					return l.is_empty() && m > 0 && m < n;
+				}
+			}
+		})
+		.count()
 }
