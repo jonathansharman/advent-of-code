@@ -111,6 +111,14 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T> {
+	pub fn tiles(&self) -> impl Iterator<Item = (Point, &T)> {
+		self.rows().enumerate().flat_map(|(i, row)| {
+			row.iter()
+				.enumerate()
+				.map(move |(j, tile)| (Point::from((i, j)), tile))
+		})
+	}
+
 	/// An iterator over the rows of the grid.
 	pub fn rows(&self) -> impl Iterator<Item = &Vec<T>> {
 		self.tiles.iter()
