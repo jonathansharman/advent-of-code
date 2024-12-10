@@ -4,7 +4,6 @@ use aoc::{
 	graph::Digraph,
 	grid::{Grid, Point},
 	io::read_lines,
-	neighbors,
 };
 
 aoc::test::test_part!(test1, part1, 688);
@@ -48,20 +47,10 @@ fn read_map() -> Map {
 			}
 			_ => {}
 		}
-		// TODO: Port neighbors functionality to the grid module.
-		for neighbor in neighbors::four(
-			map.height() as usize,
-			map.width() as usize,
-			node.row as usize,
-			node.col as usize,
-		)
-		.into_iter()
-		.filter_map(|neighbor| {
-			let neighbor = Point::from(neighbor);
-			let neighbor_height = *map.get(neighbor).unwrap();
-			(neighbor_height == height + 1).then_some(neighbor)
-		}) {
-			trails.insert_edge(node, neighbor, 1);
+		for (neighbor, &neighbor_height) in map.four_neighbors(node) {
+			if neighbor_height == height + 1 {
+				trails.insert_edge(node, neighbor, 1);
+			}
 		}
 	}
 	Map {

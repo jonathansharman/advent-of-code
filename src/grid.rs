@@ -111,11 +111,43 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T> {
+	// An iterator over the grid's coordinate-tile pairs.
 	pub fn tiles(&self) -> impl Iterator<Item = (Point, &T)> {
 		self.rows().enumerate().flat_map(|(i, row)| {
 			row.iter()
 				.enumerate()
 				.map(move |(j, tile)| (Point::from((i, j)), tile))
+		})
+	}
+
+	// An iterator over the coordinate-tile pairs orthogonally adjacent to
+	// `coords`.
+	pub fn four_neighbors(
+		&self,
+		coords: Point,
+	) -> impl Iterator<Item = (Point, &T)> {
+		[(-1, 0), (0, -1), (0, 1), (1, 0)].into_iter().filter_map(
+			move |offset| {
+				let neighbor = coords + offset.into();
+				self.get(neighbor).map(|value| (neighbor, value))
+			},
+		)
+	}
+
+	// An iterator over the coordinate-tile pairs orthogonally or diagonally
+	// adjacent to `coords`.
+	pub fn eight_neighbors(
+		&self,
+		coords: Point,
+	) -> impl Iterator<Item = (Point, &T)> {
+		(-1..=1).flat_map(move |i| {
+			(-1..=1).filter_map(move |j| {
+				if i == 0 && j == 0 {
+					return None;
+				}
+				let neighbor = coords + (i, j).into();
+				self.get(neighbor).map(|value| (neighbor, value))
+			})
 		})
 	}
 
