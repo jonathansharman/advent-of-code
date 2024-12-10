@@ -1,5 +1,7 @@
-use aoc::{io::read_lines, neighbors};
-use itertools::Itertools;
+use aoc::{
+	grid::{Grid, Point},
+	io::read_lines,
+};
 use std::collections::BinaryHeap;
 
 aoc::test::test_part!(test1, part1, 435);
@@ -13,20 +15,20 @@ pub fn part2() -> u32 {
 	dijkstra(expand_maze(read_maze()))
 }
 
-fn read_maze() -> Vec<Vec<u32>> {
+fn read_maze() -> Grid<u32> {
 	read_lines("input/15.txt")
-		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect_vec())
-		.collect_vec()
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
+		.collect()
 }
 
-fn expand_maze(maze: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
-	let n = maze.len();
-	let mut expanded = vec![vec![0; 5 * n]; 5 * n];
-	for (i, row) in maze.into_iter().enumerate() {
+fn expand_maze(maze: Grid<u32>) -> Grid<u32> {
+	let n = maze.height() as usize;
+	let mut expanded = Grid::new(5 * maze.dimensions(), 0);
+	for (i, row) in maze.into_rows().enumerate() {
 		for (j, cost) in row.into_iter().enumerate() {
 			for k in 0..5 {
 				for l in 0..5 {
-					expanded[i + n * k as usize][j + n * l as usize] =
+					expanded[(i + n * k as usize, j + n * l as usize).into()] =
 						(cost + k + l - 1) % 9 + 1;
 				}
 			}
@@ -37,8 +39,7 @@ fn expand_maze(maze: Vec<Vec<u32>>) -> Vec<Vec<u32>> {
 
 #[derive(PartialEq, Eq)]
 struct Node {
-	i: usize,
-	j: usize,
+	coords: Point,
 	d: u32,
 }
 
@@ -54,27 +55,33 @@ impl PartialOrd for Node {
 	}
 }
 
-fn dijkstra(maze: Vec<Vec<u32>>) -> u32 {
-	let n = maze.len();
+fn dijkstra(maze: Grid<u32>) -> u32 {
+	let n = maze.height() as usize;
 
-	let mut ds = vec![vec![u32::MAX; n]; n];
-	ds[0][0] = 0;
+	let mut ds = Grid::new(maze.dimensions(), u32::MAX);
+	ds[Point::zero()] = 0;
 
 	let mut queue = BinaryHeap::new();
-	queue.push(Node { i: 0, j: 0, d: 0 });
+	queue.push(Node {
+		coords: Point::zero(),
+		d: 0,
+	});
 
-	while let Some(Node { i, j, d }) = queue.pop() {
-		if ds[i][j] < d {
+	while let Some(Node { coords, d }) = queue.pop() {
+		if ds[coords] < d {
 			continue;
 		}
 
-		for (i, j) in neighbors::four(n, n, i, j) {
-			let d_new = d.saturating_add(maze[i][j]);
-			if d_new < ds[i][j] {
-				ds[i][j] = d_new;
-				queue.push(Node { i, j, d: d_new });
+		for (neighbor_coords, &d_neighbor) in maze.four_neighbors(coords) {
+			let d_new = d.saturating_add(d_neighbor);
+			if d_new < ds[neighbor_coords] {
+				ds[neighbor_coords] = d_new;
+				queue.push(Node {
+					coords: neighbor_coords,
+					d: d_new,
+				});
 			}
 		}
 	}
-	ds[n - 1][n - 1]
+	ds[(n - 1, n - 1).into()]
 }

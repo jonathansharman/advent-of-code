@@ -1,4 +1,7 @@
-use aoc::{io::read_lines, neighbors};
+use aoc::{
+	grid::{Grid, Point},
+	io::read_lines,
+};
 
 aoc::test::test_part!(test1, part1, 2273);
 aoc::test::test_part!(test2, part2, 2064);
@@ -7,20 +10,18 @@ pub fn part1() -> usize {
 	let mut layout = read_layout();
 	while evolve(&mut layout) {}
 	layout
-		.into_iter()
-		.map(|row| {
-			row.into_iter()
-				.filter(|&space| space == Space::Occupied)
-				.count()
-		})
-		.sum()
+		.into_tiles()
+		.filter(|&(_, space)| space == Space::Occupied)
+		.count()
 }
 
 pub fn part2() -> usize {
 	let mut layout = read_layout();
-	let los_neighbors = (0..layout.len())
-		.map(|i| {
-			(0..layout[0].len())
+	let los_neighbors = layout
+		.rows()
+		.enumerate()
+		.map(|(i, row)| {
+			(0..row.len())
 				.map(|j| {
 					[
 						Dir::Up,
@@ -34,22 +35,18 @@ pub fn part2() -> usize {
 					]
 					.into_iter()
 					.filter_map(|direction| {
-						line_of_sight(&layout, (i, j), direction)
+						line_of_sight(&layout, (i, j).into(), direction)
 					})
-					.collect::<Vec<_>>()
+					.collect()
 				})
-				.collect::<Vec<_>>()
+				.collect()
 		})
-		.collect::<Vec<_>>();
+		.collect();
 	while evolve2(&mut layout, &los_neighbors) {}
 	layout
-		.into_iter()
-		.map(|row| {
-			row.into_iter()
-				.filter(|&space| space == Space::Occupied)
-				.count()
-		})
-		.sum()
+		.into_tiles()
+		.filter(|&(_, space)| space == Space::Occupied)
+		.count()
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -70,7 +67,7 @@ enum Dir {
 	UpLeft,
 }
 
-fn read_layout() -> Vec<Vec<Space>> {
+fn read_layout() -> Grid<Space> {
 	read_lines("input/11.txt")
 		.map(|line| {
 			line.chars()
@@ -85,63 +82,74 @@ fn read_layout() -> Vec<Vec<Space>> {
 		.collect()
 }
 
-fn evolve(layout: &mut Vec<Vec<Space>>) -> bool {
-	let mut next_layout = Vec::with_capacity(layout.len());
+fn evolve(layout: &mut Grid<Space>) -> bool {
 	let mut changed = false;
-	for (i, row) in layout.iter().enumerate() {
-		next_layout.push(Vec::with_capacity(row.len()));
-		for (j, space) in row.iter().enumerate() {
-			let neighbors = neighbors::eight(layout.len(), row.len(), i, j)
-				.into_iter()
-				.filter(|(k, l)| layout[*k][*l] == Space::Occupied)
-				.count();
-			let next_space = match space {
-				Space::Empty if neighbors == 0 => {
-					changed = true;
-					Space::Occupied
-				}
-				Space::Occupied if neighbors >= 4 => {
-					changed = true;
-					Space::Empty
-				}
-				_ => *space,
-			};
-			next_layout[i].push(next_space);
-		}
-	}
+	let next_layout = layout
+		.rows()
+		.enumerate()
+		.map(|(i, row)| {
+			row.iter()
+				.enumerate()
+				.map(|(j, space)| {
+					let coords = (i, j).into();
+					let neighbors = layout
+						.eight_neighbors(coords)
+						.filter(|&(neighbor_coords, _)| {
+							layout[neighbor_coords] == Space::Occupied
+						})
+						.count();
+					match space {
+						Space::Empty if neighbors == 0 => {
+							changed = true;
+							Space::Occupied
+						}
+						Space::Occupied if neighbors >= 4 => {
+							changed = true;
+							Space::Empty
+						}
+						_ => *space,
+					}
+				})
+				.collect()
+		})
+		.collect();
 	if changed {
 		*layout = next_layout;
 	}
 	changed
 }
 
-fn evolve2(
-	layout: &mut Vec<Vec<Space>>,
-	los_neighbors: &[Vec<Vec<(usize, usize)>>],
-) -> bool {
-	let mut next_layout = Vec::with_capacity(layout.len());
+fn evolve2(layout: &mut Grid<Space>, los_neighbors: &Grid<Vec<Point>>) -> bool {
 	let mut changed = false;
-	for (i, row) in layout.iter().enumerate() {
-		next_layout.push(Vec::with_capacity(row.len()));
-		for (j, space) in row.iter().enumerate() {
-			let neighbors = los_neighbors[i][j]
-				.iter()
-				.filter(|(k, l)| layout[*k][*l] == Space::Occupied)
-				.count();
-			let next_space = match space {
-				Space::Empty if neighbors == 0 => {
-					changed = true;
-					Space::Occupied
-				}
-				Space::Occupied if neighbors >= 5 => {
-					changed = true;
-					Space::Empty
-				}
-				_ => *space,
-			};
-			next_layout[i].push(next_space);
-		}
-	}
+	let next_layout = layout
+		.rows()
+		.enumerate()
+		.map(|(i, row)| {
+			row.iter()
+				.enumerate()
+				.map(|(j, space)| {
+					let coords = (i, j).into();
+					let neighbors = los_neighbors[coords]
+						.iter()
+						.filter(|&&neighbor| {
+							layout[neighbor] == Space::Occupied
+						})
+						.count();
+					match space {
+						Space::Empty if neighbors == 0 => {
+							changed = true;
+							Space::Occupied
+						}
+						Space::Occupied if neighbors >= 5 => {
+							changed = true;
+							Space::Empty
+						}
+						_ => *space,
+					}
+				})
+				.collect()
+		})
+		.collect();
 	if changed {
 		*layout = next_layout;
 	}
@@ -149,25 +157,25 @@ fn evolve2(
 }
 
 fn line_of_sight(
-	layout: &[Vec<Space>],
-	start: (usize, usize),
+	layout: &Grid<Space>,
+	start: Point,
 	direction: Dir,
-) -> Option<(usize, usize)> {
-	let (mut i, mut j) = start;
-	while let Some(space) = layout.get(i).and_then(|row| row.get(j)) {
-		if (i, j) != start {
+) -> Option<Point> {
+	let mut coords = start;
+	while let Some(space) = layout.get(coords) {
+		if coords != start {
 			if let Space::Empty | Space::Occupied = space {
-				return Some((i, j));
+				return Some(coords);
 			}
 		}
 		match direction {
-			Dir::Up | Dir::UpRight | Dir::UpLeft => i -= 1,
-			Dir::Down | Dir::DownRight | Dir::DownLeft => i += 1,
+			Dir::Up | Dir::UpRight | Dir::UpLeft => coords.row -= 1,
+			Dir::Down | Dir::DownRight | Dir::DownLeft => coords.row += 1,
 			_ => {}
 		}
 		match direction {
-			Dir::Right | Dir::UpRight | Dir::DownRight => j += 1,
-			Dir::Left | Dir::UpLeft | Dir::DownLeft => j -= 1,
+			Dir::Right | Dir::UpRight | Dir::DownRight => coords.col += 1,
+			Dir::Left | Dir::UpLeft | Dir::DownLeft => coords.col -= 1,
 			_ => {}
 		}
 	}
@@ -175,8 +183,8 @@ fn line_of_sight(
 }
 
 #[allow(unused)]
-fn print_layout(layout: &[Vec<Space>]) {
-	for row in layout.iter() {
+fn print_layout(layout: &Grid<Space>) {
+	for row in layout.rows() {
 		for space in row.iter() {
 			print!(
 				"{}",

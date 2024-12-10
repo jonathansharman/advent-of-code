@@ -30,14 +30,13 @@ impl Map {
 }
 
 fn read_map() -> Map {
-	let map = Grid::from_iter(
-		read_lines("input/10.txt")
-			.map(|line| line.bytes().map(|b| b - b'0').collect()),
-	);
+	let grid: Grid<_> = read_lines("input/10.txt")
+		.map(|line| line.bytes().map(|b| b - b'0').collect())
+		.collect();
 	let mut trails = Digraph::new();
 	let mut trailheads = HashSet::new();
 	let mut peaks = HashSet::new();
-	for (node, height) in map.tiles() {
+	for (node, height) in grid.tiles() {
 		match height {
 			0 => {
 				trailheads.insert(node);
@@ -47,7 +46,7 @@ fn read_map() -> Map {
 			}
 			_ => {}
 		}
-		for (neighbor, &neighbor_height) in map.four_neighbors(node) {
+		for (neighbor, &neighbor_height) in grid.four_neighbors(node) {
 			if neighbor_height == height + 1 {
 				trails.insert_edge(node, neighbor, 1);
 			}

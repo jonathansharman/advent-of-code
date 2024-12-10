@@ -1,5 +1,6 @@
 use std::ops::{
-	Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign,
+	Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub,
+	SubAssign,
 };
 
 /// Row-column grid coordinates.
@@ -7,6 +8,12 @@ use std::ops::{
 pub struct Point {
 	pub row: i64,
 	pub col: i64,
+}
+
+impl Point {
+	pub fn zero() -> Point {
+		Point { row: 0, col: 0 }
+	}
 }
 
 impl<T: TryInto<i64>> From<(T, T)> for Point
@@ -111,10 +118,41 @@ pub struct Grid<T> {
 }
 
 impl<T> Grid<T> {
+	/// Creates a new grid with the given `size` and `default` value.
+	pub fn new(dimensions: Point, default: T) -> Grid<T>
+	where
+		T: Clone,
+	{
+		Grid {
+			tiles: vec![
+				vec![default.clone(); dimensions.col as usize];
+				dimensions.row as usize
+			],
+		}
+	}
+
 	// An iterator over the grid's coordinate-tile pairs.
 	pub fn tiles(&self) -> impl Iterator<Item = (Point, &T)> {
 		self.rows().enumerate().flat_map(|(i, row)| {
 			row.iter()
+				.enumerate()
+				.map(move |(j, tile)| (Point::from((i, j)), tile))
+		})
+	}
+
+	// An iterator over mutable references to the grid's coordinate-tile pairs.
+	pub fn tiles_mut(&mut self) -> impl Iterator<Item = (Point, &mut T)> {
+		self.rows_mut().enumerate().flat_map(|(i, row)| {
+			row.iter_mut()
+				.enumerate()
+				.map(move |(j, tile)| (Point::from((i, j)), tile))
+		})
+	}
+
+	// Converts the grid into an iterator over its coordinate-tile pairs.
+	pub fn into_tiles(self) -> impl Iterator<Item = (Point, T)> {
+		self.into_rows().enumerate().flat_map(|(i, row)| {
+			row.into_iter()
 				.enumerate()
 				.map(move |(j, tile)| (Point::from((i, j)), tile))
 		})
@@ -156,11 +194,28 @@ impl<T> Grid<T> {
 		self.tiles.iter()
 	}
 
+	/// An iterator over mutable references to the rows of the grid.
+	pub fn rows_mut(&mut self) -> impl Iterator<Item = &mut Vec<T>> {
+		self.tiles.iter_mut()
+	}
+
+	/// Converts the grid into an iterator over its rows.
+	pub fn into_rows(self) -> impl Iterator<Item = Vec<T>> {
+		self.tiles.into_iter()
+	}
+
 	/// A reference to the element at `coords`, if in bounds.
 	pub fn get(&self, coords: Point) -> Option<&T> {
 		let row: usize = coords.row.try_into().ok()?;
 		let col: usize = coords.col.try_into().ok()?;
 		self.tiles.get(row).and_then(|row| row.get(col))
+	}
+
+	/// A mutable reference to the element at `coords`, if in bounds.
+	pub fn get_mut(&mut self, coords: Point) -> Option<&mut T> {
+		let row: usize = coords.row.try_into().ok()?;
+		let col: usize = coords.col.try_into().ok()?;
+		self.tiles.get_mut(row).and_then(|row| row.get_mut(col))
 	}
 
 	/// Whether `coords` is in bounds.
@@ -178,6 +233,15 @@ impl<T> Grid<T> {
 	pub fn width(&self) -> i64 {
 		self.tiles[0].len() as i64
 	}
+
+	/// The grid's row-column dimensions. The grid must have at least one row.
+	/// This assumes that all rows have the same width.
+	pub fn dimensions(&self) -> Point {
+		Point {
+			row: self.height(),
+			col: self.width(),
+		}
+	}
 }
 
 impl<T> FromIterator<Vec<T>> for Grid<T> {
@@ -188,5 +252,19 @@ impl<T> FromIterator<Vec<T>> for Grid<T> {
 				.map(|row| row.into_iter().collect())
 				.collect(),
 		}
+	}
+}
+
+impl<T> Index<Point> for Grid<T> {
+	type Output = T;
+
+	fn index(&self, index: Point) -> &T {
+		self.get(index).unwrap()
+	}
+}
+
+impl<T> IndexMut<Point> for Grid<T> {
+	fn index_mut(&mut self, index: Point) -> &mut T {
+		self.get_mut(index).unwrap()
 	}
 }

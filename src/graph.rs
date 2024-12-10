@@ -6,7 +6,7 @@ use std::{
 
 use itertools::Itertools;
 
-use crate::neighbors;
+use crate::grid::{Grid, Point};
 
 pub trait Node: Clone + Eq + std::hash::Hash {}
 
@@ -326,21 +326,18 @@ where
 	}
 }
 
-/// Creates a `Graph<(usize, usize)>` from a grid of open/closed cells. The
-/// nodes will be the row-column coordinates of the open cells, and each node
-/// will have weight-1 edges to its open four-directional neighbors.
-pub fn from_bool_grid(grid: &[Vec<bool>]) -> Graph<(usize, usize)> {
+/// Creates a `Graph` from a grid of open/closed cells. The nodes will be the
+/// row-column coordinates of the open cells, and each node will have weight-1
+/// edges to its open four-directional neighbors.
+pub fn from_bool_grid(grid: &Grid<bool>) -> Graph<Point> {
 	let mut graph = Graph::new();
-	for (i, row) in grid.iter().enumerate() {
-		for (j, open) in row.iter().enumerate() {
-			let node = (i, j);
-			if !open {
-				continue;
-			}
-			for neighbor in neighbors::four(grid.len(), grid[0].len(), i, j) {
-				if grid[neighbor.0][neighbor.1] {
-					graph.insert_edge(node, neighbor, 1);
-				}
+	for (node, &open) in grid.tiles() {
+		if !open {
+			continue;
+		}
+		for (neighbor, &neighbor_open) in grid.four_neighbors(node) {
+			if neighbor_open {
+				graph.insert_edge(node, neighbor, 1);
 			}
 		}
 	}

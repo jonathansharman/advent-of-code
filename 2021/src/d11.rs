@@ -1,4 +1,7 @@
-use aoc::{io::read_lines, neighbors};
+use aoc::{
+	grid::{Grid, Point},
+	io::read_lines,
+};
 
 aoc::test::test_part!(test1, part1, 1757);
 aoc::test::test_part!(test2, part2, 422);
@@ -6,7 +9,7 @@ aoc::test::test_part!(test2, part2, 422);
 const WIDTH: usize = 10;
 
 pub fn part1() -> usize {
-	let mut grid: Vec<Vec<u32>> = read_lines("input/11.txt")
+	let mut grid: Grid<u32> = read_lines("input/11.txt")
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut flashes = 0;
@@ -14,15 +17,19 @@ pub fn part1() -> usize {
 	for _ in 0..100 {
 		for i in 0..WIDTH {
 			for j in 0..WIDTH {
-				process(&mut grid, &mut queue, &mut flashes, i, j);
+				process(&mut grid, &mut queue, &mut flashes, (i, j).into());
 			}
 		}
-		while let Some((i, j)) = queue.pop() {
-			for (i, j) in neighbors::eight(WIDTH, WIDTH, i, j) {
-				process(&mut grid, &mut queue, &mut flashes, i, j);
+		while let Some(coords) = queue.pop() {
+			for coords in grid
+				.eight_neighbors(coords)
+				.map(|(coords, _)| coords)
+				.collect::<Vec<_>>()
+			{
+				process(&mut grid, &mut queue, &mut flashes, coords);
 			}
 		}
-		for row in grid.iter_mut() {
+		for row in grid.rows_mut() {
 			for octopus in row {
 				if *octopus > 9 {
 					*octopus = 0;
@@ -34,7 +41,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> i64 {
-	let mut grid: Vec<Vec<u32>> = read_lines("input/11.txt")
+	let mut grid: Grid<u32> = read_lines("input/11.txt")
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut queue = Vec::new();
@@ -44,15 +51,19 @@ pub fn part2() -> i64 {
 		let mut flashes = 0;
 		for i in 0..WIDTH {
 			for j in 0..WIDTH {
-				process(&mut grid, &mut queue, &mut flashes, i, j);
+				process(&mut grid, &mut queue, &mut flashes, (i, j).into());
 			}
 		}
-		while let Some((i, j)) = queue.pop() {
-			for (i, j) in neighbors::eight(WIDTH, WIDTH, i, j) {
-				process(&mut grid, &mut queue, &mut flashes, i, j);
+		while let Some(coords) = queue.pop() {
+			for coords in grid
+				.eight_neighbors(coords)
+				.map(|(coords, _)| coords)
+				.collect::<Vec<_>>()
+			{
+				process(&mut grid, &mut queue, &mut flashes, coords);
 			}
 		}
-		for row in grid.iter_mut() {
+		for row in grid.rows_mut() {
 			for octopus in row {
 				if *octopus > 9 {
 					*octopus = 0;
@@ -66,15 +77,14 @@ pub fn part2() -> i64 {
 }
 
 fn process(
-	grid: &mut [Vec<u32>],
-	queue: &mut Vec<(usize, usize)>,
+	grid: &mut Grid<u32>,
+	queue: &mut Vec<Point>,
 	flashes: &mut usize,
-	i: usize,
-	j: usize,
+	point: Point,
 ) {
-	grid[i][j] += 1;
-	if grid[i][j] == 10 {
+	grid[point] += 1;
+	if grid[point] == 10 {
 		*flashes += 1;
-		queue.push((i, j));
+		queue.push(point);
 	}
 }
