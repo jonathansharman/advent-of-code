@@ -21,14 +21,16 @@ fn blink(stones: HashMap<usize, usize>) -> HashMap<usize, usize> {
 	stones
 		.into_iter()
 		.flat_map(|(stone, count)| {
-			let string = stone.to_string();
-			let stones = match string.as_str() {
-				"0" => vec![1],
-				string if string.len() % 2 == 0 => {
-					let (left, right) = string.split_at(string.len() / 2);
-					vec![left.parse().unwrap(), right.parse().unwrap()]
+			let stones = if stone == 0 {
+				vec![1]
+			} else {
+				let digit_count = stone.ilog10() + 1;
+				if digit_count % 2 == 0 {
+					let divisor = 10usize.pow(digit_count / 2);
+					vec![stone / divisor, stone % divisor]
+				} else {
+					vec![2024 * stone]
 				}
-				_ => vec![2024 * stone],
 			};
 			stones.into_iter().map(move |stone| (stone, count))
 		})
