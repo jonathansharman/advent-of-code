@@ -204,6 +204,23 @@ impl<T> Grid<T> {
 		self.tiles.into_iter()
 	}
 
+	/// An iterator over the elements of the row at `row_idx`, if there is one.
+	pub fn get_row(&self, row_idx: i64) -> Option<impl Iterator<Item = &T>> {
+		(0..=self.height())
+			.contains(&row_idx)
+			.then(|| self.tiles[row_idx as usize].iter())
+	}
+
+	/// An iterator over the elements of the column at `col_idx`, if there is
+	/// one.
+	pub fn get_col(&self, col_idx: i64) -> Option<impl Iterator<Item = &T>> {
+		(0..=self.width()).contains(&col_idx).then(move || {
+			(0..self.height()).map(move |row_idx| {
+				&self.tiles[row_idx as usize][col_idx as usize]
+			})
+		})
+	}
+
 	/// A reference to the element at `coords`, if in bounds.
 	pub fn get(&self, coords: Point) -> Option<&T> {
 		let row: usize = coords.row.try_into().ok()?;
