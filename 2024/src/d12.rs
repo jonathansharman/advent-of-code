@@ -1,9 +1,13 @@
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap, HashSet};
 
-use aoc::{graph::Graph, grid::Grid, io::read_lines};
+use aoc::{
+	graph::Graph,
+	grid::{Grid, Point},
+	io::read_lines,
+};
 
 aoc::test::test_part!(test1, part1, 1437300);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 849332);
 
 fn read_grid() -> Grid<char> {
 	read_lines("input/12.txt")
@@ -40,6 +44,67 @@ pub fn part1() -> usize {
 		.sum()
 }
 
+fn sides(region: &HashSet<Point>) -> usize {
+	sides_towards(region, (-1, 0).into())
+		+ sides_towards(region, (1, 0).into())
+		+ sides_towards(region, (0, -1).into())
+		+ sides_towards(region, (0, 1).into())
+}
+
+fn sides_towards(region: &HashSet<Point>, offset: Point) -> usize {
+	let side_offset = Point {
+		row: offset.col,
+		col: offset.row,
+	};
+	let mut sides = 0;
+	let mut queue: BTreeSet<Point> = region.iter().cloned().collect();
+	while let Some(coords) = queue.pop_first() {
+		if !region.contains(&(coords + offset)) {
+			sides += 1;
+			for n in 1.. {
+				let colinear = coords + n * side_offset;
+				if region.contains(&(colinear))
+					&& !region.contains(&(colinear + offset))
+				{
+					queue.remove(&colinear);
+				} else {
+					break;
+				}
+			}
+			for n in 1.. {
+				let colinear = coords - n * side_offset;
+				if region.contains(&(colinear))
+					&& !region.contains(&(colinear + offset))
+				{
+					queue.remove(&colinear);
+				} else {
+					break;
+				}
+			}
+		}
+	}
+	sides
+}
+
 pub fn part2() -> usize {
-	0
+	let mut graph = Graph::new();
+	let grid = read_grid();
+	grid.tiles().for_each(|(coords, &plant)| {
+		graph.insert_edge(coords, coords, 0);
+		grid.four_neighbors(coords)
+			.filter(|(_, &neighbor_plant)| neighbor_plant == plant)
+			.map(|(n_coords, _)| n_coords)
+			.for_each(|n_coords| {
+				graph.insert_edge(coords, n_coords, 1);
+			});
+	});
+	let graphs = graph.into_connected_components();
+	graphs
+		.into_iter()
+		.map(|graph| {
+			let region = graph.get_nodes();
+			let area = region.len();
+			area * sides(&region)
+		})
+		.sum()
 }

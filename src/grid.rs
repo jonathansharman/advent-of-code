@@ -4,7 +4,7 @@ use std::ops::{
 };
 
 /// Row-column grid coordinates.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct Point {
 	pub row: i64,
 	pub col: i64,
