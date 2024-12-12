@@ -1,9 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
 use aoc::io::read_lines;
+use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 2461);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(
+	test2,
+	part2,
+	"ltbj,nrfmm,pvhcsn,jxbnb,chpdjkf,jtqt,zzkq,jqnhd".to_string()
+);
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 struct Ingredient(String);
@@ -35,12 +40,10 @@ fn read_foods() -> Vec<Food> {
 		.collect()
 }
 
-pub fn part1() -> usize {
-	let foods = read_foods();
-
+fn ingredient_allergens(foods: &[Food]) -> HashMap<Ingredient, Allergen> {
 	let mut possible_ingredients: HashMap<Allergen, Vec<HashSet<Ingredient>>> =
 		HashMap::new();
-	for food in &foods {
+	for food in foods {
 		for allergen in &food.allergens {
 			possible_ingredients
 				.entry(allergen.clone())
@@ -71,9 +74,10 @@ pub fn part1() -> usize {
 			(allergen.clone(), ingredients.iter().next().unwrap().clone())
 		})
 		.collect();
-	let mut allergenic_ingredients = HashSet::new();
+	let mut ingredient_allergens = HashMap::new();
 	while let Some((determined_allergen, determined_ingredient)) = queue.pop() {
-		allergenic_ingredients.insert(determined_ingredient.clone());
+		ingredient_allergens
+			.insert(determined_ingredient.clone(), determined_allergen.clone());
 		for (allergen, ingredients) in possible_ingredients.iter_mut() {
 			if *allergen != determined_allergen
 				&& ingredients.remove(&determined_ingredient)
@@ -86,17 +90,27 @@ pub fn part1() -> usize {
 			}
 		}
 	}
+	ingredient_allergens
+}
 
+pub fn part1() -> usize {
+	let foods = read_foods();
+	let ingredient_allergens = ingredient_allergens(&foods);
 	foods
 		.into_iter()
 		.flat_map(|food| {
 			food.ingredients.into_iter().filter(|ingredient| {
-				!allergenic_ingredients.contains(ingredient)
+				!ingredient_allergens.contains_key(ingredient)
 			})
 		})
 		.count()
 }
 
-pub fn part2() -> usize {
-	0
+pub fn part2() -> String {
+	let foods = read_foods();
+	ingredient_allergens(&foods)
+		.into_iter()
+		.sorted_by(|(_, a), (_, b)| a.0.cmp(&b.0))
+		.map(|(ingredient, _)| ingredient.0)
+		.join(",")
 }
