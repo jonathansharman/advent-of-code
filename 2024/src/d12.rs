@@ -2,7 +2,7 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 
 use aoc::{
 	graph::Graph,
-	grid::{Grid, Point},
+	grid::{Grid, Point, Vector},
 	io::read_lines,
 };
 
@@ -51,8 +51,8 @@ fn sides(region: &HashSet<Point>) -> usize {
 		+ sides_towards(region, (0, 1).into())
 }
 
-fn sides_towards(region: &HashSet<Point>, offset: Point) -> usize {
-	let side_offset = Point {
+fn sides_towards(region: &HashSet<Point>, offset: Vector) -> usize {
+	let side_offset = Vector {
 		row: offset.col,
 		col: offset.row,
 	};

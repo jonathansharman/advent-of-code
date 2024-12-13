@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use aoc::{
-	grid::{Grid, Point},
+	grid::{Grid, Point, Vector},
 	io::read_lines,
 };
 
@@ -71,7 +71,7 @@ fn flip_graph(graph: Graph) -> Graph {
 	flipped
 }
 
-fn bfs(start: Point, size: Point, graph: &Graph) -> Grid<u32> {
+fn bfs(start: Point, size: Vector, graph: &Graph) -> Grid<u32> {
 	let mut distances = Grid::new(size, u32::MAX);
 	let mut visited = Grid::new(size, false);
 	distances[start] = 0;
