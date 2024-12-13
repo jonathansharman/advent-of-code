@@ -53,24 +53,31 @@ fn read_machines() -> Vec<Machine> {
 		.collect()
 }
 
-pub fn part1() -> i64 {
-	read_machines()
-		.into_iter()
-		.filter_map(|machine| {
-			let mut min = None;
-			for a in 0..=100 {
-				for b in 0..=100 {
-					if a * machine.a + b * machine.b == machine.prize {
-						let cost = 3 * a + b;
-						min = Some(min.unwrap_or(cost).min(cost));
-					}
-				}
+fn min_cost(machine: Machine) -> Option<i64> {
+	(0..=100)
+		.cartesian_product(0..=100)
+		.filter_map(|(a, b)| {
+			if a * machine.a + b * machine.b == machine.prize {
+				Some(3 * a + b)
+			} else {
+				None
 			}
-			min
 		})
-		.sum()
+		.min()
 }
 
-pub fn part2() -> usize {
-	0
+pub fn part1() -> i64 {
+	read_machines().into_iter().filter_map(min_cost).sum()
+}
+
+pub fn part2() -> i64 {
+	const ERROR: i64 = 10000000000000;
+	read_machines()
+		.into_iter()
+		.map(|machine| Machine {
+			prize: Point::from((ERROR, ERROR)) + machine.prize,
+			..machine
+		})
+		.filter_map(min_cost)
+		.sum()
 }
