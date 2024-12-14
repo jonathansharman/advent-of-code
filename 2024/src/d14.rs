@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use aoc::{define_point_and_vector, io::read_lines};
 use itertools::Itertools;
 
@@ -6,47 +8,44 @@ aoc::test::test_part!(test2, part2, ?);
 
 define_point_and_vector!(Point, Vector, x, y, i64);
 
-fn parse_line(line: &str) -> (Point, Vector) {
-	let (p, v) = line.split_once(' ').unwrap();
-	(
-		p[2..]
-			.split(',')
-			.map(|n| n.parse().unwrap())
-			.collect_tuple::<(i64, i64)>()
-			.unwrap()
-			.into(),
-		v[2..]
-			.split(',')
-			.map(|n| n.parse().unwrap())
-			.collect_tuple::<(i64, i64)>()
-			.unwrap()
-			.into(),
-	)
+struct Robot {
+	p: Point,
+	v: Vector,
+}
+
+fn read_robots() -> Vec<Robot> {
+	read_lines("input/14.txt")
+		.map(|line| {
+			let parse_tuple = |s: &str| {
+				s[2..]
+					.split(',')
+					.map(|n| n.parse().unwrap())
+					.collect_tuple::<(i64, i64)>()
+					.unwrap()
+			};
+			let (p, v) = line.split_once(' ').unwrap();
+			Robot {
+				p: parse_tuple(p).into(),
+				v: parse_tuple(v).into(),
+			}
+		})
+		.collect()
 }
 
 fn safety_factor(size: Vector, seconds: i64) -> usize {
 	let (mut q0, mut q1, mut q2, mut q3) = (0, 0, 0, 0);
-	read_lines("input/14.txt").for_each(|line| {
-		let (p0, v) = parse_line(&line);
-		let p = p0 + seconds * v;
+	read_robots().into_iter().for_each(|robot| {
+		let p = robot.p + seconds * robot.v;
 		let px = ((p.x % size.x) + size.x) % size.x;
 		let py = ((p.y % size.y) + size.y) % size.y;
-		println!("{px} {py}");
-		if py < size.y / 2 {
-			if px < size.x / 2 {
-				q0 += 1;
-			} else if px > size.x / 2 {
-				q1 += 1;
-			}
-		} else if py > size.y / 2 {
-			if px < size.x / 2 {
-				q2 += 1;
-			} else if px > size.x / 2 {
-				q3 += 1;
-			}
-		}
+		match (px.cmp(&(size.x / 2)), py.cmp(&(size.y / 2))) {
+			(Ordering::Less, Ordering::Less) => q0 += 1,
+			(Ordering::Greater, Ordering::Less) => q1 += 1,
+			(Ordering::Less, Ordering::Greater) => q2 += 1,
+			(Ordering::Greater, Ordering::Greater) => q3 += 1,
+			_ => {}
+		};
 	});
-	println!("{q0} {q1} {q2} {q3}");
 	q0 * q1 * q2 * q3
 }
 
