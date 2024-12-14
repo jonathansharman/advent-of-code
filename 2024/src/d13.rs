@@ -1,13 +1,16 @@
-use aoc::{grid::Point, io::read_lines};
+use aoc::{define_point_and_vector, io::read_lines};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 29187);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 99968222587852);
 
+define_point_and_vector!(Point, Vector, x, y, i128);
+
+#[derive(Debug)]
 struct Machine {
-	a: Point,
-	b: Point,
-	prize: Point,
+	a: Vector,
+	b: Vector,
+	p: Point,
 }
 
 fn read_machines() -> Vec<Machine> {
@@ -23,9 +26,9 @@ fn read_machines() -> Vec<Machine> {
 				.unwrap()
 				.split_once(", Y+")
 				.unwrap();
-			let a = Point {
-				col: left.parse::<i64>().unwrap(),
-				row: right.parse().unwrap(),
+			let a = Vector {
+				x: left.parse::<i128>().unwrap(),
+				y: right.parse().unwrap(),
 			};
 
 			let (left, right) = chunk[1]
@@ -33,9 +36,9 @@ fn read_machines() -> Vec<Machine> {
 				.unwrap()
 				.split_once(", Y+")
 				.unwrap();
-			let b = Point {
-				col: left.parse::<i64>().unwrap(),
-				row: right.parse().unwrap(),
+			let b = Vector {
+				x: left.parse::<i128>().unwrap(),
+				y: right.parse().unwrap(),
 			};
 
 			let (left, right) = chunk[2]
@@ -44,38 +47,45 @@ fn read_machines() -> Vec<Machine> {
 				.split_once(", Y=")
 				.unwrap();
 			let prize = Point {
-				col: left.parse::<i64>().unwrap(),
-				row: right.parse().unwrap(),
+				x: left.parse::<i128>().unwrap(),
+				y: right.parse().unwrap(),
 			};
 
-			Machine { a, b, prize }
+			Machine { a, b, p: prize }
 		})
 		.collect()
 }
 
-fn min_cost(machine: Machine) -> Option<i64> {
-	(0..=100)
-		.cartesian_product(0..=100)
-		.filter_map(|(a, b)| {
-			if a * machine.a + b * machine.b == machine.prize {
-				Some(3 * a + b)
-			} else {
-				None
-			}
-		})
-		.min()
+fn min_cost(m: Machine) -> Option<i128> {
+	let b_numer = m.a.y * m.p.x - m.a.x * m.p.y;
+	let b_denom = m.a.y * m.b.x - m.a.x * m.b.y;
+	if b_denom == 0 || b_numer % b_denom != 0 {
+		return None;
+	}
+	let b = b_numer / b_denom;
+
+	let a_numer = m.p.x - m.b.x * b;
+	let a_denom = m.a.x;
+	if a_numer % a_denom != 0 {
+		return None;
+	}
+	let a = a_numer / a_denom;
+
+	let cost = 3 * a + b;
+	Some(cost)
 }
 
-pub fn part1() -> i64 {
+pub fn part1() -> i128 {
 	read_machines().into_iter().filter_map(min_cost).sum()
 }
 
-pub fn part2() -> i64 {
-	const ERROR: i64 = 10000000000000;
+pub fn part2() -> i128 {
+	const ERROR: i128 = 10000000000000;
+	const ERROR_VEC: Vector = Vector { x: ERROR, y: ERROR };
 	read_machines()
 		.into_iter()
 		.map(|machine| Machine {
-			prize: Point::from((ERROR, ERROR)) + machine.prize,
+			p: ERROR_VEC + machine.p,
 			..machine
 		})
 		.filter_map(min_cost)
