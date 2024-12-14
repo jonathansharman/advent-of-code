@@ -11,6 +11,13 @@ macro_rules! define_point_and_vector {
 		}
 
 		impl $vector {
+			pub fn new($field1: $t, $field2: $t) -> $vector {
+				$vector {
+					$field1: $field1,
+					$field2: $field2,
+				}
+			}
+
 			pub fn zero() -> $vector {
 				$vector {
 					$field1: 0,
@@ -121,6 +128,13 @@ macro_rules! define_point_and_vector {
 		}
 
 		impl $point {
+			pub fn new($field1: $t, $field2: $t) -> $point {
+				$point {
+					$field1: $field1,
+					$field2: $field2,
+				}
+			}
+
 			pub fn zero() -> $point {
 				$point {
 					$field1: 0,
