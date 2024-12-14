@@ -16,6 +16,7 @@ name = "aoc"
 version = "0.1.0"
 dependencies = [
  "itertools",
+ "num",
 ]
 
 [[package]]
