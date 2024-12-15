@@ -104,6 +104,17 @@ impl<T> Grid<T> {
 			.then(|| self.tiles[row_idx as usize].iter())
 	}
 
+	/// An iterator over the columns of the grid. Note that because the grid is
+	/// stored in row-major order, this is less efficient than iterating over
+	/// the rows: it performs one allocation per column.
+	pub fn cols(&self) -> impl Iterator<Item = Vec<&T>> {
+		(0..self.width()).map(|col_idx| {
+			(0..self.height())
+				.map(|row_idx| &self[(row_idx, col_idx).into()])
+				.collect()
+		})
+	}
+
 	/// An iterator over the elements of the column at `col_idx`, if there is
 	/// one.
 	pub fn get_col(&self, col_idx: i64) -> Option<impl Iterator<Item = &T>> {
@@ -151,6 +162,50 @@ impl<T> Grid<T> {
 			row: self.height(),
 			col: self.width(),
 		}
+	}
+
+	/// The grid's transpose, i.e. the reflection of the grid's tiles over its
+	/// diagonal.
+	pub fn transpose(&self) -> Grid<T>
+	where
+		T: Clone,
+	{
+		Grid {
+			tiles: self
+				.cols()
+				.map(|col| col.into_iter().cloned().collect())
+				.collect(),
+		}
+	}
+
+	/// Reverses the order of the grid's rows in-place.
+	pub fn flip_vertically(&mut self) {
+		self.tiles.reverse();
+	}
+
+	/// Reverses the order of the grid's columns in-place.
+	pub fn flip_horizontally(&mut self) {
+		for row in &mut self.tiles {
+			row.reverse();
+		}
+	}
+
+	/// Rotates the grid's tiles clockwise.
+	pub fn rotate_cw(&mut self)
+	where
+		T: Clone,
+	{
+		self.flip_vertically();
+		*self = self.transpose();
+	}
+
+	/// Rotates the grid's tiles counterclockwise.
+	pub fn rotate_ccw(&mut self)
+	where
+		T: Clone,
+	{
+		*self = self.transpose();
+		self.flip_vertically();
 	}
 }
 
