@@ -1,11 +1,14 @@
-use std::ops::{Index, IndexMut};
+use std::{
+	fmt::{Debug, Write},
+	ops::{Index, IndexMut},
+};
 
 use crate::define_point_and_vector;
 
 define_point_and_vector!(Point, Vector, row, col, i64);
 
 /// A rectangular grid of tiles.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Grid<T> {
 	tiles: Vec<Vec<T>>,
 }
@@ -231,5 +234,17 @@ impl<T> Index<Point> for Grid<T> {
 impl<T> IndexMut<Point> for Grid<T> {
 	fn index_mut(&mut self, index: Point) -> &mut T {
 		self.get_mut(index).unwrap()
+	}
+}
+
+impl<T: Debug> Debug for Grid<T> {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		for row in self.rows() {
+			for tile in row.iter() {
+				f.write_fmt(format_args!("{:?}", tile))?;
+			}
+			f.write_char('\n')?;
+		}
+		Ok(())
 	}
 }
