@@ -1,5 +1,5 @@
 use aoc::{
-	graph::Graph,
+	graph::Digraph,
 	grid::{Point, Vector, COMPASS, EAST},
 	io::read_grid,
 };
@@ -54,7 +54,7 @@ pub fn part1() -> usize {
 		col: maze.col_count() - 2,
 	};
 
-	let mut graph = Graph::new();
+	let mut graph = Digraph::new();
 	for (coords, tile) in &maze {
 		if let Tile::Floor = tile {
 			for forward in COMPASS {
