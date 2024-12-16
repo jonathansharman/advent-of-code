@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use aoc::{
 	graph::Digraph,
 	grid::{Point, Vector, COMPASS, EAST},
@@ -5,7 +7,7 @@ use aoc::{
 };
 
 aoc::test::test_part!(test1, part1, 78428);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 463);
 
 #[derive(Clone, Copy)]
 enum Tile {
@@ -13,7 +15,7 @@ enum Tile {
 	Floor,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 struct State {
 	coords: Point,
 	direction: Vector,
@@ -33,8 +35,14 @@ fn rotate_ccw(v: Vector) -> Vector {
 	}
 }
 
-pub fn part1() -> usize {
-	let maze = read_grid("input/16.txt", |c| {
+struct Maze {
+	graph: Digraph<State>,
+	start: State,
+	end: Point,
+}
+
+fn read_maze() -> Maze {
+	let grid = read_grid("input/16.txt", |c| {
 		if c == '#' {
 			Tile::Wall
 		} else {
@@ -44,24 +52,24 @@ pub fn part1() -> usize {
 
 	let start = State {
 		coords: Point {
-			row: maze.row_count() - 2,
+			row: grid.row_count() - 2,
 			col: 1,
 		},
 		direction: EAST,
 	};
 	let end = Point {
 		row: 1,
-		col: maze.col_count() - 2,
+		col: grid.col_count() - 2,
 	};
 
 	let mut graph = Digraph::new();
-	for (coords, tile) in &maze {
+	for (coords, tile) in &grid {
 		if let Tile::Floor = tile {
 			for forward in COMPASS {
 				const MOVE_COST: usize = 1;
 				const TURN_COST: usize = 1000;
 
-				if let Tile::Floor = maze[coords + forward] {
+				if let Tile::Floor = grid[coords + forward] {
 					graph.insert_edge(
 						State {
 							coords,
@@ -76,7 +84,7 @@ pub fn part1() -> usize {
 				}
 
 				let left = rotate_ccw(forward);
-				if let Tile::Floor = maze[coords + left] {
+				if let Tile::Floor = grid[coords + left] {
 					graph.insert_edge(
 						State {
 							coords,
@@ -91,7 +99,7 @@ pub fn part1() -> usize {
 				}
 
 				let right = rotate_cw(forward);
-				if let Tile::Floor = maze[coords + right] {
+				if let Tile::Floor = grid[coords + right] {
 					graph.insert_edge(
 						State {
 							coords,
@@ -107,11 +115,37 @@ pub fn part1() -> usize {
 			}
 		}
 	}
-	graph
-		.shortest_distance(start, |&node| node.coords == end)
+
+	Maze { graph, start, end }
+}
+
+pub fn part1() -> usize {
+	let maze = read_maze();
+	maze.graph
+		.shortest_distance(maze.start, |&node| node.coords == maze.end)
 		.unwrap()
 }
 
 pub fn part2() -> usize {
-	0
+	let Maze { graph, start, end } = read_maze();
+	let d_start_end = graph
+		.shortest_distance(start, |&node| node.coords == end)
+		.unwrap();
+	graph
+		.get_nodes()
+		.into_iter()
+		.filter_map(|waypoint| {
+			let d_start_waypoint =
+				graph.shortest_distance(start, |&node| node == waypoint)?;
+			// Short-circuit if we're already overbudget.
+			if d_start_waypoint > d_start_end {
+				return None;
+			}
+			let d_waypoint_end = graph
+				.shortest_distance(waypoint, |&node| node.coords == end)?;
+			let d_start_waypoint_end = d_start_waypoint + d_waypoint_end;
+			(d_start_waypoint_end == d_start_end).then_some(waypoint.coords)
+		})
+		.collect::<HashSet<_>>()
+		.len()
 }
