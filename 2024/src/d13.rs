@@ -1,10 +1,11 @@
-use aoc::{define_point_and_vector, io::read_lines};
+use aoc::{
+	io::read_lines,
+	vector::{Point, Vector},
+};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 29187);
 aoc::test::test_part!(test2, part2, 99968222587852);
-
-define_point_and_vector!(Point, Vector, x, y, i128);
 
 #[derive(Debug)]
 struct Machine {
@@ -27,7 +28,7 @@ fn read_machines() -> Vec<Machine> {
 				.split_once(", Y+")
 				.unwrap();
 			let a = Vector {
-				x: left.parse::<i128>().unwrap(),
+				x: left.parse::<i64>().unwrap(),
 				y: right.parse().unwrap(),
 			};
 
@@ -37,7 +38,7 @@ fn read_machines() -> Vec<Machine> {
 				.split_once(", Y+")
 				.unwrap();
 			let b = Vector {
-				x: left.parse::<i128>().unwrap(),
+				x: left.parse::<i64>().unwrap(),
 				y: right.parse().unwrap(),
 			};
 
@@ -47,7 +48,7 @@ fn read_machines() -> Vec<Machine> {
 				.split_once(", Y=")
 				.unwrap();
 			let prize = Point {
-				x: left.parse::<i128>().unwrap(),
+				x: left.parse::<i64>().unwrap(),
 				y: right.parse().unwrap(),
 			};
 
@@ -56,7 +57,7 @@ fn read_machines() -> Vec<Machine> {
 		.collect()
 }
 
-fn min_cost(m: Machine) -> Option<i128> {
+fn min_cost(m: Machine) -> Option<i64> {
 	let b_numer = m.a.y * m.p.x - m.a.x * m.p.y;
 	let b_denom = m.a.y * m.b.x - m.a.x * m.b.y;
 	if b_denom == 0 || b_numer % b_denom != 0 {
@@ -75,12 +76,12 @@ fn min_cost(m: Machine) -> Option<i128> {
 	Some(cost)
 }
 
-pub fn part1() -> i128 {
+pub fn part1() -> i64 {
 	read_machines().into_iter().filter_map(min_cost).sum()
 }
 
-pub fn part2() -> i128 {
-	const ERROR: i128 = 10000000000000;
+pub fn part2() -> i64 {
+	const ERROR: i64 = 10000000000000;
 	const ERROR_VEC: Vector = Vector { x: ERROR, y: ERROR };
 	read_machines()
 		.into_iter()
