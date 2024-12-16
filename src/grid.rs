@@ -7,6 +7,20 @@ use crate::define_point_and_vector;
 
 define_point_and_vector!(Point, Vector, row, col, i64);
 
+pub const NORTH: Vector = Vector { row: -1, col: 0 };
+pub const SOUTH: Vector = Vector { row: 1, col: 0 };
+pub const EAST: Vector = Vector { row: 0, col: 1 };
+pub const WEST: Vector = Vector { row: 0, col: -1 };
+pub const CARDINALS: [Vector; 4] = [NORTH, SOUTH, EAST, WEST];
+
+pub const NORTHEAST: Vector = Vector { row: -1, col: 1 };
+pub const NORTHWEST: Vector = Vector { row: -1, col: -1 };
+pub const SOUTHEAST: Vector = Vector { row: 1, col: 1 };
+pub const SOUTHWEST: Vector = Vector { row: 1, col: -1 };
+pub const COMPASS: [Vector; 8] = [
+	NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST,
+];
+
 /// A rectangular grid of tiles.
 #[derive(Clone)]
 pub struct Grid<T> {
@@ -55,12 +69,10 @@ impl<T> Grid<T> {
 		&self,
 		coords: Point,
 	) -> impl Iterator<Item = (Point, &T)> {
-		[(-1, 0), (0, -1), (0, 1), (1, 0)].into_iter().filter_map(
-			move |offset| {
-				let neighbor = coords + offset.into();
-				self.get(neighbor).map(|value| (neighbor, value))
-			},
-		)
+		CARDINALS.into_iter().filter_map(move |offset| {
+			let neighbor = coords + offset;
+			self.get(neighbor).map(|value| (neighbor, value))
+		})
 	}
 
 	/// An iterator over the coordinate-tile pairs orthogonally or diagonally
@@ -69,14 +81,9 @@ impl<T> Grid<T> {
 		&self,
 		coords: Point,
 	) -> impl Iterator<Item = (Point, &T)> {
-		(-1..=1).flat_map(move |i| {
-			(-1..=1).filter_map(move |j| {
-				if i == 0 && j == 0 {
-					return None;
-				}
-				let neighbor = coords + Vector::new(i, j);
-				self.get(neighbor).map(|value| (neighbor, value))
-			})
+		COMPASS.into_iter().filter_map(move |offset| {
+			let neighbor = coords + offset;
+			self.get(neighbor).map(|value| (neighbor, value))
 		})
 	}
 
