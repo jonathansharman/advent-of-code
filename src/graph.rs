@@ -331,7 +331,7 @@ where
 /// edges to its open four-directional neighbors.
 pub fn from_bool_grid(grid: &Grid<bool>) -> Graph<Point> {
 	let mut graph = Graph::new();
-	for (node, &open) in grid.tiles() {
+	for (node, &open) in grid {
 		if !open {
 			continue;
 		}

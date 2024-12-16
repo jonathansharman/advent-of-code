@@ -22,10 +22,10 @@ fn read_maze() -> Grid<u32> {
 }
 
 fn expand_maze(maze: Grid<u32>) -> Grid<u32> {
-	let n = maze.height() as usize;
-	let mut expanded = Grid::new(5 * maze.dimensions(), 0);
-	for (i, row) in maze.into_rows().enumerate() {
-		for (j, cost) in row.into_iter().enumerate() {
+	let n = maze.row_count() as usize;
+	let mut expanded = Grid::new(5 * maze.size(), 0);
+	for (i, row) in maze.rows().enumerate() {
+		for (j, cost) in row.enumerate() {
 			for k in 0..5 {
 				for l in 0..5 {
 					expanded[(i + n * k as usize, j + n * l as usize).into()] =
@@ -56,9 +56,9 @@ impl PartialOrd for Node {
 }
 
 fn dijkstra(maze: Grid<u32>) -> u32 {
-	let n = maze.height() as usize;
+	let n = maze.row_count() as usize;
 
-	let mut ds = Grid::new(maze.dimensions(), u32::MAX);
+	let mut ds = Grid::new(maze.size(), u32::MAX);
 	ds[Point::zero()] = 0;
 
 	let mut queue = BinaryHeap::new();

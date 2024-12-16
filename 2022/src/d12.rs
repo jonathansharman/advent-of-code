@@ -51,7 +51,7 @@ type Graph = HashMap<Point, HashSet<Point>>;
 
 fn build_graph(map: &Map) -> Graph {
 	let mut graph = Graph::new();
-	for (coords, &h) in map.heights.tiles() {
+	for (coords, &h) in &map.heights {
 		for (neighbor_coords, &nh) in map.heights.four_neighbors(coords) {
 			if nh <= h + 1 {
 				graph.entry(coords).or_default().insert(neighbor_coords);
@@ -100,15 +100,15 @@ fn bfs(start: Point, size: Vector, graph: &Graph) -> Grid<u32> {
 pub fn part1() -> u32 {
 	let map = read_map();
 	let graph = build_graph(&map);
-	bfs(map.start, map.heights.dimensions(), &graph)[map.end]
+	bfs(map.start, map.heights.size(), &graph)[map.end]
 }
 
 pub fn part2() -> u32 {
 	let map = read_map();
 	let graph = flip_graph(build_graph(&map));
-	let distances = bfs(map.end, map.heights.dimensions(), &graph);
+	let distances = bfs(map.end, map.heights.size(), &graph);
 	map.heights
-		.tiles()
+		.iter()
 		.filter(|(_, &h)| (h == 0))
 		.map(|(coords, _)| distances[coords])
 		.min()

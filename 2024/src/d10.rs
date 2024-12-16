@@ -36,7 +36,7 @@ fn read_map() -> Map {
 	let mut trails = Digraph::new();
 	let mut trailheads = HashSet::new();
 	let mut peaks = HashSet::new();
-	for (node, height) in grid.tiles() {
+	for (node, height) in &grid {
 		match height {
 			0 => {
 				trailheads.insert(node);

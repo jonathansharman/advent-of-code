@@ -69,7 +69,7 @@ fn has_tree(size: Vector, t: i64, robots: &[Robot]) -> bool {
 	for robot in robots {
 		grid[robot.p(size, t)] = true;
 	}
-	for row in grid.into_rows() {
+	for row in grid.rows() {
 		for i in 0..row.len() - NEEDLE.len() {
 			if row[i..i + NEEDLE.len()] == NEEDLE {
 				return true;
@@ -85,7 +85,7 @@ fn print_robots(size: Vector, t: i64, robots: &[Robot]) {
 	for robot in robots {
 		grid[robot.p(size, t)] = '*';
 	}
-	for row in grid.into_rows() {
+	for row in grid.rows() {
 		for c in row {
 			print!("{c}");
 		}

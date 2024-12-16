@@ -10,52 +10,47 @@ define_point_and_vector!(Point, Vector, row, col, i64);
 /// A rectangular grid of tiles.
 #[derive(Clone)]
 pub struct Grid<T> {
-	tiles: Vec<Vec<T>>,
+	tiles: Vec<T>,
+	size: Vector,
 }
 
 impl<T> Grid<T> {
 	/// Creates a new grid with the given `size` and `default` value.
-	pub fn new(dimensions: Vector, default: T) -> Grid<T>
+	pub fn new(size: Vector, default: T) -> Grid<T>
 	where
 		T: Clone,
 	{
 		Grid {
-			tiles: vec![
-				vec![default.clone(); dimensions.col as usize];
-				dimensions.row as usize
-			],
+			tiles: vec![default.clone(); (size.row * size.col) as usize],
+			size,
 		}
 	}
 
-	// An iterator over the grid's coordinate-tile pairs.
-	pub fn tiles(&self) -> impl Iterator<Item = (Point, &T)> {
-		self.rows().enumerate().flat_map(|(i, row)| {
-			row.iter()
-				.enumerate()
-				.map(move |(j, tile)| (Point::from((i, j)), tile))
-		})
+	/// An iterator over the grid's coordinate-tile pairs.
+	pub fn iter(&self) -> GridIter<'_, T> {
+		self.into_iter()
 	}
 
-	// An iterator over mutable references to the grid's coordinate-tile pairs.
-	pub fn tiles_mut(&mut self) -> impl Iterator<Item = (Point, &mut T)> {
-		self.rows_mut().enumerate().flat_map(|(i, row)| {
-			row.iter_mut()
-				.enumerate()
-				.map(move |(j, tile)| (Point::from((i, j)), tile))
-		})
+	/// Converts the grid into a vector of all of its tiles.
+	pub fn into_tiles(self) -> Vec<T> {
+		self.tiles
 	}
 
-	// Converts the grid into an iterator over its coordinate-tile pairs.
-	pub fn into_tiles(self) -> impl Iterator<Item = (Point, T)> {
-		self.into_rows().enumerate().flat_map(|(i, row)| {
-			row.into_iter()
-				.enumerate()
-				.map(move |(j, tile)| (Point::from((i, j)), tile))
-		})
+	// TODO: Implement Tiles and TilesMut iterators, similar to Rows and
+	// RowsMut, and use them to implement tiles and tiles_mut?
+
+	/// A slice of all the tiles in the grid.
+	pub fn tiles(&self) -> &[T] {
+		&self.tiles
 	}
 
-	// An iterator over the coordinate-tile pairs orthogonally adjacent to
-	// `coords`.
+	/// Mutable references to all the tiles in the grid.
+	pub fn tiles_mut(&mut self) -> &mut [T] {
+		&mut self.tiles
+	}
+
+	/// An iterator over the coordinate-tile pairs orthogonally adjacent to
+	/// `coords`.
 	pub fn four_neighbors(
 		&self,
 		coords: Point,
@@ -68,8 +63,8 @@ impl<T> Grid<T> {
 		)
 	}
 
-	// An iterator over the coordinate-tile pairs orthogonally or diagonally
-	// adjacent to `coords`.
+	/// An iterator over the coordinate-tile pairs orthogonally or diagonally
+	/// adjacent to `coords`.
 	pub fn eight_neighbors(
 		&self,
 		coords: Point,
@@ -79,117 +74,162 @@ impl<T> Grid<T> {
 				if i == 0 && j == 0 {
 					return None;
 				}
-				let neighbor = coords + (i, j).into();
+				let neighbor = coords + Vector::new(i, j);
 				self.get(neighbor).map(|value| (neighbor, value))
 			})
 		})
 	}
 
 	/// An iterator over the rows of the grid.
-	pub fn rows(&self) -> impl Iterator<Item = &Vec<T>> {
-		self.tiles.iter()
+	pub fn rows(&self) -> impl Iterator<Item = Row<'_, T>> {
+		self.tiles
+			.chunks_exact(self.size.col as usize)
+			.map(|chunk| Row { tiles: chunk })
 	}
 
 	/// An iterator over mutable references to the rows of the grid.
-	pub fn rows_mut(&mut self) -> impl Iterator<Item = &mut Vec<T>> {
-		self.tiles.iter_mut()
+	pub fn rows_mut(&mut self) -> impl Iterator<Item = RowMut<'_, T>> {
+		self.tiles
+			.chunks_exact_mut(self.size.col as usize)
+			.map(|chunk| RowMut { tiles: chunk })
 	}
 
-	/// Converts the grid into an iterator over its rows.
-	pub fn into_rows(self) -> impl Iterator<Item = Vec<T>> {
-		self.tiles.into_iter()
-	}
-
-	/// An iterator over the elements of the row at `row_idx`, if there is one.
-	pub fn get_row(&self, row_idx: i64) -> Option<impl Iterator<Item = &T>> {
-		(0..=self.height())
-			.contains(&row_idx)
-			.then(|| self.tiles[row_idx as usize].iter())
-	}
-
-	/// An iterator over the columns of the grid. Note that because the grid is
-	/// stored in row-major order, this is less efficient than iterating over
-	/// the rows: it performs one allocation per column.
-	pub fn cols(&self) -> impl Iterator<Item = Vec<&T>> {
-		(0..self.width()).map(|col_idx| {
-			(0..self.height())
-				.map(|row_idx| &self[(row_idx, col_idx).into()])
-				.collect()
+	/// The elements of the row at `row_idx`, if there is one.
+	pub fn get_row(&self, row_idx: i64) -> Option<Row<'_, T>> {
+		(0..self.row_count()).contains(&row_idx).then(|| {
+			let start = (row_idx * self.size.col) as usize;
+			let end = ((row_idx + 1) + self.size.col) as usize;
+			Row {
+				tiles: &self.tiles[start..end],
+			}
 		})
 	}
+
+	/// Mutable references to the elements of the row at `row_idx`, if there is
+	/// one.
+	pub fn get_row_mut(&mut self, row_idx: i64) -> Option<RowMut<'_, T>> {
+		(0..self.row_count()).contains(&row_idx).then(|| {
+			let start = (row_idx * self.size.col) as usize;
+			let end = ((row_idx + 1) + self.size.col) as usize;
+			RowMut {
+				tiles: &mut self.tiles[start..end],
+			}
+		})
+	}
+
+	/// An iterator over the columns of the grid.
+	pub fn cols(&self) -> impl Iterator<Item = impl Iterator<Item = &T>> {
+		(0..self.size.col).map(|col_idx| {
+			self.tiles
+				.iter()
+				.skip(col_idx as usize)
+				.step_by(self.size.col as usize)
+		})
+	}
+
+	// TODO: Implement Cols, ColsMut, Col, and ColMut, and use ColsMut to
+	// implement a cols_mut. Since columns don't have contiguous storage, ColMut
+	// and especially ColsMut may require unsafe code.
 
 	/// An iterator over the elements of the column at `col_idx`, if there is
 	/// one.
 	pub fn get_col(&self, col_idx: i64) -> Option<impl Iterator<Item = &T>> {
-		(0..=self.width()).contains(&col_idx).then(move || {
-			(0..self.height()).map(move |row_idx| {
-				&self.tiles[row_idx as usize][col_idx as usize]
-			})
+		(0..=self.size.col).contains(&col_idx).then(move || {
+			self.tiles
+				.iter()
+				.skip(col_idx as usize)
+				.step_by(self.size.col as usize)
+		})
+	}
+
+	/// An iterator over mutable references to the elements of the column at
+	/// `col_idx`, if there is one.
+	pub fn get_col_mut(
+		&mut self,
+		col_idx: i64,
+	) -> Option<impl Iterator<Item = &mut T>> {
+		(0..=self.size.col).contains(&col_idx).then(move || {
+			self.tiles
+				.iter_mut()
+				.skip(col_idx as usize)
+				.step_by(self.size.col as usize)
 		})
 	}
 
 	/// A reference to the element at `coords`, if in bounds.
 	pub fn get(&self, coords: Point) -> Option<&T> {
-		let row: usize = coords.row.try_into().ok()?;
-		let col: usize = coords.col.try_into().ok()?;
-		self.tiles.get(row).and_then(|row| row.get(col))
+		self.tile_index(coords).map(|idx| &self.tiles[idx])
 	}
 
 	/// A mutable reference to the element at `coords`, if in bounds.
 	pub fn get_mut(&mut self, coords: Point) -> Option<&mut T> {
-		let row: usize = coords.row.try_into().ok()?;
-		let col: usize = coords.col.try_into().ok()?;
-		self.tiles.get_mut(row).and_then(|row| row.get_mut(col))
+		self.tile_index(coords).map(|idx| &mut self.tiles[idx])
+	}
+
+	/// Swaps the tiles at `coords1` and `coords2`, if they're both in-bounds.
+	pub fn swap(&mut self, coords1: Point, coords2: Point) {
+		if let (Some(idx1), Some(idx2)) =
+			(self.tile_index(coords1), self.tile_index(coords2))
+		{
+			self.tiles.swap(idx1, idx2);
+		}
 	}
 
 	/// Whether `coords` is in bounds.
-	pub fn contains(&self, coords: Point) -> bool {
+	pub fn contains_coords(&self, coords: Point) -> bool {
 		self.get(coords).is_some()
 	}
 
 	/// The number of rows in the grid.
-	pub fn height(&self) -> i64 {
-		self.tiles.len() as i64
+	pub fn row_count(&self) -> i64 {
+		self.size.row
 	}
 
-	/// The number of columns in the grid. The grid must have at least one row.
-	/// This assumes that all rows have the same width.
-	pub fn width(&self) -> i64 {
-		self.tiles[0].len() as i64
+	/// The number of columns in the grid.
+	pub fn col_count(&self) -> i64 {
+		self.size.col
 	}
 
-	/// The grid's row-column dimensions. The grid must have at least one row.
-	/// This assumes that all rows have the same width.
-	pub fn dimensions(&self) -> Vector {
-		Vector {
-			row: self.height(),
-			col: self.width(),
-		}
+	/// The grid's row-column dimensions.
+	pub fn size(&self) -> Vector {
+		self.size
 	}
 
-	/// The grid's transpose, i.e. the reflection of the grid's tiles over its
-	/// diagonal.
-	pub fn transpose(&self) -> Grid<T>
+	/// Transposes the grid in-place, reflecting its tiles over its diagonal.
+	pub fn transpose(&mut self)
 	where
 		T: Clone,
 	{
-		Grid {
-			tiles: self
-				.cols()
-				.map(|col| col.into_iter().cloned().collect())
-				.collect(),
-		}
+		// TODO: Swap elements in-place, and remove the Clone bound on T.
+		*self = Grid {
+			tiles: self.cols().fold(Vec::new(), |mut acc, col| {
+				acc.extend(col.cloned());
+				acc
+			}),
+			size: Vector {
+				row: self.size.col,
+				col: self.size.row,
+			},
+		};
 	}
 
 	/// Reverses the order of the grid's rows in-place.
 	pub fn flip_vertically(&mut self) {
-		self.tiles.reverse();
+		for row_idx in 0..self.size.row / 2 {
+			let other_row_idx = self.size.row - 1 - row_idx;
+			for col_idx in 0..self.size.col {
+				self.swap(
+					Point::new(row_idx, col_idx),
+					Point::new(other_row_idx, col_idx),
+				);
+			}
+		}
 	}
 
 	/// Reverses the order of the grid's columns in-place.
 	pub fn flip_horizontally(&mut self) {
-		for row in &mut self.tiles {
-			row.reverse();
+		for row in self.rows_mut() {
+			row.tiles.reverse();
 		}
 	}
 
@@ -199,7 +239,7 @@ impl<T> Grid<T> {
 		T: Clone,
 	{
 		self.flip_vertically();
-		*self = self.transpose();
+		self.transpose();
 	}
 
 	/// Rotates the grid's tiles counterclockwise.
@@ -207,18 +247,90 @@ impl<T> Grid<T> {
 	where
 		T: Clone,
 	{
-		*self = self.transpose();
+		self.transpose();
 		self.flip_vertically();
+	}
+
+	/// The index of `coords` within the underlying tile vector.
+	fn tile_index(&self, coords: Point) -> Option<usize> {
+		((0..self.size.row).contains(&coords.row)
+			&& (0..self.size.col).contains(&coords.col))
+		.then_some((coords.row * self.size.col + coords.col) as usize)
 	}
 }
 
 impl<T> FromIterator<Vec<T>> for Grid<T> {
 	fn from_iter<I: IntoIterator<Item = Vec<T>>>(iter: I) -> Self {
+		let tiles: Vec<Vec<T>> = iter
+			.into_iter()
+			.map(|row| row.into_iter().collect())
+			.collect();
+		let size = Vector {
+			row: tiles.len() as i64,
+			col: tiles[0].len() as i64,
+		};
 		Self {
-			tiles: iter
-				.into_iter()
-				.map(|row| row.into_iter().collect())
-				.collect(),
+			tiles: tiles.into_iter().fold(Vec::new(), |mut acc, row| {
+				acc.extend(row);
+				acc
+			}),
+			size,
+		}
+	}
+}
+
+/// An iterator over a [`Grid`]'s coordinate-tile pairs.
+pub struct GridIter<'a, T> {
+	grid: &'a Grid<T>,
+	coords: Point,
+}
+
+impl<'a, T> Iterator for GridIter<'a, T> {
+	type Item = (Point, &'a T);
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let tile = self.grid.get(self.coords)?;
+		let coords = self.coords;
+
+		if self.coords.col < self.grid.size.col {
+			self.coords.col += 1;
+		}
+		if self.coords.col == self.grid.size.col {
+			self.coords.col = 0;
+			self.coords.row += 1;
+		}
+
+		Some((coords, tile))
+	}
+}
+
+impl<'a, T> IntoIterator for &'a Grid<T> {
+	type Item = (Point, &'a T);
+
+	type IntoIter = GridIter<'a, T>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		GridIter {
+			grid: self,
+			coords: Point::zero(),
+		}
+	}
+}
+
+// TODO: Implement Grid::iter_mut and IntoIterator for &mut Grid using
+// Grid::iter_mut once the use of impl trait in associated types is stabilized.
+// At the same time, could probably get rid of GridIter and reimplement Iterator
+// for &Grid more simply using Grid::iter.
+
+impl<'a, T> IntoIterator for &'a mut Grid<T> {
+	type Item = (Point, &'a T);
+
+	type IntoIter = GridIter<'a, T>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		GridIter {
+			grid: self,
+			coords: Point::zero(),
 		}
 	}
 }
@@ -240,11 +352,97 @@ impl<T> IndexMut<Point> for Grid<T> {
 impl<T: Debug> Debug for Grid<T> {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		for row in self.rows() {
-			for tile in row.iter() {
+			for tile in row {
 				f.write_fmt(format_args!("{:?}", tile))?;
 			}
 			f.write_char('\n')?;
 		}
 		Ok(())
+	}
+}
+
+/// A reference to a [`Grid`] row.
+pub struct Row<'a, T> {
+	tiles: &'a [T],
+}
+
+impl<T> Row<'_, T> {
+	/// Whether the row has no tiles.
+	pub fn is_empty(&self) -> bool {
+		self.tiles.is_empty()
+	}
+
+	/// The number of tiles in the row.
+	pub fn len(&self) -> usize {
+		self.tiles.len()
+	}
+}
+
+impl<'a, T> Iterator for Row<'a, T> {
+	type Item = &'a T;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let (first, rest) = self.tiles.split_first()?;
+		self.tiles = rest;
+		Some(first)
+	}
+}
+
+impl<T, Idx> Index<Idx> for Row<'_, T>
+where
+	Idx: std::slice::SliceIndex<[T]>,
+{
+	type Output = Idx::Output;
+
+	fn index(&self, index: Idx) -> &Self::Output {
+		&self.tiles[index]
+	}
+}
+
+/// A mutable reference to a [`Grid`] row.
+pub struct RowMut<'a, T> {
+	tiles: &'a mut [T],
+}
+
+impl<T> RowMut<'_, T> {
+	/// Whether the row has no tiles.
+	pub fn is_empty(&self) -> bool {
+		self.tiles.is_empty()
+	}
+
+	/// The number of tiles in the row.
+	pub fn len(&self) -> usize {
+		self.tiles.len()
+	}
+}
+
+impl<'a, T> Iterator for RowMut<'a, T> {
+	type Item = &'a mut T;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let tiles = std::mem::take(&mut self.tiles);
+		let (first, rest) = tiles.split_first_mut()?;
+		self.tiles = rest;
+		Some(first)
+	}
+}
+
+impl<T, Idx> Index<Idx> for RowMut<'_, T>
+where
+	Idx: std::slice::SliceIndex<[T]>,
+{
+	type Output = Idx::Output;
+
+	fn index(&self, index: Idx) -> &Self::Output {
+		&self.tiles[index]
+	}
+}
+
+impl<T, Idx> IndexMut<Idx> for RowMut<'_, T>
+where
+	Idx: std::slice::SliceIndex<[T]>,
+{
+	fn index_mut(&mut self, index: Idx) -> &mut Self::Output {
+		&mut self.tiles[index]
 	}
 }

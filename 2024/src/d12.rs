@@ -19,7 +19,7 @@ pub fn part1() -> usize {
 	let mut graph = Graph::new();
 	let mut plant_perimeters = HashMap::new();
 	let grid = read_grid();
-	grid.tiles().for_each(|(coords, &plant)| {
+	for (coords, &plant) in &grid {
 		graph.insert_edge(coords, coords, 0);
 		let neighbor_coords = grid
 			.four_neighbors(coords)
@@ -30,7 +30,7 @@ pub fn part1() -> usize {
 		for n_coords in neighbor_coords {
 			graph.insert_edge(coords, n_coords, 1);
 		}
-	});
+	}
 	let graphs = graph.into_connected_components();
 	graphs
 		.into_iter()
@@ -89,7 +89,7 @@ fn sides_towards(region: &HashSet<Point>, offset: Vector) -> usize {
 pub fn part2() -> usize {
 	let mut graph = Graph::new();
 	let grid = read_grid();
-	grid.tiles().for_each(|(coords, &plant)| {
+	for (coords, &plant) in &grid {
 		graph.insert_edge(coords, coords, 0);
 		grid.four_neighbors(coords)
 			.filter(|(_, &neighbor_plant)| neighbor_plant == plant)
@@ -97,7 +97,7 @@ pub fn part2() -> usize {
 			.for_each(|n_coords| {
 				graph.insert_edge(coords, n_coords, 1);
 			});
-	});
+	}
 	let graphs = graph.into_connected_components();
 	graphs
 		.into_iter()

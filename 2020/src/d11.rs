@@ -11,7 +11,8 @@ pub fn part1() -> usize {
 	while evolve(&mut layout) {}
 	layout
 		.into_tiles()
-		.filter(|&(_, space)| space == Space::Occupied)
+		.into_iter()
+		.filter(|&space| space == Space::Occupied)
 		.count()
 }
 
@@ -44,8 +45,9 @@ pub fn part2() -> usize {
 		.collect();
 	while evolve2(&mut layout, &los_neighbors) {}
 	layout
-		.into_tiles()
-		.filter(|&(_, space)| space == Space::Occupied)
+		.tiles()
+		.iter()
+		.filter(|&&space| space == Space::Occupied)
 		.count()
 }
 
@@ -88,8 +90,7 @@ fn evolve(layout: &mut Grid<Space>) -> bool {
 		.rows()
 		.enumerate()
 		.map(|(i, row)| {
-			row.iter()
-				.enumerate()
+			row.enumerate()
 				.map(|(j, space)| {
 					let coords = (i, j).into();
 					let neighbors = layout
@@ -125,8 +126,7 @@ fn evolve2(layout: &mut Grid<Space>, los_neighbors: &Grid<Vec<Point>>) -> bool {
 		.rows()
 		.enumerate()
 		.map(|(i, row)| {
-			row.iter()
-				.enumerate()
+			row.enumerate()
 				.map(|(j, space)| {
 					let coords = (i, j).into();
 					let neighbors = los_neighbors[coords]
@@ -185,7 +185,7 @@ fn line_of_sight(
 #[allow(unused)]
 fn print_layout(layout: &Grid<Space>) {
 	for row in layout.rows() {
-		for space in row.iter() {
+		for space in row {
 			print!(
 				"{}",
 				match space {

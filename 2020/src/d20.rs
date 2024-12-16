@@ -12,9 +12,15 @@ impl Tile {
 	fn edges(&self) -> impl Iterator<Item = Vec<&bool>> {
 		[
 			self.grid.get_row(0).unwrap().collect(),
-			self.grid.get_row(self.grid.height() - 1).unwrap().collect(),
+			self.grid
+				.get_row(self.grid.row_count() - 1)
+				.unwrap()
+				.collect(),
 			self.grid.get_col(0).unwrap().collect(),
-			self.grid.get_col(self.grid.width() - 1).unwrap().collect(),
+			self.grid
+				.get_col(self.grid.col_count() - 1)
+				.unwrap()
+				.collect(),
 		]
 		.into_iter()
 	}

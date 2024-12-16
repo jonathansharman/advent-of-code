@@ -24,8 +24,7 @@ fn node_locations(map: &Map) -> HashMap<char, Vec<Point>> {
 	map.rows()
 		.enumerate()
 		.flat_map(|(i, row)| {
-			row.iter()
-				.enumerate()
+			row.enumerate()
 				.filter_map(move |(j, c)| c.map(|c| (c, Point::from((i, j)))))
 		})
 		.fold(
@@ -52,7 +51,7 @@ fn antinode_locations(
 				.flat_map(|((_, &p1), (_, &p2))| {
 					range.clone().into_iter().map_while(move |offset| {
 						let p3 = p2 + offset * (p2 - p1);
-						map.contains(p3).then_some(p3)
+						map.contains_coords(p3).then_some(p3)
 					})
 				})
 		})

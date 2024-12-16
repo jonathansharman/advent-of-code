@@ -50,17 +50,16 @@ impl Warehouse {
 		};
 		let tiles = self
 			.tiles
-			.into_rows()
+			.rows()
 			.map(|row| {
-				row.into_iter()
-					.flat_map(|tile| match tile {
-						Tile::Robot => [Tile::Robot, Tile::Floor],
-						Tile::Floor => [Tile::Floor; 2],
-						Tile::Box => [Tile::LeftBox, Tile::RightBox],
-						Tile::Wall => [Tile::Wall; 2],
-						_ => panic!("inexpansible tile"),
-					})
-					.collect()
+				row.flat_map(|tile| match tile {
+					Tile::Robot => [Tile::Robot, Tile::Floor],
+					Tile::Floor => [Tile::Floor; 2],
+					Tile::Box => [Tile::LeftBox, Tile::RightBox],
+					Tile::Wall => [Tile::Wall; 2],
+					_ => panic!("inexpansible tile"),
+				})
+				.collect()
 			})
 			.collect();
 		Warehouse { robot, tiles }
@@ -73,8 +72,7 @@ impl Warehouse {
 			self.push(&mut HashSet::new(), self.robot, offset)
 		{
 			for box_coords in to_move {
-				self.tiles[box_coords + offset] = self.tiles[box_coords];
-				self.tiles[box_coords] = Tile::Floor;
+				self.tiles.swap(box_coords, box_coords + offset);
 			}
 			self.robot += offset;
 		}
@@ -166,7 +164,7 @@ impl Warehouse {
 
 	fn total_gps(self) -> i64 {
 		self.tiles
-			.into_tiles()
+			.iter()
 			.filter_map(|(coords, tile)| {
 				(matches!(tile, Tile::Box | Tile::LeftBox))
 					.then_some(100 * coords.row + coords.col)
