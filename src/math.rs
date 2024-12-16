@@ -1,9 +1,12 @@
 use num::PrimInt;
 
-/// Given `a`, `b`, and `c` for ax + by = c, provides an example integral
-/// solution (x0, y0), if one exists. There will be infinitely many additional
-/// solutions of the form (x0 + bt, y0 - at), where t is an integer.
-pub fn solve_diophantine<T: PrimInt>(a: T, b: T, c: T) -> Option<(T, T)> {
+/// Given `a`, `b`, and `c` where ax + by = c, returns a function f: Z → (Z, Z)
+/// that produces solutions to the equation, if such a function exists.
+pub fn solve_diophantine<T: PrimInt>(
+	a: T,
+	b: T,
+	c: T,
+) -> Option<impl Fn(T) -> (T, T)> {
 	// Use the extended Euclidean algorithm on a and b to find their GCD and
 	// Bézout's coefficients x and y such that ax + by = gcd(x, y).
 	let results = extended_euclidean(a, b);
@@ -17,7 +20,11 @@ pub fn solve_diophantine<T: PrimInt>(a: T, b: T, c: T) -> Option<(T, T)> {
 
 	// Multiply both sides by c / gcd(x, y) to find one solution (x0, y0) to the
 	// original equation, i.e. where a*x0 + b*y0 = c.
-	Some((x * c / results.gcd, y * c / results.gcd))
+	let (x0, y0) = (x * c / results.gcd, y * c / results.gcd);
+
+	// There are infinitely many additional solutions of the form
+	// (x0 + bt, y0 - at), where t is an integer.
+	Some(move |t| (x0 + b * t, y0 - a * t))
 }
 
 /// Outputs of the extended Euclidean algorithm.
@@ -53,9 +60,9 @@ mod test_solve_diophantine {
 	#[test]
 	fn solution() {
 		let (a, b, c) = (1, 2, 3);
-		let (x0, y0) =
-			solve_diophantine(a, b, c).expect("expected integer solutions");
+		let f = solve_diophantine(a, b, c).expect("expected integer solutions");
 		for t in -10..=10 {
+			let (x0, y0) = f(t);
 			assert_eq!(a * (x0 + b * t) + b * (y0 - a * t), c);
 		}
 	}
