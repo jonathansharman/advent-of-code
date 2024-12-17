@@ -122,29 +122,35 @@ fn read_maze() -> Maze {
 pub fn part1() -> usize {
 	let maze = read_maze();
 	maze.graph
-		.shortest_distance(maze.start, |&node| node.coords == maze.end)
+		.shortest_distance(maze.start, |&state| state.coords == maze.end)
 		.unwrap()
 }
 
 pub fn part2() -> usize {
 	let Maze { graph, start, end } = read_maze();
-	let d_start_end = graph
-		.shortest_distance(start, |&node| node.coords == end)
-		.unwrap();
+	// Find the lowest-cost paths from the start state to all other states.
+	let dijkstra = graph.dijkstra(start);
+	// Get the lowest cost of any path to a state with the target end
+	// coordinates, facing any direction.
+	let lowest_cost = dijkstra.shortest_distance(|state| state.coords == end);
 	graph
-		.get_nodes()
-		.into_iter()
-		.filter_map(|waypoint| {
-			let d_start_waypoint =
-				graph.shortest_distance(start, |&node| node == waypoint)?;
-			// Short-circuit if we're already overbudget.
-			if d_start_waypoint > d_start_end {
-				return None;
-			}
-			let d_waypoint_end = graph
-				.shortest_distance(waypoint, |&node| node.coords == end)?;
-			let d_start_waypoint_end = d_start_waypoint + d_waypoint_end;
-			(d_start_waypoint_end == d_start_end).then_some(waypoint.coords)
+		.nodes()
+		.iter()
+		.filter(|state| {
+			// Some states with the correct coordinates may be facing the wrong
+			// direction - and thus be reachable with a suboptimal number of
+			// points. Only consider states that are reachable in the globally
+			// lowest number of points.
+			state.coords == end && dijkstra.distance(state) == lowest_cost
+		})
+		.flat_map(|&state| {
+			// Trace each of these states' shortest paths back to the start, and
+			// disregard their directions.
+			dijkstra
+				.backtrace(state)
+				.into_nodes()
+				.into_iter()
+				.map(|state| state.coords)
 		})
 		.collect::<HashSet<_>>()
 		.len()

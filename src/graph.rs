@@ -1,6 +1,6 @@
 use std::{
 	borrow::Borrow,
-	collections::{hash_map::Entry, BinaryHeap, HashMap, HashSet},
+	collections::{BinaryHeap, HashMap, HashSet},
 	hash::Hash,
 };
 
@@ -33,23 +33,87 @@ impl<T: Node> PartialOrd for State<T> {
 /// A directed graph.
 #[derive(Clone, Default)]
 pub struct Digraph<T: Node> {
+	nodes: HashSet<T>,
 	edges: HashMap<T, HashMap<T, usize>>,
+}
+
+/// The results of a call to Dijkstra's algorithm for a particular start node.
+pub struct DijkstraResults<T: Node> {
+	/// A (node → parent nodes) map, which steps from each node through all
+	/// shortest paths to the start node.
+	parents: HashMap<T, HashSet<T>>,
+	/// A (node → distance) map, representing the length of the shortest path
+	/// from the start node to each other node.
+	distances: HashMap<T, usize>,
+}
+
+impl<T: Node> DijkstraResults<T> {
+	/// The shortest distance from the start node to any node that satisfies
+	/// `pred` or `None` if no such node is reachable.
+	pub fn shortest_distance<F>(&self, pred: F) -> Option<usize>
+	where
+		F: Fn(&T) -> bool,
+	{
+		self.distances
+			.iter()
+			.filter_map(|(node, d)| pred(node).then_some(d))
+			.min()
+			.copied()
+	}
+
+	/// The shortest distance from the start node to `end`.
+	pub fn distance<Q>(&self, end: &Q) -> Option<usize>
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq + ?Sized,
+	{
+		self.distances.get(end).copied()
+	}
+
+	/// A digraph from `end` back through all shortest paths to the start node.
+	pub fn backtrace(&self, end: T) -> Digraph<T> {
+		let mut digraph = Digraph::new();
+		let mut queue = vec![end];
+		while let Some(node) = queue.pop() {
+			let Some(parents) = self.parents.get(&node) else {
+				continue;
+			};
+			for parent in parents {
+				digraph.insert_edge(node.clone(), parent.clone(), 1);
+				queue.push(parent.clone());
+			}
+		}
+		digraph
+	}
 }
 
 impl<T: Node> Digraph<T> {
 	/// Creates a new empty `Digraph`.
 	pub fn new() -> Self {
 		Self {
+			nodes: HashSet::new(),
 			edges: HashMap::new(),
 		}
 	}
 
-	/// Adds an edge from node `from` to node `to` with the given `weight`.
-	pub fn insert_edge(&mut self, from: T, to: T, weight: usize) {
-		self.edges.entry(from).or_default().insert(to, weight);
+	/// Adds an edge from node `from` to node `to` with the given `weight` or
+	/// updates the weight if the edge already exists. Returns the previous
+	/// weight, if there was one. The nodes will be created if they don't
+	/// already exist.
+	pub fn insert_edge(
+		&mut self,
+		from: T,
+		to: T,
+		weight: usize,
+	) -> Option<usize> {
+		self.nodes.insert(from.clone());
+		self.nodes.insert(to.clone());
+		self.edges.entry(from).or_default().insert(to, weight)
 	}
 
-	/// Removes any edge from node `from` to node `to`.
+	/// Removes the edge from node `from` to node `to`, if there is one. Note
+	/// that the nodes themselves will not be removed, even if they no longer
+	/// have any edges.
 	pub fn remove_edge<Q>(&mut self, from: &Q, to: &Q)
 	where
 		T: Borrow<Q>,
@@ -58,6 +122,17 @@ impl<T: Node> Digraph<T> {
 		if let Some(neighbors) = self.edges.get_mut(from) {
 			neighbors.remove(to);
 		}
+	}
+
+	/// The weight of the edge from node `from` to node `to`, if any.
+	pub fn weight<Q>(&self, from: &Q, to: &Q) -> Option<usize>
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq + ?Sized,
+	{
+		self.edges
+			.get(from)
+			.and_then(|edges| edges.get(to).copied())
 	}
 
 	/// The set of outgoing edges (node → weight) from `from`.
@@ -69,16 +144,14 @@ impl<T: Node> Digraph<T> {
 		self.edges.get(from)
 	}
 
-	// TODO: Maybe I should track nodes eagerly to make this O(1), especially
-	// since this is used in some other methods.
-	/// The set of nodes in the digraph. O(|N|+|E|).
-	pub fn get_nodes(&self) -> HashSet<T> {
-		let mut nodes = HashSet::new();
-		for (node, edges) in self.edges.iter() {
-			nodes.insert(node.clone());
-			nodes.extend(edges.keys().cloned());
-		}
-		nodes
+	/// Converts the digraph into its set of nodes.
+	pub fn into_nodes(self) -> HashSet<T> {
+		self.nodes
+	}
+
+	/// The set of nodes in the digraph.
+	pub fn nodes(&self) -> &HashSet<T> {
+		&self.nodes
 	}
 
 	/// Consumes the digraph to produce a list of its strongly connected
@@ -131,78 +204,83 @@ impl<T: Node> Digraph<T> {
 		output
 	}
 
-	/// The shortest distance from `start` to a node that satisfies `pred` or
+	/// Uses Dijkstra's algorithm to compute shortest path info from the `start`
+	/// node to all other nodes.
+	pub fn dijkstra(&self, start: T) -> DijkstraResults<T> {
+		let mut parents: HashMap<T, HashSet<T>> = HashMap::new();
+		let mut distances = HashMap::from([(start.clone(), 0)]);
+
+		let mut queue: BinaryHeap<State<T>> = BinaryHeap::from([State {
+			distance: 0,
+			node: start,
+		}]);
+		while let Some(State { distance, node }) = queue.pop() {
+			let Some(edges) = self.edges_from(&node) else {
+				continue;
+			};
+			for (neighbor, weight) in edges {
+				let candidate = distance + weight;
+				let d = distances.get(neighbor);
+				if d.map_or(true, |&d| candidate < d) {
+					queue.push(State {
+						distance: candidate,
+						node: neighbor.clone(),
+					});
+					*parents.entry(neighbor.clone()).or_default() =
+						[node.clone()].into();
+					distances.insert(neighbor.clone(), candidate);
+				} else if d.map_or(true, |&d| candidate == d) {
+					queue.push(State {
+						distance: candidate,
+						node: neighbor.clone(),
+					});
+					parents
+						.entry(neighbor.clone())
+						.or_default()
+						.insert(node.clone());
+					distances.insert(neighbor.clone(), candidate);
+				}
+			}
+		}
+		DijkstraResults { parents, distances }
+	}
+
+	/// The shortest distance from `start` to any node that satisfies `pred` or
 	/// `None` if no such node is reachable. Uses Dijkstra's algorithm.
 	pub fn shortest_distance<F>(&self, start: T, pred: F) -> Option<usize>
 	where
 		F: Fn(&T) -> bool,
 	{
-		let mut distances: HashMap<T, usize> = HashMap::new();
-		let mut queue: BinaryHeap<State<T>> = BinaryHeap::new();
-		distances.insert(start.clone(), 0);
-		queue.push(State {
-			distance: 0,
-			node: start,
-		});
-		while let Some(State { distance, node }) = queue.pop() {
-			if pred(&node) {
-				return Some(distance);
-			}
-			if distance > distances[&node] {
-				// We've already reached this node by a shorter path.
-				continue;
-			}
-			if let Some(edges) = self.edges_from(&node) {
-				for (neighbor, weight) in edges {
-					let candidate = distance + weight;
-					let d = distances.get(neighbor);
-					if d.map_or(true, |d| candidate < *d) {
-						queue.push(State {
-							distance: candidate,
-							node: neighbor.clone(),
-						});
-						distances.insert(neighbor.clone(), candidate);
-					}
-				}
-			}
-		}
-		None
+		self.dijkstra(start.clone()).shortest_distance(pred)
 	}
 
 	/// The shortest distance from each node to each other node. Uses the
-	/// Floyd-Warshall algorithm.
-	pub fn shortest_distances(&self) -> HashMap<T, HashMap<T, usize>> {
-		let nodes = self.get_nodes();
-		let mut distances: HashMap<T, HashMap<T, usize>> = HashMap::new();
-		for node in &nodes {
-			let node_distances = distances.entry(node.clone()).or_default();
-			node_distances.insert(node.clone(), 0);
-			if let Some(edges) = self.edges_from(node) {
-				for (neighbor, &weight) in edges {
-					node_distances.insert(neighbor.clone(), weight);
-				}
-			}
+	/// Floyd-Warshall algorithm. The returned digraph will contain an edge from
+	/// each node to each other reachable node, with a weight equal to the
+	/// shortest distance between them.
+	pub fn shortest_distances(&self) -> Digraph<T> {
+		let mut distances = self.clone();
+		for node in &self.nodes {
+			distances.insert_edge(node.clone(), node.clone(), 0);
 		}
-		for i in &nodes {
-			for j in &nodes {
-				for k in &nodes {
+		for i in &self.nodes {
+			for j in &self.nodes {
+				for k in &self.nodes {
 					if let Some(candidate) = distances
-						.get(i)
+						.edges_from(i)
 						.and_then(|d| d.get(k))
 						.and_then(|left| {
 							distances
-								.get(k)
+								.edges_from(k)
 								.and_then(|d| d.get(j))
 								.map(|right| left + right)
 						}) {
-						match distances.get_mut(i).unwrap().entry(j.clone()) {
-							Entry::Occupied(mut entry) => {
-								entry.insert(*entry.get().min(&candidate));
-							}
-							Entry::Vacant(entry) => {
-								entry.insert(candidate);
-							}
-						}
+						let weight = distances
+							.weight(i, j)
+							.map_or(candidate, |current| {
+								current.min(candidate)
+							});
+						distances.insert_edge(i.clone(), j.clone(), weight);
 					}
 				}
 			}
@@ -232,13 +310,15 @@ impl<T: Node> Graph<T> {
 		Self(Digraph::new())
 	}
 
-	/// Adds an edge between nodes `a` and `b` with the given `weight`.
-	pub fn insert_edge(&mut self, a: T, b: T, weight: usize) {
+	/// Adds an edge between nodes `a` and `b` with the given `weight` or
+	/// updates the weight if the edge already exists. Returns the previous
+	/// weight, if there was one.
+	pub fn insert_edge(&mut self, a: T, b: T, weight: usize) -> Option<usize> {
 		self.0.insert_edge(a.clone(), b.clone(), weight);
-		self.0.insert_edge(b, a, weight);
+		self.0.insert_edge(b, a, weight)
 	}
 
-	/// Removes any edge between nodes `a` and `b`.
+	/// Removes the edge between nodes `a` and `b`, if there is one.
 	pub fn remove_edge<Q>(&mut self, a: &Q, b: &Q)
 	where
 		T: Borrow<Q>,
@@ -246,6 +326,15 @@ impl<T: Node> Graph<T> {
 	{
 		self.0.remove_edge(a, b);
 		self.0.remove_edge(b, a);
+	}
+
+	/// The weight of the edge from node `from` to node `to`, if any.
+	pub fn weight<Q>(&self, from: &Q, to: &Q) -> Option<usize>
+	where
+		T: Borrow<Q>,
+		Q: Hash + Eq + ?Sized,
+	{
+		self.0.weight(from, to)
 	}
 
 	/// The set of edges (node → weight) from `from`.
@@ -257,9 +346,14 @@ impl<T: Node> Graph<T> {
 		self.0.edges_from(from)
 	}
 
-	/// The set of nodes in the graph. O(|N|+|E|).
-	pub fn get_nodes(&self) -> HashSet<T> {
-		self.0.get_nodes()
+	/// Converts the graph into its set of nodes.
+	pub fn into_nodes(self) -> HashSet<T> {
+		self.0.into_nodes()
+	}
+
+	/// The set of nodes in the graph.
+	pub fn nodes(&self) -> &HashSet<T> {
+		self.0.nodes()
 	}
 
 	/// Consumes the graph to produce a list of its connected components.
@@ -278,10 +372,10 @@ impl<T: Node> Graph<T> {
 	{
 		let mut output = String::new();
 		output += "graph {\n";
-		let mut nodes = Vec::from_iter(self.get_nodes());
+		let mut nodes = Vec::from_iter(self.nodes());
 		nodes.sort();
 		let mut unique_edges = HashSet::new();
-		for node in &nodes {
+		for node in nodes {
 			if let Some(edges) = self.edges_from(node) {
 				for (neighbor, weight) in edges {
 					if !unique_edges.contains(&(neighbor, node, weight)) {
@@ -301,6 +395,16 @@ impl<T: Node> Graph<T> {
 		output
 	}
 
+	/// Uses Dijkstra's algorithm to compute shortest path info from the `start`
+	/// node to an arbitrary node that satisfies `pred`. If no such path exists,
+	/// this returns `None`.
+	pub fn dijkstra<F>(&self, start: T) -> DijkstraResults<T>
+	where
+		F: Fn(&T) -> bool,
+	{
+		self.0.dijkstra(start)
+	}
+
 	/// The shortest distance from `start` to a node that satisfies `pred` or
 	/// `None` if no such node is reachable. Uses Dijkstra's algorithm.
 	pub fn shortest_distance<F>(&self, start: T, pred: F) -> Option<usize>
@@ -311,8 +415,10 @@ impl<T: Node> Graph<T> {
 	}
 
 	/// The shortest distance from each node to each other node. Uses the
-	/// Floyd-Warshall algorithm.
-	pub fn shortest_distances(&self) -> HashMap<T, HashMap<T, usize>> {
+	/// Floyd-Warshall algorithm. The returned digraph will contain an edge from
+	/// each node to each other reachable node, with a weight equal to the
+	/// shortest distance between them.
+	pub fn shortest_distances(&self) -> Digraph<T> {
 		self.0.shortest_distances()
 	}
 }
@@ -391,21 +497,21 @@ mod tests {
 	#[test]
 	fn digraph_shortest_distances() {
 		let d = new_test_digraph().shortest_distances();
-		assert_eq!(d["start"]["start"], 0);
-		assert_eq!(d["start"]["goal"], 3);
-		assert_eq!(d["a"]["c"], 3);
-		assert_eq!(d["goal"]["goal"], 0);
-		assert!(!d["goal"].contains_key("start"));
+		assert_eq!(d.weight("start", "start"), Some(0));
+		assert_eq!(d.weight("start", "goal"), Some(3));
+		assert_eq!(d.weight("a", "c"), Some(3));
+		assert_eq!(d.weight("goal", "goal"), Some(0));
+		assert!(d.weight("goal", "start").is_none());
 	}
 
 	#[test]
 	fn graph_shortest_distances() {
 		let d = new_test_graph().shortest_distances();
-		assert_eq!(d["start"]["start"], 0);
-		assert_eq!(d["start"]["goal"], 3);
-		assert_eq!(d["a"]["c"], 3);
-		assert_eq!(d["goal"]["goal"], 0);
-		assert_eq!(d["goal"]["start"], 3);
+		assert_eq!(d.weight("start", "start"), Some(0));
+		assert_eq!(d.weight("start", "goal"), Some(3));
+		assert_eq!(d.weight("a", "c"), Some(3));
+		assert_eq!(d.weight("goal", "goal"), Some(0));
+		assert_eq!(d.weight("goal", "start"), Some(3));
 	}
 
 	#[test]

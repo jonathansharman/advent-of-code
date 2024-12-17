@@ -35,7 +35,7 @@ pub fn part1() -> usize {
 	graphs
 		.into_iter()
 		.map(|graph| {
-			let region = graph.get_nodes();
+			let region = graph.nodes();
 			let area = region.len();
 			let perimeter: usize =
 				region.iter().map(|coords| plant_perimeters[coords]).sum();
@@ -102,9 +102,9 @@ pub fn part2() -> usize {
 	graphs
 		.into_iter()
 		.map(|graph| {
-			let region = graph.get_nodes();
+			let region = graph.nodes();
 			let area = region.len();
-			area * sides(&region)
+			area * sides(region)
 		})
 		.sum()
 }
