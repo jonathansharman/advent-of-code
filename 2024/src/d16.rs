@@ -129,10 +129,10 @@ pub fn part1() -> usize {
 pub fn part2() -> usize {
 	let Maze { graph, start, end } = read_maze();
 	// Find the lowest-cost paths from the start state to all other states.
-	let dijkstra = graph.dijkstra(start);
+	let paths = graph.one_to_all_shortest_paths(start);
 	// Get the lowest cost of any path to a state with the target end
 	// coordinates, facing any direction.
-	let lowest_cost = dijkstra.shortest_distance(|state| state.coords == end);
+	let lowest_cost = paths.shortest_distance(|state| state.coords == end);
 	graph
 		.nodes()
 		.iter()
@@ -141,12 +141,12 @@ pub fn part2() -> usize {
 			// direction - and thus be reachable with a suboptimal number of
 			// points. Only consider states that are reachable in the globally
 			// lowest number of points.
-			state.coords == end && dijkstra.distance(state) == lowest_cost
+			state.coords == end && paths.distance(state) == lowest_cost
 		})
 		.flat_map(|&state| {
 			// Trace each of these states' shortest paths back to the start, and
 			// disregard their directions.
-			dijkstra
+			paths
 				.backtrace(state)
 				.into_nodes()
 				.into_iter()

@@ -204,47 +204,6 @@ impl<T: Node> Digraph<T> {
 		output
 	}
 
-	/// Uses Dijkstra's algorithm to compute shortest path info from the `start`
-	/// node to all other nodes.
-	pub fn dijkstra(&self, start: T) -> DijkstraResults<T> {
-		let mut parents: HashMap<T, HashSet<T>> = HashMap::new();
-		let mut distances = HashMap::from([(start.clone(), 0)]);
-
-		let mut queue: BinaryHeap<State<T>> = BinaryHeap::from([State {
-			distance: 0,
-			node: start,
-		}]);
-		while let Some(State { distance, node }) = queue.pop() {
-			let Some(edges) = self.edges_from(&node) else {
-				continue;
-			};
-			for (neighbor, weight) in edges {
-				let candidate = distance + weight;
-				let d = distances.get(neighbor);
-				if d.map_or(true, |&d| candidate < d) {
-					queue.push(State {
-						distance: candidate,
-						node: neighbor.clone(),
-					});
-					*parents.entry(neighbor.clone()).or_default() =
-						[node.clone()].into();
-					distances.insert(neighbor.clone(), candidate);
-				} else if d.map_or(true, |&d| candidate == d) {
-					queue.push(State {
-						distance: candidate,
-						node: neighbor.clone(),
-					});
-					parents
-						.entry(neighbor.clone())
-						.or_default()
-						.insert(node.clone());
-					distances.insert(neighbor.clone(), candidate);
-				}
-			}
-		}
-		DijkstraResults { parents, distances }
-	}
-
 	/// The shortest distance from `start` to any node that satisfies `pred` or
 	/// `None` if no such node is reachable. Uses Dijkstra's algorithm.
 	pub fn shortest_distance<F>(&self, start: T, pred: F) -> Option<usize>
@@ -283,11 +242,52 @@ impl<T: Node> Digraph<T> {
 		None
 	}
 
+	/// Uses Dijkstra's algorithm to compute shortest path info from the `start`
+	/// node to all other nodes.
+	pub fn one_to_all_shortest_paths(&self, start: T) -> DijkstraResults<T> {
+		let mut parents: HashMap<T, HashSet<T>> = HashMap::new();
+		let mut distances = HashMap::from([(start.clone(), 0)]);
+
+		let mut queue: BinaryHeap<State<T>> = BinaryHeap::from([State {
+			distance: 0,
+			node: start,
+		}]);
+		while let Some(State { distance, node }) = queue.pop() {
+			let Some(edges) = self.edges_from(&node) else {
+				continue;
+			};
+			for (neighbor, weight) in edges {
+				let candidate = distance + weight;
+				let d = distances.get(neighbor);
+				if d.map_or(true, |&d| candidate < d) {
+					queue.push(State {
+						distance: candidate,
+						node: neighbor.clone(),
+					});
+					*parents.entry(neighbor.clone()).or_default() =
+						[node.clone()].into();
+					distances.insert(neighbor.clone(), candidate);
+				} else if d.map_or(true, |&d| candidate == d) {
+					queue.push(State {
+						distance: candidate,
+						node: neighbor.clone(),
+					});
+					parents
+						.entry(neighbor.clone())
+						.or_default()
+						.insert(node.clone());
+					distances.insert(neighbor.clone(), candidate);
+				}
+			}
+		}
+		DijkstraResults { parents, distances }
+	}
+
 	/// The shortest distance from each node to each other node. Uses the
 	/// Floyd-Warshall algorithm. The returned digraph will contain an edge from
 	/// each node to each other reachable node, with a weight equal to the
 	/// shortest distance between them.
-	pub fn shortest_distances(&self) -> Digraph<T> {
+	pub fn all_to_all_shortest_distances(&self) -> Digraph<T> {
 		let mut distances = self.clone();
 		for node in &self.nodes {
 			distances.insert_edge(node.clone(), node.clone(), 0);
@@ -427,11 +427,11 @@ impl<T: Node> Graph<T> {
 	/// Uses Dijkstra's algorithm to compute shortest path info from the `start`
 	/// node to an arbitrary node that satisfies `pred`. If no such path exists,
 	/// this returns `None`.
-	pub fn dijkstra<F>(&self, start: T) -> DijkstraResults<T>
+	pub fn one_to_all_shortest_paths<F>(&self, start: T) -> DijkstraResults<T>
 	where
 		F: Fn(&T) -> bool,
 	{
-		self.0.dijkstra(start)
+		self.0.one_to_all_shortest_paths(start)
 	}
 
 	/// The shortest distance from `start` to a node that satisfies `pred` or
@@ -447,8 +447,8 @@ impl<T: Node> Graph<T> {
 	/// Floyd-Warshall algorithm. The returned digraph will contain an edge from
 	/// each node to each other reachable node, with a weight equal to the
 	/// shortest distance between them.
-	pub fn shortest_distances(&self) -> Digraph<T> {
-		self.0.shortest_distances()
+	pub fn all_to_all_shortest_distances(&self) -> Digraph<T> {
+		self.0.all_to_all_shortest_distances()
 	}
 }
 
@@ -524,8 +524,8 @@ mod tests {
 	}
 
 	#[test]
-	fn digraph_shortest_distances() {
-		let d = new_test_digraph().shortest_distances();
+	fn digraph_all_to_all_shortest_distances() {
+		let d = new_test_digraph().all_to_all_shortest_distances();
 		assert_eq!(d.weight("start", "start"), Some(0));
 		assert_eq!(d.weight("start", "goal"), Some(3));
 		assert_eq!(d.weight("a", "c"), Some(3));
@@ -534,8 +534,8 @@ mod tests {
 	}
 
 	#[test]
-	fn graph_shortest_distances() {
-		let d = new_test_graph().shortest_distances();
+	fn graph_all_to_all_shortest_distances() {
+		let d = new_test_graph().all_to_all_shortest_distances();
 		assert_eq!(d.weight("start", "start"), Some(0));
 		assert_eq!(d.weight("start", "goal"), Some(3));
 		assert_eq!(d.weight("a", "c"), Some(3));
