@@ -1,5 +1,4 @@
 use aoc::{
-	graph::{self},
 	grid::{Grid, Point, Vector},
 	io::read_lines,
 };
@@ -19,31 +18,29 @@ pub fn part1() -> usize {
 		})
 		.take(BYTE_COUNT)
 		.for_each(|point| grid[point] = false);
-	let graph = graph::from_bool_grid(&grid);
-	graph
-		.shortest_distance(Point::zero(), |&p| {
-			p == Point::new(grid.row_count() - 1, grid.col_count() - 1)
-		})
-		.unwrap()
+	grid.bfs_four(
+		Point::zero(),
+		Point::new(grid.row_count() - 1, grid.col_count() - 1),
+		|coords| !grid[coords],
+	)
+	.unwrap()
 }
 
 pub fn part2() -> String {
-	let grid = Grid::new(GRID_SIZE, true);
-	let mut graph = graph::from_bool_grid(&grid);
+	let mut grid = Grid::new(GRID_SIZE, true);
 	let point = read_lines("input/18.txt")
 		.map(|line| {
 			let (col, row) = line.split_once(',').unwrap();
 			Point::new(row.parse().unwrap(), col.parse().unwrap())
 		})
 		.find(|&point| {
-			for (neighbor, _) in grid.four_neighbors(point) {
-				graph.remove_edge(&point, &neighbor);
-			}
-			graph
-				.shortest_distance(Point::zero(), |&p| {
-					p == Point::new(grid.row_count() - 1, grid.col_count() - 1)
-				})
-				.is_none()
+			grid[point] = false;
+			grid.bfs_four(
+				Point::zero(),
+				Point::new(grid.row_count() - 1, grid.col_count() - 1),
+				|coords| !grid[coords],
+			)
+			.is_none()
 		})
 		.unwrap();
 	format!("{},{}", point.col, point.row)

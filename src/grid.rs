@@ -1,4 +1,5 @@
 use std::{
+	collections::{HashSet, VecDeque},
 	fmt::{Debug, Write},
 	ops::{Index, IndexMut},
 };
@@ -263,6 +264,33 @@ impl<T> Grid<T> {
 		((0..self.size.row).contains(&coords.row)
 			&& (0..self.size.col).contains(&coords.col))
 		.then_some((coords.row * self.size.col + coords.col) as usize)
+	}
+
+	/// Finds the shortest distance from `start` to `end`, moving from tiles to
+	/// their orthogonally adjacent neighbors, treating tiles where `is_wall`
+	/// returns true as walls. For more complex search scenarios, consider using
+	/// the [`graph`](crate::graph) module instead.
+	pub fn bfs_four(
+		&self,
+		start: Point,
+		end: Point,
+		is_wall: impl Fn(Point) -> bool,
+	) -> Option<usize> {
+		let mut queue = VecDeque::from([(start, 0)]);
+		let mut visited = HashSet::new();
+		while let Some((coords, distance)) = queue.pop_front() {
+			if !visited.insert(coords) || is_wall(coords) {
+				continue;
+			}
+			if coords == end {
+				return Some(distance);
+			}
+			queue.extend(
+				self.four_neighbors(coords)
+					.map(|(neighbor, _)| (neighbor, distance + 1)),
+			);
+		}
+		None
 	}
 }
 
