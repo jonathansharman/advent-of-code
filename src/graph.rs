@@ -251,7 +251,36 @@ impl<T: Node> Digraph<T> {
 	where
 		F: Fn(&T) -> bool,
 	{
-		self.dijkstra(start.clone()).shortest_distance(pred)
+		let mut distances: HashMap<T, usize> = HashMap::new();
+		let mut queue: BinaryHeap<State<T>> = BinaryHeap::new();
+		distances.insert(start.clone(), 0);
+		queue.push(State {
+			distance: 0,
+			node: start,
+		});
+		while let Some(State { distance, node }) = queue.pop() {
+			if pred(&node) {
+				return Some(distance);
+			}
+			if distance > distances[&node] {
+				// We've already reached this node by a shorter path.
+				continue;
+			}
+			if let Some(edges) = self.edges_from(&node) {
+				for (neighbor, weight) in edges {
+					let candidate = distance + weight;
+					let d = distances.get(neighbor);
+					if d.map_or(true, |d| candidate < *d) {
+						queue.push(State {
+							distance: candidate,
+							node: neighbor.clone(),
+						});
+						distances.insert(neighbor.clone(), candidate);
+					}
+				}
+			}
+		}
+		None
 	}
 
 	/// The shortest distance from each node to each other node. Uses the
@@ -432,22 +461,22 @@ where
 	}
 }
 
-/// Creates a `Graph` from a grid of open/closed cells. The nodes will be the
-/// row-column coordinates of the open cells, and each node will have weight-1
-/// edges to its open four-directional neighbors.
-pub fn from_bool_grid(grid: &Grid<bool>) -> Graph<Point> {
-	let mut graph = Graph::new();
+/// Creates a `Digraph<Point>` from a grid of open/closed cells. The nodes will
+/// be the row-column coordinates of the open cells, and each node will have
+/// weight-1 edges to its open four-directional neighbors.
+pub fn from_bool_grid(grid: &Grid<bool>) -> Digraph<Point> {
+	let mut digraph = Digraph::new();
 	for (node, &open) in grid {
 		if !open {
 			continue;
 		}
 		for (neighbor, &neighbor_open) in grid.four_neighbors(node) {
 			if neighbor_open {
-				graph.insert_edge(node, neighbor, 1);
+				digraph.insert_edge(node, neighbor, 1);
 			}
 		}
 	}
-	graph
+	digraph
 }
 
 #[cfg(test)]
