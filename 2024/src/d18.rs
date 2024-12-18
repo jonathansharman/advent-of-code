@@ -28,15 +28,17 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> String {
-	let mut grid = Grid::new(GRID_SIZE, true);
+	let grid = Grid::new(GRID_SIZE, true);
+	let mut graph = graph::from_bool_grid(&grid);
 	let point = read_lines("input/18.txt")
 		.map(|line| {
 			let (col, row) = line.split_once(',').unwrap();
 			Point::new(row.parse().unwrap(), col.parse().unwrap())
 		})
 		.find(|&point| {
-			grid[point] = false;
-			let graph = graph::from_bool_grid(&grid);
+			for (neighbor, _) in grid.four_neighbors(point) {
+				graph.remove_edge(&point, &neighbor);
+			}
 			graph
 				.shortest_distance(Point::zero(), |&p| {
 					p == Point::new(grid.row_count() - 1, grid.col_count() - 1)
