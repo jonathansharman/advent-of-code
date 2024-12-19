@@ -97,23 +97,20 @@ pub fn part1() -> String {
 // Note that this solution is based on analysis specific to my puzzle input.
 fn a_candidates(a: u64, out: &[u8]) -> HashSet<u64> {
 	let (&last, rest) = out.split_last().unwrap();
-	(0..8)
-		.filter_map(|word1| {
-			let new_a = a ^ word1;
-			let word2 = (new_a >> (word1 ^ 1)) % 8;
-			let guess = word1 ^ 4 ^ word2;
-			(guess == last as u64).then(|| {
-				if rest.is_empty() {
-					HashSet::from([new_a])
-				} else {
-					a_candidates(new_a << 3, rest)
-				}
-			})
-		})
-		.fold(HashSet::new(), |mut acc, candidates| {
-			acc.extend(candidates);
-			acc
-		})
+	let mut results = HashSet::new();
+	for word1 in 0..8 {
+		let new_a = a ^ word1;
+		let word2 = (new_a >> (word1 ^ 1)) % 8;
+		let guess = word1 ^ 4 ^ word2;
+		if guess == last as u64 {
+			if rest.is_empty() {
+				results.insert(new_a);
+			} else {
+				results.extend(a_candidates(new_a << 3, rest))
+			}
+		}
+	}
+	results
 }
 
 pub fn part2() -> u64 {
