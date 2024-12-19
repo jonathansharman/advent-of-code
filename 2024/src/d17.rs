@@ -120,31 +120,27 @@ pub fn part2() -> u64 {
 
 #[allow(unused)]
 fn print_program(program: &[u8]) {
-	program
-		.iter()
-		.tuples()
-		.enumerate()
-		.for_each(|(i, (&opcode, &operand))| {
-			let combo = || match operand {
-				0..=3 => operand.to_string(),
-				4 => "A".to_string(),
-				5 => "B".to_string(),
-				6 => "C".to_string(),
-				_ => "!!!".to_string(),
-			};
-			let literal = || operand.to_string();
+	for (i, (&opcode, &operand)) in program.iter().tuples().enumerate() {
+		let combo = || match operand {
+			0..=3 => operand.to_string(),
+			4 => "A".to_string(),
+			5 => "B".to_string(),
+			6 => "C".to_string(),
+			_ => "!!!".to_string(),
+		};
+		let literal = || operand.to_string();
 
-			let (opcode, operand) = match opcode {
-				ADV => ("adv", combo()),
-				BXL => ("bxl", literal()),
-				BST => ("bst", combo()),
-				JNZ => ("jnz", literal()),
-				BXC => ("bxc", "_".to_string()),
-				OUT => ("out", combo()),
-				BDV => ("bdv", combo()),
-				CDV => ("cdv", combo()),
-				_ => unreachable!(),
-			};
-			println!("{i}: {opcode} {operand}");
-		});
+		let (opcode, operand) = match opcode {
+			ADV => ("adv", combo()),
+			BXL => ("bxl", literal()),
+			BST => ("bst", combo()),
+			JNZ => ("jnz", literal()),
+			BXC => ("bxc", "_".to_string()),
+			OUT => ("out", combo()),
+			BDV => ("bdv", combo()),
+			CDV => ("cdv", combo()),
+			_ => unreachable!(),
+		};
+		println!("{i}: {opcode} {operand}");
+	}
 }
