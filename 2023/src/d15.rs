@@ -1,15 +1,10 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 512950);
 aoc::test::test_part!(test2, part2, 247153);
 
+const INPUT: &str = include_str!("input/15.txt");
+
 pub fn part1() -> usize {
-	read_lines("input/15.txt")
-		.next()
-		.unwrap()
-		.split(',')
-		.map(hash)
-		.sum()
+	INPUT.lines().next().unwrap().split(',').map(hash).sum()
 }
 
 fn hash(label: &str) -> usize {
@@ -52,7 +47,8 @@ impl LensBoxes {
 }
 
 pub fn part2() -> usize {
-	read_lines("input/15.txt")
+	INPUT
+		.lines()
 		.next()
 		.unwrap()
 		.split(',')

@@ -1,9 +1,10 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 use std::collections::HashMap;
 
 aoc::test::test_part!(test1, part1, 684495);
 aoc::test::test_part!(test2, part2, 152587196649184);
+
+const INPUT: &str = include_str!("input/21.txt");
 
 pub fn part1() -> u32 {
 	let mut spaces = read_starting_spaces();
@@ -34,7 +35,8 @@ pub fn part2() -> u64 {
 }
 
 fn read_starting_spaces() -> [u32; 2] {
-	read_lines("input/21.txt")
+	INPUT
+		.lines()
 		.map(|line| line.chars().last().unwrap().to_digit(10).unwrap())
 		.collect_vec()
 		.try_into()

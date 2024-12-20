@@ -10,8 +10,11 @@ use crate::{io::read_lines, neighbors};
 aoc::test::test_part!(test1, part1, 3733);
 aoc::test::test_part!(test2, part2, 617729401414635);
 
+const INPUT: &str = include_str!("input/21.txt");
+
 fn read_grid() -> Vec<Vec<bool>> {
-	read_lines("input/21.txt")
+	INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c == '.' || c == 'S').collect())
 		.collect()
 }

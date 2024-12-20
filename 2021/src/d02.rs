@@ -1,13 +1,14 @@
-use aoc::io::read_lines;
-
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 2187380);
 aoc::test::test_part!(test2, part2, 2086357770);
 
+const INPUT: &str = include_str!("input/02.txt");
+
 pub fn part1() -> i64 {
 	let (depth, latitude) =
-		read_lines("input/02.txt")
+		INPUT
+			.lines()
 			.map(|line| {
 				let (direction, distance_string) = line
 					.split(' ')
@@ -30,7 +31,8 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let (depth, latitude, _) = read_lines("input/02.txt")
+	let (depth, latitude, _) = INPUT
+		.lines()
 		.map(|line| {
 			let (direction, distance_string) = line
 				.split(' ')

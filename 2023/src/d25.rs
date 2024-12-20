@@ -2,9 +2,11 @@ use crate::{graph::Graph, io::read_lines};
 
 aoc::test::test_part!(test1, part1, 562772);
 
+const INPUT: &str = include_str!("input/25.txt");
+
 pub fn part1() -> usize {
 	let mut graph = Graph::new();
-	for line in read_lines("input/25.txt") {
+	for line in INPUT.lines() {
 		let (node, neighbors) = line.split_once(": ").unwrap();
 		for neighbor in neighbors.split_whitespace() {
 			graph.insert_edge(node.to_owned(), neighbor.to_owned(), 1);

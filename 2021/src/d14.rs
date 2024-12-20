@@ -1,11 +1,11 @@
 use itertools::{Itertools, MinMaxResult};
 
-use aoc::io::read_lines;
-
 use std::collections::HashMap;
 
 aoc::test::test_part!(test1, part1, 2003);
 aoc::test::test_part!(test2, part2, 2276644000111);
+
+const INPUT: &str = include_str!("input/14.txt");
 
 pub fn part1() -> usize {
 	polymerize(10)
@@ -16,8 +16,7 @@ pub fn part2() -> usize {
 }
 
 fn polymerize(steps: usize) -> usize {
-	let mut lines =
-		read_lines("input/14.txt").map(|line| line.as_bytes().to_owned());
+	let mut lines = INPUT.lines().map(|line| line.as_bytes().to_owned());
 	// Insert starting polymer's k-mers.
 	let mut element_counts = HashMap::new();
 	let mut kmers = HashMap::new();

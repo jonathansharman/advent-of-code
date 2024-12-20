@@ -2,10 +2,10 @@ use std::ops::Add;
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 3359);
 aoc::test::test_part!(test2, part2, 4616);
+
+const INPUT: &str = include_str!("input/18.txt");
 
 pub fn part1() -> u64 {
 	read_numbers().reduce(Add::add).unwrap().magnitude()
@@ -20,7 +20,8 @@ pub fn part2() -> u64 {
 }
 
 fn read_numbers() -> impl Iterator<Item = Number> {
-	read_lines("input/18.txt")
+	INPUT
+		.lines()
 		.map(|line| -> Number { parse_number(&mut line.as_bytes()) })
 }
 

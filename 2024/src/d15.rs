@@ -3,15 +3,12 @@ use std::{
 	fmt::{Debug, Write},
 };
 
-use aoc::{
-	grid::{Grid, Point, Vector},
-	io::read_lines,
-};
+use aoc::grid::{Grid, Point, Vector};
 
 aoc::test::test_part!(test1, part1, 1475249);
 aoc::test::test_part!(test2, part2, 1509724);
-// 756814 too low
-// 1196504 too low
+
+const INPUT: &str = include_str!("input/15.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -174,7 +171,7 @@ impl Warehouse {
 }
 
 fn read() -> (Warehouse, Vec<Vector>) {
-	let mut lines = read_lines("input/15.txt");
+	let mut lines = INPUT.lines();
 	let mut robot = Point::zero();
 	let tiles = lines
 		.by_ref()

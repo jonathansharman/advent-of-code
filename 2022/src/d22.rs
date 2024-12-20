@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 77318);
 aoc::test::test_part!(test2, part2, 126017);
+
+const INPUT: &str = include_str!("input/22.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -18,7 +18,8 @@ struct Map {
 
 impl Map {
 	fn load() -> Map {
-		let mut tiles: Vec<Vec<Tile>> = read_lines("input/22.txt")
+		let mut tiles: Vec<Vec<Tile>> = INPUT
+			.lines()
 			.take_while(|line| !line.is_empty())
 			.map(|line| {
 				line.as_bytes()
@@ -54,7 +55,7 @@ enum Action {
 fn get_path() -> Vec<Action> {
 	let mut path = Vec::new();
 	let mut n = String::new();
-	for c in read_lines("input/22.txt").last().unwrap().chars() {
+	for c in INPUT.lines().last().unwrap().chars() {
 		match c {
 			'R' => {
 				if !n.is_empty() {

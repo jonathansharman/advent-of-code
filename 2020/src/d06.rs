@@ -1,13 +1,14 @@
-use aoc::io::read_lines;
 use std::collections::HashSet;
 
 aoc::test::test_part!(test1, part1, 6782);
 aoc::test::test_part!(test2, part2, 3596);
 
+const INPUT: &str = include_str!("input/06.txt");
+
 pub fn part1() -> usize {
 	let mut sum = 0;
 	let mut group = HashSet::new();
-	for line in read_lines("input/06.txt") {
+	for line in INPUT.lines() {
 		if line.is_empty() {
 			sum += group.len();
 			group.clear();
@@ -24,7 +25,7 @@ pub fn part1() -> usize {
 pub fn part2() -> usize {
 	let mut sum = 0;
 	let mut group = Vec::new();
-	let mut process_group = |group: &mut Vec<String>| {
+	let mut process_group = |group: &mut Vec<&str>| {
 		sum += group
 			.iter()
 			.map(|line| HashSet::from_iter(line.chars()))
@@ -35,7 +36,7 @@ pub fn part2() -> usize {
 			.len();
 		group.clear();
 	};
-	for line in read_lines("input/06.txt") {
+	for line in INPUT.lines() {
 		if line.is_empty() {
 			process_group(&mut group);
 		} else {

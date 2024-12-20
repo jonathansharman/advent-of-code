@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 220);
 aoc::test::test_part!(test2, part2, 439);
+
+const INPUT: &str = include_str!("input/19.txt");
 
 #[derive(Clone)]
 enum Rule {
@@ -61,7 +61,7 @@ fn parse_list(s: &str) -> Vec<u8> {
 	s.split_whitespace().map(|s| s.parse().unwrap()).collect()
 }
 
-fn parse_rule_set(lines: &mut impl Iterator<Item = String>) -> RuleSet {
+fn parse_rule_set(lines: &mut impl Iterator<Item = &'static str>) -> RuleSet {
 	RuleSet {
 		rules: lines
 			.map(|line| {
@@ -83,16 +83,16 @@ fn parse_rule_set(lines: &mut impl Iterator<Item = String>) -> RuleSet {
 }
 
 pub fn part1() -> usize {
-	let mut lines = read_lines("input/19.txt");
+	let mut lines = INPUT.lines();
 	let mut rule_set =
 		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
 	rule_set.eval(&0);
 	let rule0 = rule_set.get(&0);
-	lines.filter(|line| rule0.contains(line)).count()
+	lines.filter(|line| rule0.contains(*line)).count()
 }
 
 pub fn part2() -> usize {
-	let mut lines = read_lines("input/19.txt");
+	let mut lines = INPUT.lines();
 	let mut rule_set =
 		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
 	// Replacing rules 8 and 11, rule 0 is equivalent to: 0 -> 42+ 42{n} 31{n}.
@@ -104,7 +104,7 @@ pub fn part2() -> usize {
 	let rule31 = rule_set.get(&31);
 	lines
 		.filter(|line| {
-			let mut l = line.as_str();
+			let mut l = *line;
 			// Count the number of leading 42s.
 			let mut n = 0;
 			loop {

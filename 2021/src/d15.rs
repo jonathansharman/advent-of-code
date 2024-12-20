@@ -1,11 +1,10 @@
-use aoc::{
-	grid::{Grid, Point},
-	io::read_lines,
-};
+use aoc::grid::{Grid, Point};
 use std::collections::BinaryHeap;
 
 aoc::test::test_part!(test1, part1, 435);
 aoc::test::test_part!(test2, part2, 2842);
+
+const INPUT: &str = include_str!("input/15.txt");
 
 pub fn part1() -> u32 {
 	dijkstra(read_maze())
@@ -16,7 +15,8 @@ pub fn part2() -> u32 {
 }
 
 fn read_maze() -> Grid<u32> {
-	read_lines("input/15.txt")
+	INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect()
 }

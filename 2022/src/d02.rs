@@ -1,10 +1,11 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 12458);
 aoc::test::test_part!(test2, part2, 12683);
 
+const INPUT: &str = include_str!("input/02.txt");
+
 pub fn part1() -> i32 {
-	read_lines("input/02.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let opp = (line.as_bytes()[0] - b'A') as i32;
 			let player = (line.as_bytes()[2] - b'X') as i32;
@@ -16,7 +17,8 @@ pub fn part1() -> i32 {
 }
 
 pub fn part2() -> i32 {
-	read_lines("input/02.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let opp = (line.as_bytes()[0] - b'A') as i32;
 			let goal = (line.as_bytes()[2] - b'X') as i32;

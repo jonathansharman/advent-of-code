@@ -1,11 +1,13 @@
 use std::{cmp::Ordering, collections::HashSet};
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 5747);
 aoc::test::test_part!(test2, part2, 5502);
 
-fn get_less(rules: &mut impl Iterator<Item = String>) -> HashSet<(u32, u32)> {
+const INPUT: &str = include_str!("input/05.txt");
+
+fn get_less(
+	rules: &mut impl Iterator<Item = &'static str>,
+) -> HashSet<(u32, u32)> {
 	rules
 		.map_while(|rule| {
 			if rule.is_empty() {
@@ -19,7 +21,7 @@ fn get_less(rules: &mut impl Iterator<Item = String>) -> HashSet<(u32, u32)> {
 }
 
 pub fn part1() -> u32 {
-	let mut lines = read_lines("input/05.txt");
+	let mut lines = INPUT.lines();
 	let less = get_less(lines.by_ref());
 	lines
 		.map(|update| {
@@ -38,7 +40,7 @@ pub fn part1() -> u32 {
 }
 
 pub fn part2() -> u32 {
-	let mut lines = read_lines("input/05.txt");
+	let mut lines = INPUT.lines();
 	let less = get_less(lines.by_ref());
 	lines
 		.map(|update| {

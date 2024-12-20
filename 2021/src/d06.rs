@@ -1,9 +1,11 @@
-use aoc::io::read_comma_separated_integers;
+use aoc::input::parse_comma_separated_items;
 
 use std::collections::{hash_map::Entry, HashMap};
 
 aoc::test::test_part!(test1, part1, 379114);
 aoc::test::test_part!(test2, part2, 1702631502303);
+
+const INPUT: &str = include_str!("input/06.txt");
 
 pub fn part1() -> i64 {
 	fish(80)
@@ -15,7 +17,7 @@ pub fn part2() -> i64 {
 
 pub fn fish(days: i64) -> i64 {
 	let mut cache: HashMap<(i64, i64), i64> = HashMap::new();
-	read_comma_separated_integers("input/06.txt")
+	parse_comma_separated_items(INPUT)
 		.fold(0, |acc, timer| acc + get_count(&mut cache, timer, days))
 }
 

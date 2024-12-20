@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 9684228);
 aoc::test::test_part!(test2, part2, 483844716556);
+
+const INPUT: &str = include_str!("input/11.txt");
 
 pub fn part1() -> usize {
 	solve(1)
@@ -12,7 +12,8 @@ pub fn part2() -> usize {
 }
 
 fn solve(expansion: usize) -> usize {
-	let map = read_lines("input/11.txt")
+	let map = INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c == '#').collect::<Vec<_>>())
 		.collect::<Vec<_>>();
 	let galaxies = map

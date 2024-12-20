@@ -1,12 +1,13 @@
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 5962);
 aoc::test::test_part!(test2, part2, ?);
 
+const INPUT: &str = include_str!("input/20.txt");
+
 pub fn part1() -> isize {
-	let mut numbers = read_lines("input/20.txt")
+	let mut numbers = INPUT
+		.lines()
 		.enumerate()
 		.map(|(i, line)| (i, line.parse::<isize>().unwrap()))
 		.collect_vec();
@@ -35,7 +36,8 @@ pub fn part1() -> isize {
 }
 
 pub fn part2() -> isize {
-	let mut numbers = read_lines("input/20.txt")
+	let mut numbers = INPUT
+		.lines()
 		.enumerate()
 		.map(|(i, line)| (i, 811589153 * line.parse::<isize>().unwrap()))
 		.collect_vec();

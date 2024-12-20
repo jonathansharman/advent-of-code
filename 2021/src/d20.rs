@@ -1,9 +1,10 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 use std::collections::HashMap;
 
 aoc::test::test_part!(test1, part1, 5359);
 aoc::test::test_part!(test2, part2, 12333);
+
+const INPUT: &str = include_str!("input/20.txt");
 
 pub fn part1() -> usize {
 	enhance(2)
@@ -14,7 +15,7 @@ pub fn part2() -> usize {
 }
 
 fn enhance(iter_count: u32) -> usize {
-	let mut lines = read_lines("input/20.txt");
+	let mut lines = INPUT.lines();
 	let algo = read_algo(&mut lines);
 	lines.next();
 	let mut image = read_image(&mut lines);
@@ -51,7 +52,7 @@ fn enhance(iter_count: u32) -> usize {
 	image.into_values().filter(|&x| x).count()
 }
 
-fn read_algo(lines: &mut impl Iterator<Item = String>) -> [bool; 512] {
+fn read_algo(lines: &mut impl Iterator<Item = &'static str>) -> [bool; 512] {
 	lines
 		.next()
 		.unwrap()
@@ -63,7 +64,7 @@ fn read_algo(lines: &mut impl Iterator<Item = String>) -> [bool; 512] {
 }
 
 fn read_image(
-	lines: &mut impl Iterator<Item = String>,
+	lines: &mut impl Iterator<Item = &'static str>,
 ) -> HashMap<(i32, i32), bool> {
 	let mut image = HashMap::new();
 	for (i, line) in lines.enumerate() {

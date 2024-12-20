@@ -1,15 +1,17 @@
 use std::collections::{HashMap, HashSet};
 
-use aoc::io::read_lines;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 269);
 aoc::test::test_part!(test2, part2, 1380);
 
+const INPUT: &str = include_str!("input/17.txt");
+
 type Point3 = [i32; 3];
 
 pub fn part1() -> usize {
-	let mut state: HashSet<Point3> = read_lines("input/17.txt")
+	let mut state: HashSet<Point3> = INPUT
+		.lines()
 		.enumerate()
 		.flat_map(|(i, line)| {
 			line.chars()
@@ -52,7 +54,8 @@ pub fn part1() -> usize {
 type Point4 = [i32; 4];
 
 pub fn part2() -> usize {
-	let mut state: HashSet<Point4> = read_lines("input/17.txt")
+	let mut state: HashSet<Point4> = INPUT
+		.lines()
 		.enumerate()
 		.flat_map(|(i, line)| {
 			line.chars()

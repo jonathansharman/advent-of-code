@@ -1,10 +1,11 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 55971);
 aoc::test::test_part!(test2, part2, 54719);
 
+const INPUT: &str = include_str!("input/01.txt");
+
 pub fn part1() -> usize {
-	read_lines("input/01.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let digits = line
 				.bytes()
@@ -18,7 +19,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	read_lines("input/01.txt")
+	INPUT
+		.lines()
 		.map(|line| 10 * first(line.as_bytes()) + last(line.as_bytes()))
 		.sum()
 }

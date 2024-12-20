@@ -2,10 +2,10 @@ use std::collections::HashSet;
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 484023871);
 aoc::test::test_part!(test2, part2, 46294175);
+
+const INPUT: &str = include_str!("input/05.txt");
 
 struct RangeMap {
 	dst: usize,
@@ -52,7 +52,7 @@ impl Map {
 }
 
 pub fn part1() -> usize {
-	let mut lines = read_lines("input/05.txt");
+	let mut lines = INPUT.lines();
 	let seeds = lines
 		.next()
 		.unwrap()
@@ -93,7 +93,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut lines = read_lines("input/05.txt");
+	let mut lines = INPUT.lines();
 	let seed_ranges = lines
 		.next()
 		.unwrap()

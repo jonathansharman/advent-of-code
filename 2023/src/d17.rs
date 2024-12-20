@@ -3,6 +3,8 @@ use crate::{graph::Digraph, io::read_lines};
 aoc::test::test_part!(test1, part1, 970);
 aoc::test::test_part!(test2, part2, 1149);
 
+const INPUT: &str = include_str!("input/17.txt");
+
 pub fn part1() -> usize {
 	solve(1, 3)
 }
@@ -26,7 +28,8 @@ fn solve(min: usize, max: usize) -> usize {
 }
 
 fn read_costs() -> Vec<Vec<usize>> {
-	read_lines("input/17.txt")
+	INPUT
+		.lines()
 		.map(|line| line.bytes().map(|b| (b - b'0') as usize).collect())
 		.collect()
 }

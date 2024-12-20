@@ -2,10 +2,10 @@ use std::collections::HashSet;
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 592);
 aoc::test::test_part!(test2, part2, 30367);
+
+const INPUT: &str = include_str!("input/14.txt");
 
 fn merge(
 	acc: HashSet<(i32, i32)>,
@@ -15,7 +15,8 @@ fn merge(
 }
 
 pub fn part1() -> usize {
-	let mut walls = read_lines("input/14.txt")
+	let mut walls = INPUT
+		.lines()
 		.map(|line| {
 			line.split(" -> ")
 				.map(|coords| {
@@ -70,7 +71,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut walls = read_lines("input/14.txt")
+	let mut walls = INPUT
+		.lines()
 		.map(|line| {
 			line.split(" -> ")
 				.map(|coords| {

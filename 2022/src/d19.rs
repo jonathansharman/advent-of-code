@@ -1,10 +1,10 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 1395);
 aoc::test::test_part!(test2, part2, 2700);
 
 const TIME_LIMIT_1: usize = 24;
 const TIME_LIMIT_2: usize = 32;
+
+const INPUT: &str = include_str!("input/19.txt");
 
 #[derive(Clone)]
 struct Factory<'b> {
@@ -79,7 +79,8 @@ fn max_geodes(time_limit: usize, blueprint: &Blueprint) -> usize {
 
 pub fn part1() -> usize {
 	let overall_start = std::time::Instant::now();
-	read_lines("input/19.txt")
+	INPUT
+		.lines()
 		.enumerate()
 		.map(|(i, line)| {
 			let start = std::time::Instant::now();
@@ -111,7 +112,8 @@ pub fn part1() -> usize {
 
 pub fn part2() -> usize {
 	let overall_start = std::time::Instant::now();
-	read_lines("input/19.txt")
+	INPUT
+		.lines()
 		.take(3)
 		.map(|line| {
 			let start = std::time::Instant::now();

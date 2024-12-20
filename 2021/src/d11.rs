@@ -1,15 +1,14 @@
-use aoc::{
-	grid::{Grid, Point},
-	io::read_lines,
-};
+use aoc::grid::{Grid, Point};
 
 aoc::test::test_part!(test1, part1, 1757);
 aoc::test::test_part!(test2, part2, 422);
 
+const INPUT: &str = include_str!("input/11.txt");
 const WIDTH: usize = 10;
 
 pub fn part1() -> usize {
-	let mut grid: Grid<u32> = read_lines("input/11.txt")
+	let mut grid: Grid<u32> = INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut flashes = 0;
@@ -41,7 +40,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> i64 {
-	let mut grid: Grid<u32> = read_lines("input/11.txt")
+	let mut grid: Grid<u32> = INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut queue = Vec::new();

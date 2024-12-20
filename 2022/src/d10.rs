@@ -1,5 +1,3 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 14720);
 aoc::test::test_part!(
 	test2,
@@ -14,6 +12,8 @@ aoc::test::test_part!(
 	)
 );
 
+const INPUT: &str = include_str!("input/10.txt");
+
 pub fn part1() -> i32 {
 	let mut cycle = 1;
 	let mut x = 1;
@@ -24,7 +24,7 @@ pub fn part1() -> i32 {
 		}
 		*cycle += 1;
 	};
-	for line in read_lines("input/10.txt") {
+	for line in INPUT.lines() {
 		tick(&mut cycle, &x);
 		if let Some(v) = line.strip_prefix("addx ") {
 			tick(&mut cycle, &x);
@@ -46,7 +46,7 @@ pub fn part2() -> String {
 		display += if col.abs_diff(x) <= 1 { "#" } else { "." };
 		*cycle += 1;
 	};
-	for line in read_lines("input/10.txt") {
+	for line in INPUT.lines() {
 		tick(&mut cycle, x);
 		if let Some(v) = line.strip_prefix("addx ") {
 			tick(&mut cycle, x);

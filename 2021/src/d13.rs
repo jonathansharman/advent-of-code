@@ -1,5 +1,3 @@
-use aoc::io::read_lines;
-
 use itertools::Itertools;
 
 use std::collections::HashSet;
@@ -18,14 +16,16 @@ aoc::test::test_part!(
 	)
 );
 
+const INPUT: &str = include_str!("input/13.txt");
+
 pub fn part1() -> usize {
-	let mut lines = read_lines("input/13.txt");
+	let mut lines = INPUT.lines();
 	let points = read_points(&mut lines);
 	apply_fold(&points, lines.next().unwrap()).len()
 }
 
 pub fn part2() -> String {
-	let mut lines = read_lines("input/13.txt");
+	let mut lines = INPUT.lines();
 	let mut points = read_points(&mut lines);
 	for fold in lines {
 		points = apply_fold(&points, fold);
@@ -47,7 +47,7 @@ pub fn part2() -> String {
 }
 
 fn read_points(
-	lines: &mut impl Iterator<Item = String>,
+	lines: &mut impl Iterator<Item = &'static str>,
 ) -> HashSet<(i32, i32)> {
 	let mut points = HashSet::new();
 	for line in lines {
@@ -64,10 +64,7 @@ fn read_points(
 	points
 }
 
-fn apply_fold(
-	points: &HashSet<(i32, i32)>,
-	fold: String,
-) -> HashSet<(i32, i32)> {
+fn apply_fold(points: &HashSet<(i32, i32)>, fold: &str) -> HashSet<(i32, i32)> {
 	let (axis, fold_coord) = fold
 		.trim_start_matches("fold along ")
 		.split('=')

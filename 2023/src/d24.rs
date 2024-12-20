@@ -6,10 +6,10 @@ use z3::{
 	Config, Context, Solver,
 };
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 11995);
 aoc::test::test_part!(test2, part2, 983620716335751);
+
+const INPUT: &str = include_str!("input/24.txt");
 
 #[derive(Clone, Copy, Debug)]
 struct Vector([i64; 3]);
@@ -72,7 +72,8 @@ impl FromStr for Point {
 }
 
 fn read_hail_stones() -> Vec<(Point, Vector)> {
-	read_lines("input/24.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let (p, v) = line.split_once(" @ ").unwrap();
 			(p.parse().unwrap(), v.parse().unwrap())

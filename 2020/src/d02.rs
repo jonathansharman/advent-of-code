@@ -1,11 +1,13 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 636);
 aoc::test::test_part!(test2, part2, 588);
 
+const INPUT: &str = include_str!("input/02.txt");
+
 pub fn part1() -> usize {
-	read_lines("input/02.txt")
+	INPUT
+		.lines()
 		.filter(|line| {
 			let parts = line.split_whitespace().collect_vec();
 			let (min, max) = parts[0]
@@ -22,7 +24,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	read_lines("input/02.txt")
+	INPUT
+		.lines()
 		.filter(|line| {
 			let parts = line.split_whitespace().collect_vec();
 			let (first, second) = parts[0]

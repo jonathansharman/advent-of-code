@@ -1,14 +1,14 @@
 use std::collections::BinaryHeap;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 74711);
 aoc::test::test_part!(test2, part2, 209481);
+
+const INPUT: &str = include_str!("input/01.txt");
 
 pub fn part1() -> usize {
 	let mut current_total = 0;
 	let mut max_total = 0;
-	for line in read_lines("input/01.txt") {
+	for line in INPUT.lines() {
 		if let Ok(calories) = line.parse::<usize>() {
 			current_total += calories;
 		} else {
@@ -23,7 +23,7 @@ pub fn part2() -> usize {
 	let mut current_total = 0;
 	// Suboptimal since pushes are O(lg n) instead of O(k), but good enough.
 	let mut queue = BinaryHeap::new();
-	for line in read_lines("input/01.txt") {
+	for line in INPUT.lines() {
 		if let Ok(calories) = line.parse::<usize>() {
 			current_total += calories;
 		} else {

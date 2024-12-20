@@ -1,15 +1,15 @@
 use std::collections::HashSet;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 6522);
 aoc::test::test_part!(test2, part2, 2717);
+
+const INPUT: &str = include_str!("input/09.txt");
 
 pub fn part1() -> usize {
 	let mut head = (0, 0);
 	let mut tail = (0, 0);
 	let mut trail = HashSet::from([(0, 0)]);
-	for line in read_lines("input/09.txt") {
+	for line in INPUT.lines() {
 		let (direction, count) = line.split_once(' ').unwrap();
 		let count = count.parse::<u32>().unwrap();
 		for _ in 0..count {
@@ -42,7 +42,7 @@ pub fn part1() -> usize {
 pub fn part2() -> usize {
 	let mut rope = [(0, 0); 10];
 	let mut trail = HashSet::from([(0, 0)]);
-	for line in read_lines("input/09.txt") {
+	for line in INPUT.lines() {
 		let (direction, count) = line.split_once(' ').unwrap();
 		let count = count.parse::<u32>().unwrap();
 		for _ in 0..count {

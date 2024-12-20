@@ -2,10 +2,10 @@ use std::{cmp::Ordering, fmt::Debug};
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 5208);
 aoc::test::test_part!(test2, part2, 25792);
+
+const INPUT: &str = include_str!("input/13.txt");
 
 #[derive(Clone, Eq, PartialEq)]
 enum Value {
@@ -80,7 +80,8 @@ fn parse_number(input: &mut &[u8]) -> Option<Value> {
 }
 
 pub fn part1() -> usize {
-	read_lines("input/13.txt")
+	INPUT
+		.lines()
 		.filter_map(|line| parse_value(&mut line.as_bytes()))
 		.chunks(2)
 		.into_iter()
@@ -97,7 +98,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut packets = read_lines("input/13.txt")
+	let mut packets = INPUT
+		.lines()
 		.filter_map(|line| parse_value(&mut line.as_bytes()))
 		.collect_vec();
 	let div1 = parse_value(&mut "[[2]]".as_bytes()).unwrap();

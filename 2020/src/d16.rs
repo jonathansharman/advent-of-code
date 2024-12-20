@@ -1,9 +1,9 @@
 use std::{collections::HashSet, ops::RangeInclusive};
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 21071);
 aoc::test::test_part!(test2, part2, 3429967441937);
+
+const INPUT: &str = include_str!("input/16.txt");
 
 struct Rule {
 	field: String,
@@ -15,7 +15,7 @@ fn parse_ticket(s: &str) -> Vec<usize> {
 }
 
 pub fn part1() -> usize {
-	let mut lines = read_lines("input/16.txt");
+	let mut lines = INPUT.lines();
 	let rules = lines
 		.by_ref()
 		.map_while(|line| {
@@ -35,10 +35,7 @@ pub fn part1() -> usize {
 			})
 		})
 		.collect::<Vec<_>>();
-	let nearby_tickets = lines
-		.skip(4)
-		.map(|line| parse_ticket(&line))
-		.collect::<Vec<_>>();
+	let nearby_tickets = lines.skip(4).map(parse_ticket).collect::<Vec<_>>();
 	nearby_tickets
 		.into_iter()
 		.map(|nearby_ticket| {
@@ -59,7 +56,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut lines = read_lines("input/16.txt");
+	let mut lines = INPUT.lines();
 	let rules = lines
 		.by_ref()
 		.map_while(|line| {
@@ -79,14 +76,14 @@ pub fn part2() -> usize {
 			})
 		})
 		.collect::<Vec<_>>();
-	let ticket = parse_ticket(&lines.by_ref().nth(1).unwrap());
+	let ticket = parse_ticket(lines.by_ref().nth(1).unwrap());
 	// Map each field index to its set of possible field labels.
 	let all_fields = rules.iter().map(|rule| rule.field.clone()).collect();
 	let mut possible_fields: Vec<HashSet<String>> =
 		std::iter::repeat(all_fields).take(ticket.len()).collect();
 	// Eliminate field possibilities using valid nearby tickets.
 	for line in lines.skip(2) {
-		let ticket = parse_ticket(&line);
+		let ticket = parse_ticket(line);
 		if !ticket.iter().all(|n| {
 			rules
 				.iter()

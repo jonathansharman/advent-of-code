@@ -7,6 +7,8 @@ use crate::{graph::Graph, io::read_lines, neighbors};
 aoc::test::test_part!(test1, part1, 2414);
 aoc::test::test_part!(test2, part2, 6598);
 
+const INPUT: &str = include_str!("input/23.txt");
+
 enum Tile {
 	Path,
 	Forest,
@@ -35,7 +37,8 @@ impl Tile {
 }
 
 pub fn part1() -> usize {
-	let tiles: Vec<Vec<Tile>> = read_lines("input/23.txt")
+	let tiles: Vec<Vec<Tile>> = INPUT
+		.lines()
 		.map(|line| {
 			line.chars()
 				.map(|c| match c {
@@ -112,7 +115,8 @@ pub fn part2() -> usize {
 }
 
 fn read_tiles() -> Vec<Vec<bool>> {
-	read_lines("input/23.txt")
+	INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c != '#').collect())
 		.collect()
 }

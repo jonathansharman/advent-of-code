@@ -3,9 +3,10 @@ use std::collections::{BTreeSet, HashSet};
 aoc::test::test_part!(test1, part1, 3179);
 aoc::test::test_part!(test2, part2, 1567723342929);
 
+const INPUT: &str = include_str!("input/17.txt");
+
 fn get_wind() -> Vec<i64> {
-	std::fs::read_to_string("input/17.txt")
-		.unwrap()
+	INPUT
 		.chars()
 		.map(|c| if c == '>' { 1 } else { -1 })
 		.collect()

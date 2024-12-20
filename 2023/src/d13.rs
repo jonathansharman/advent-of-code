@@ -1,12 +1,12 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 32723);
 aoc::test::test_part!(test2, part2, 34536);
+
+const INPUT: &str = include_str!("input/13.txt");
 
 pub fn part1() -> usize {
 	let mut pattern = Vec::new();
 	let mut result = 0;
-	for line in read_lines("input/13.txt") {
+	for line in INPUT.lines() {
 		if line.is_empty() {
 			result += summary(&pattern);
 			pattern.clear();
@@ -46,7 +46,7 @@ fn summary(pattern: &[Vec<bool>]) -> usize {
 pub fn part2() -> usize {
 	let mut pattern = Vec::new();
 	let mut result = 0;
-	for line in read_lines("input/13.txt") {
+	for line in INPUT.lines() {
 		if line.is_empty() {
 			result += summary2(&pattern);
 			pattern.clear();

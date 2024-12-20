@@ -1,15 +1,17 @@
-use aoc::io::parse_lines;
+use aoc::input::parse_lines;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 1309761972);
 aoc::test::test_part!(test2, part2, 177989832);
 
+const INPUT: &str = include_str!("input/09.txt");
+
 pub fn part1() -> u64 {
-	find_invalid(&parse_lines("input/09.txt").collect_vec())
+	find_invalid(&parse_lines(INPUT).collect_vec())
 }
 
 pub fn part2() -> u64 {
-	let numbers: Vec<u64> = parse_lines("input/09.txt").collect_vec();
+	let numbers: Vec<u64> = parse_lines(INPUT).collect_vec();
 	let target = find_invalid(&numbers);
 	for window_size in 2..numbers.len() {
 		for window in numbers.windows(window_size) {

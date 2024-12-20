@@ -1,11 +1,13 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 591);
 aoc::test::test_part!(test2, part2, 621);
 
+const INPUT: &str = include_str!("input/02.txt");
+
 pub fn part1() -> usize {
-	read_lines("input/02.txt")
+	INPUT
+		.lines()
 		.filter(|report| {
 			report
 				.split_whitespace()
@@ -22,7 +24,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	read_lines("input/02.txt")
+	INPUT
+		.lines()
 		.filter(|report| {
 			let levels: Vec<i32> = report
 				.split_whitespace()

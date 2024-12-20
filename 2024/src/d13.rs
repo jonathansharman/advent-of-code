@@ -1,11 +1,10 @@
-use aoc::{
-	io::read_lines,
-	vector::{Point, Vector},
-};
+use aoc::vector::{Point, Vector};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 29187);
 aoc::test::test_part!(test2, part2, 99968222587852);
+
+const INPUT: &str = include_str!("input/13.txt");
 
 #[derive(Debug)]
 struct Machine {
@@ -15,12 +14,13 @@ struct Machine {
 }
 
 fn read_machines() -> Vec<Machine> {
-	read_lines("input/13.txt")
+	INPUT
+		.lines()
 		.filter(|line| !line.is_empty())
 		.chunks(3)
 		.into_iter()
 		.map(|chunk| {
-			let chunk: Vec<String> = chunk.collect();
+			let chunk: Vec<&str> = chunk.collect();
 
 			let (left, right) = chunk[0]
 				.strip_prefix("Button A: X+")

@@ -1,6 +1,6 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 513);
+
+const INPUT: &str = include_str!("input/23.txt");
 
 pub fn part1() -> i64 {
 	let mut region = read_region();
@@ -44,7 +44,5 @@ pub fn part1() -> i64 {
 }
 
 fn read_region() -> Vec<Vec<u8>> {
-	read_lines("input/25.txt")
-		.map(|line| line.into_bytes())
-		.collect()
+	INPUT.lines().map(|line| line.as_bytes().to_vec()).collect()
 }

@@ -1,12 +1,13 @@
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 1798);
 aoc::test::test_part!(test2, part2, 259308);
 
+const INPUT: &str = include_str!("input/08.txt");
+
 pub fn part1() -> usize {
-	let grid: Vec<Vec<i32>> = read_lines("input/08.txt")
+	let grid: Vec<Vec<i32>> = INPUT
+		.lines()
 		.map(|line| line.as_bytes().iter().map(|c| (c - b'0') as i32).collect())
 		.collect();
 	let (nrows, ncols) = (grid.len(), grid[0].len());
@@ -50,7 +51,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let grid: Vec<Vec<i32>> = read_lines("input/08.txt")
+	let grid: Vec<Vec<i32>> = INPUT
+		.lines()
 		.map(|line| line.as_bytes().iter().map(|c| (c - b'0') as i32).collect())
 		.collect();
 	let (nrows, ncols) = (grid.len(), grid[0].len());

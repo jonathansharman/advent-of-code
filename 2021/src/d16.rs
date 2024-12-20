@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 901);
 aoc::test::test_part!(test2, part2, 110434737925);
+
+const INPUT: &str = include_str!("input/16.txt");
 
 pub fn part1() -> u64 {
 	parse_packet(&mut &read_bits()[..]).version_sum()
@@ -12,7 +12,8 @@ pub fn part2() -> u64 {
 }
 
 fn read_bits() -> Vec<u8> {
-	read_lines("input/16.txt")
+	INPUT
+		.lines()
 		.next()
 		.unwrap()
 		.chars()

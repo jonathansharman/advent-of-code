@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 1921197370);
 aoc::test::test_part!(test2, part2, 1124);
+
+const INPUT: &str = include_str!("input/09.txt");
 
 fn prediction(history: Vec<i64>) -> i64 {
 	let mut rows = vec![history];
@@ -27,7 +27,8 @@ fn prediction(history: Vec<i64>) -> i64 {
 }
 
 pub fn part1() -> i64 {
-	read_lines("input/09.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let history = line
 				.split_whitespace()
@@ -62,7 +63,8 @@ fn prediction2(history: Vec<i64>) -> i64 {
 }
 
 pub fn part2() -> i64 {
-	read_lines("input/09.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let history = line
 				.split_whitespace()

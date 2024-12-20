@@ -1,10 +1,11 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 540);
 aoc::test::test_part!(test2, part2, 872);
 
+const INPUT: &str = include_str!("input/04.txt");
+
 pub fn part1() -> usize {
-	read_lines("input/04.txt")
+	INPUT
+		.lines()
 		.filter(|line| {
 			let bounds: Vec<u32> =
 				line.split(['-', ',']).map(|n| n.parse().unwrap()).collect();
@@ -16,7 +17,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	read_lines("input/04.txt")
+	INPUT
+		.lines()
 		.filter(|line| {
 			let bounds: Vec<u32> =
 				line.split(['-', ',']).map(|n| n.parse().unwrap()).collect();

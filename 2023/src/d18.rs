@@ -1,21 +1,17 @@
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 36679);
 aoc::test::test_part!(test2, part2, 88007104020978);
 
+const INPUT: &str = include_str!("input/18.txt");
+
 pub fn part1() -> i64 {
-	let instructions = read_lines("input/18.txt")
-		.map(parse1)
-		.collect::<Vec<_>>();
+	let instructions = INPUT.lines().map(parse1).collect::<Vec<_>>();
 	area(&instructions)
 }
 
 pub fn part2() -> i64 {
-	let vectors = read_lines("input/18.txt")
-		.map(parse2)
-		.collect::<Vec<_>>();
+	let vectors = INPUT.lines().map(parse2).collect::<Vec<_>>();
 	area(&vectors)
 }
 

@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 2496);
 aoc::test::test_part!(test2, part2, 1967);
+
+const INPUT: &str = include_str!("input/04.txt");
 
 fn xmas(
 	word_search: &[Vec<char>],
@@ -41,9 +41,8 @@ fn xmas(
 }
 
 pub fn part1() -> usize {
-	let word_search: Vec<Vec<char>> = read_lines("input/04.txt")
-		.map(|line| line.chars().collect())
-		.collect();
+	let word_search: Vec<Vec<char>> =
+		INPUT.lines().map(|line| line.chars().collect()).collect();
 	let mut sum = 0;
 	for row in 0..word_search.len() {
 		for col in 0..word_search[row].len() {
@@ -83,9 +82,8 @@ fn x_mas(word_search: &[Vec<char>], row: usize, col: usize) -> bool {
 }
 
 pub fn part2() -> usize {
-	let word_search: Vec<Vec<char>> = read_lines("input/04.txt")
-		.map(|line| line.chars().collect())
-		.collect();
+	let word_search: Vec<Vec<char>> =
+		INPUT.lines().map(|line| line.chars().collect()).collect();
 	let mut sum = 0;
 	for row in 0..word_search.len() - 2 {
 		for col in 0..word_search[row].len() - 2 {

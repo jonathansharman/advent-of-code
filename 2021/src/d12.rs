@@ -1,11 +1,11 @@
-use aoc::io::read_lines;
-
 use itertools::Itertools;
 
 use std::collections::{HashMap, HashSet};
 
 aoc::test::test_part!(test1, part1, 4707);
 aoc::test::test_part!(test2, part2, 130493);
+
+const INPUT: &str = include_str!("input/12.txt");
 
 pub fn part1() -> i64 {
 	read_graph().count_paths_from_start(false)
@@ -24,7 +24,7 @@ struct NamedNode {
 fn read_graph() -> Graph {
 	let mut named_nodes = HashMap::new();
 
-	for line in read_lines("input/12.txt") {
+	for line in INPUT.lines() {
 		let mut add_edge = |a: &str, b: &str| {
 			let n = named_nodes.len();
 			named_nodes

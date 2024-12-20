@@ -1,10 +1,11 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 449550);
 aoc::test::test_part!(test2, part2, 28360140);
 
+const INPUT: &str = include_str!("input/06.txt");
+
 pub fn part1() -> usize {
-	let lines = read_lines("input/06.txt")
+	let lines = INPUT
+		.lines()
 		.map(|line| {
 			line.split_whitespace()
 				.skip(1)
@@ -21,7 +22,8 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let lines = read_lines("input/06.txt")
+	let lines = INPUT
+		.lines()
 		.map(|line| {
 			line.chars()
 				.filter(char::is_ascii_digit)

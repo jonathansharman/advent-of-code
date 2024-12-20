@@ -6,10 +6,10 @@ use std::{
 	hash::{Hash, Hasher},
 };
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 112048);
 aoc::test::test_part!(test2, part2, 105606);
+
+const INPUT: &str = include_str!("input/14.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Tile {
@@ -24,7 +24,8 @@ struct Tiles(Vec<Vec<Tile>>);
 impl Tiles {
 	fn read() -> Tiles {
 		Tiles(
-			read_lines("input/14.txt")
+			INPUT
+				.lines()
 				.map(|line| {
 					line.chars()
 						.map(|c| match c {

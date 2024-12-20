@@ -1,11 +1,11 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 841526);
 aoc::test::test_part!(test2, part2, 4790390);
 
+const INPUT: &str = include_str!("input/03.txt");
+
 pub fn part1() -> i64 {
 	let (bit_len, lines) = {
-		let mut lines = read_lines("input/03.txt").peekable();
+		let mut lines = INPUT.lines().peekable();
 		let len = lines
 			.peek()
 			.expect("expected at least one line of input")
@@ -34,7 +34,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut lines = read_lines("input/03.txt").collect::<Vec<String>>();
+	let mut lines = INPUT.lines().collect::<Vec<_>>();
 
 	// Sort the lines to enable partitioning by bits at each index.
 	lines.sort();
@@ -44,7 +44,7 @@ pub fn part2() -> i64 {
 	oxygen_rating * co2_rating
 }
 
-fn rating(mut slice: &[String], criteria: Criteria) -> i64 {
+fn rating(mut slice: &[&str], criteria: Criteria) -> i64 {
 	let mut bit_idx = 0;
 	while slice.len() > 1 {
 		let partition = slice
@@ -58,7 +58,7 @@ fn rating(mut slice: &[String], criteria: Criteria) -> i64 {
 		};
 		bit_idx += 1;
 	}
-	i64::from_str_radix(&slice[0], 2).expect("could not parse binary")
+	i64::from_str_radix(slice[0], 2).expect("could not parse binary")
 }
 
 #[derive(Clone, Copy)]

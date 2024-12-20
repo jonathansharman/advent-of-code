@@ -1,8 +1,9 @@
-use aoc::io::read_lines;
 use std::collections::{HashMap, HashSet};
 
 aoc::test::test_part!(test1, part1, 248);
 aoc::test::test_part!(test2, part2, 57281);
+
+const INPUT: &str = include_str!("input/07.txt");
 
 pub fn part1() -> usize {
 	let contained_bags = get_contained_bags();
@@ -37,7 +38,8 @@ fn contains_gold(
 }
 
 fn get_contained_bags() -> HashMap<String, Vec<(usize, String)>> {
-	read_lines("input/07.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let tokens: Vec<_> = line.split_whitespace().collect();
 			let outer = format!("{} {}", tokens[0], tokens[1]);

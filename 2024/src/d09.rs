@@ -1,11 +1,12 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 6398608069280);
 aoc::test::test_part!(test2, part2, 6427437134372);
 
+const INPUT: &str = include_str!("input/09.txt");
+
 fn read_disk() -> Vec<Option<usize>> {
 	let mut disk = Vec::new();
-	for (i, size) in read_lines("input/09.txt")
+	for (i, size) in INPUT
+		.lines()
 		.next()
 		.unwrap()
 		.bytes()
@@ -64,7 +65,8 @@ impl Disk {
 	fn read() -> Disk {
 		let mut segments = Vec::new();
 		let mut file_indices = Vec::new();
-		for (i, size) in read_lines("input/09.txt")
+		for (i, size) in include_str!("input/09.txt")
+			.lines()
 			.next()
 			.unwrap()
 			.bytes()

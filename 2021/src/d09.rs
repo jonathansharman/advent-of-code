@@ -1,12 +1,13 @@
-use aoc::io::read_lines;
-
 use std::collections::BinaryHeap;
 
 aoc::test::test_part!(test1, part1, 452);
 aoc::test::test_part!(test2, part2, 1263735);
 
+const INPUT: &str = include_str!("input/09.txt");
+
 pub fn part1() -> u32 {
-	let field: Vec<Vec<u32>> = read_lines("input/09.txt")
+	let field: Vec<Vec<u32>> = INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 	let mut sum = 0;
@@ -26,7 +27,8 @@ pub fn part1() -> u32 {
 }
 
 pub fn part2() -> u32 {
-	let mut field: Vec<Vec<u32>> = read_lines("input/09.txt")
+	let mut field: Vec<Vec<u32>> = INPUT
+		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
 

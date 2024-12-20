@@ -1,9 +1,9 @@
 use std::collections::{HashMap, VecDeque};
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 1020211150);
 aoc::test::test_part!(test2, part2, 238815727638557);
+
+const INPUT: &str = include_str!("input/20.txt");
 
 pub fn part1() -> usize {
 	let mut modules = read_modules();
@@ -101,7 +101,7 @@ fn period(
 /// module name -> (module, destination module names)
 fn read_modules() -> HashMap<String, (Module, Vec<String>)> {
 	let mut modules = HashMap::new();
-	for line in read_lines("input/20.txt") {
+	for line in INPUT.lines() {
 		let (lhs, rhs) = line.split_once(" -> ").unwrap();
 		let dsts: Vec<String> = rhs.split(", ").map(str::to_owned).collect();
 		let (name, module) = if lhs == "broadcaster" {

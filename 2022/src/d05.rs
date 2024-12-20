@@ -2,13 +2,13 @@ use std::collections::VecDeque;
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, "TWSGQHNHL");
 aoc::test::test_part!(test2, part2, "JNRSCDWPP");
 
+const INPUT: &str = include_str!("input/05.txt");
+
 pub fn part1() -> String {
-	let mut lines = read_lines("input/05.txt");
+	let mut lines = INPUT.lines();
 	let mut stacks: [_; 9] = std::array::from_fn(|_| VecDeque::new());
 	loop {
 		let line = lines.next().unwrap();
@@ -39,7 +39,7 @@ pub fn part1() -> String {
 }
 
 pub fn part2() -> String {
-	let mut lines = read_lines("input/05.txt");
+	let mut lines = INPUT.lines();
 	let mut stacks: [_; 9] = std::array::from_fn(|_| VecDeque::new());
 	loop {
 		let line = lines.next().unwrap();

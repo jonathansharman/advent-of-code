@@ -1,17 +1,16 @@
-use aoc::{
-	grid::{Grid, Point, Vector},
-	io::read_lines,
-};
+use aoc::grid::{Grid, Point, Vector};
 
 aoc::test::test_part!(test1, part1, 432);
 aoc::test::test_part!(test2, part2, "56,27");
 
+const INPUT: &str = include_str!("input/18.txt");
 const GRID_SIZE: Vector = Vector::new(71, 71);
 const BYTE_COUNT: usize = 1024;
 
 pub fn part1() -> usize {
 	let mut grid = Grid::new(GRID_SIZE, true);
-	read_lines("input/18.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let (col, row) = line.split_once(',').unwrap();
 			Point::new(row.parse().unwrap(), col.parse().unwrap())
@@ -28,7 +27,8 @@ pub fn part1() -> usize {
 
 pub fn part2() -> String {
 	let mut grid = Grid::new(GRID_SIZE, true);
-	let point = read_lines("input/18.txt")
+	let point = INPUT
+		.lines()
 		.map(|line| {
 			let (col, row) = line.split_once(',').unwrap();
 			Point::new(row.parse().unwrap(), col.parse().unwrap())

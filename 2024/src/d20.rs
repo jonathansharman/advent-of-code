@@ -1,41 +1,47 @@
 use aoc::{
-	graph,
-	grid::{Grid, Point, NORTH, WEST},
-	io::read_lines,
+	graph::{self, DijkstraResults},
+	grid::{Grid, Point, Vector, NORTH, WEST},
 };
 
 aoc::test::test_part!(test1, part1, 1422);
 aoc::test::test_part!(test2, part2, ?);
 
+const INPUT: &str = include_str!("input/20.txt");
 const MIN_SAVINGS: usize = 100;
 
-pub fn part1() -> usize {
-	let mut start = Point::zero();
+struct Maze {
+	grid: Grid<bool>,
+	to_end: DijkstraResults<Point>,
+}
+
+fn read_maze() -> Maze {
 	let mut end = Point::zero();
-	let grid: Grid<bool> = read_lines("input/20.txt")
+	let grid: Grid<bool> = INPUT
+		.lines()
 		.enumerate()
 		.map(|(i, line)| {
 			line.chars()
 				.enumerate()
 				.map(|(j, c)| match c {
-					'S' => {
-						start = (i, j).into();
-						true
-					}
+					'.' | 'S' => true,
 					'E' => {
 						end = (i, j).into();
 						true
 					}
-					'.' => true,
 					_ => false,
 				})
 				.collect()
 		})
 		.collect();
 	let graph = graph::from_bool_grid(&grid);
-	let paths = graph.one_to_all_shortest_paths(end);
+	let to_end = graph.one_to_all_shortest_paths(end);
+	Maze { grid, to_end }
+}
+
+pub fn part1() -> usize {
+	let maze = read_maze();
 	let mut cheats = 0;
-	for (coords, &tile) in &grid {
+	for (coords, &tile) in &maze.grid {
 		// Only consider walls.
 		if tile {
 			continue;
@@ -44,7 +50,9 @@ pub fn part1() -> usize {
 			// Get opposing neighbors.
 			let nc1 = coords + offset;
 			let nc2 = coords - offset;
-			let (Some(&n1), Some(&n2)) = (grid.get(nc1), grid.get(nc2)) else {
+			let (Some(&n1), Some(&n2)) =
+				(maze.grid.get(nc1), maze.grid.get(nc2))
+			else {
 				continue;
 			};
 			// Both neighbors must be open.
@@ -53,7 +61,7 @@ pub fn part1() -> usize {
 			}
 			// Both neighbors must be able to reach the end.
 			let (Some(d1), Some(d2)) =
-				(paths.distance(&nc1), paths.distance(&nc2))
+				(maze.to_end.distance(&nc1), maze.to_end.distance(&nc2))
 			else {
 				continue;
 			};

@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 1949);
 aoc::test::test_part!(test2, part2, 2092);
+
+const INPUT: &str = include_str!("input/08.txt");
 
 pub fn part1() -> i64 {
 	exec(&read_program()).err().unwrap()
@@ -52,7 +52,8 @@ struct Op {
 }
 
 fn read_program() -> Vec<Op> {
-	read_lines("input/08.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let arg = line[4..].parse().unwrap();
 			let code = match &line[..3] {

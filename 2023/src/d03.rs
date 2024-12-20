@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 543867);
 aoc::test::test_part!(test2, part2, 79613331);
+
+const INPUT: &str = include_str!("input/03.txt");
 
 fn neighbor_is_symbol(lines: &[Vec<char>], i: usize, j: usize) -> bool {
 	for (ii, line) in lines.iter().skip(i - 1).take(3).enumerate() {
@@ -18,7 +18,8 @@ fn neighbor_is_symbol(lines: &[Vec<char>], i: usize, j: usize) -> bool {
 }
 
 pub fn part1() -> usize {
-	let mut lines = read_lines("input/03.txt")
+	let mut lines = INPUT
+		.lines()
 		.map(|line| {
 			let mut line = line.chars().collect::<Vec<_>>();
 			line.insert(0, '.');
@@ -68,7 +69,8 @@ fn get_n(line: &[char], mut i: usize) -> Option<u32> {
 }
 
 pub fn part2() -> u32 {
-	let mut lines = read_lines("input/03.txt")
+	let mut lines = INPUT
+		.lines()
 		.map(|line| {
 			let mut line = line.chars().collect::<Vec<_>>();
 			line.insert(0, '.');

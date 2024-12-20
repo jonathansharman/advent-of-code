@@ -1,4 +1,3 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -6,6 +5,8 @@ use std::collections::HashMap;
 
 aoc::test::test_part!(test1, part1, 235);
 aoc::test::test_part!(test2, part2, 194);
+
+const INPUT: &str = include_str!("input/04.txt");
 
 pub fn part1() -> usize {
 	count_valid(has_all_fields)
@@ -20,7 +21,7 @@ type Passport = HashMap<String, String>;
 fn count_valid(valid: impl Fn(&Passport) -> bool) -> usize {
 	let mut valid_count = 0;
 	let mut passport = HashMap::new();
-	for line in read_lines("input/04.txt") {
+	for line in INPUT.lines() {
 		if line.is_empty() {
 			if valid(&passport) {
 				valid_count += 1;

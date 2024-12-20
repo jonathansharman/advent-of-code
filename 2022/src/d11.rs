@@ -2,10 +2,10 @@ use std::collections::VecDeque;
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 62491);
 aoc::test::test_part!(test2, part2, 17408399184);
+
+const INPUT: &str = include_str!("input/11.txt");
 
 #[derive(Debug)]
 enum Op {
@@ -34,7 +34,7 @@ where
 fn read_monkeys_and_worries() -> (Vec<Monkey>, Vec<u64>) {
 	let mut monkeys = Vec::new();
 	let mut worries: Vec<u64> = Vec::new();
-	let mut lines = read_lines("input/11.txt").filter(|line| !line.is_empty());
+	let mut lines = INPUT.lines().filter(|line| !line.is_empty());
 	while lines.next().is_some() {
 		let n = worries.len();
 		worries.append(
@@ -52,13 +52,13 @@ fn read_monkeys_and_worries() -> (Vec<Monkey>, Vec<u64>) {
 		let op = if op_line.ends_with("old") {
 			Op::Square
 		} else if op_line.contains('*') {
-			Op::Times(get_n(&op_line))
+			Op::Times(get_n(op_line))
 		} else {
-			Op::Plus(get_n(&op_line))
+			Op::Plus(get_n(op_line))
 		};
-		let divisor = get_n(&lines.next().unwrap());
-		let if_true = get_n(&lines.next().unwrap());
-		let if_false = get_n(&lines.next().unwrap());
+		let divisor = get_n(lines.next().unwrap());
+		let if_true = get_n(lines.next().unwrap());
+		let if_false = get_n(lines.next().unwrap());
 		monkeys.push(Monkey {
 			items,
 			op,

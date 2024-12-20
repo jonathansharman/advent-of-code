@@ -1,9 +1,9 @@
 use std::{cmp::Ordering, collections::HashMap};
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 7718);
 aoc::test::test_part!(test2, part2, 128741994134728);
+
+const INPUT: &str = include_str!("input/12.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Spring {
@@ -23,7 +23,8 @@ impl Spring {
 }
 
 fn parse_input() -> Vec<(Vec<Spring>, Vec<usize>)> {
-	read_lines("input/12.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let (springs, groups) = line.split_once(' ').unwrap();
 			let springs = springs

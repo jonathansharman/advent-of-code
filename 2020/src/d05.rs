@@ -1,20 +1,23 @@
 use itertools::Itertools;
 
-use aoc::io::read_lines;
 use std::collections::BTreeSet;
 
 aoc::test::test_part!(test1, part1, 904);
 aoc::test::test_part!(test2, part2, 669);
 
+const INPUT: &str = include_str!("input/05.txt");
+
 pub fn part1() -> u32 {
-	read_lines("input/05.txt")
+	INPUT
+		.lines()
 		.map(|line| Pass::from(line.as_bytes()).seat_id())
 		.max()
 		.unwrap_or_default()
 }
 
 pub fn part2() -> u32 {
-	let seat_ids: BTreeSet<_> = read_lines("input/05.txt")
+	let seat_ids: BTreeSet<_> = INPUT
+		.lines()
 		.map(|line| Pass::from(line.as_bytes()).seat_id())
 		.collect();
 	for (current, next) in seat_ids.into_iter().tuple_windows() {

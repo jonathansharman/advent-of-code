@@ -1,4 +1,3 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 use std::{
 	collections::{HashMap, HashSet},
@@ -8,6 +7,8 @@ use std::{
 
 aoc::test::test_part!(test1, part1, 570915);
 aoc::test::test_part!(test2, part2, 1268313839428137);
+
+const INPUT: &str = include_str!("input/22.txt");
 
 pub fn part1() -> usize {
 	let mut cubes = HashMap::new();
@@ -197,7 +198,8 @@ struct RebootStep {
 }
 
 fn read_reboot_steps() -> Vec<RebootStep> {
-	read_lines("input/22.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let on = line.as_bytes()[1] == b'n';
 			let x_str_begin = line.find("x=").unwrap() + 2;

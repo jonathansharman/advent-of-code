@@ -1,7 +1,7 @@
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 45283905029161);
 aoc::test::test_part!(test2, part2, 216975281211165);
+
+const INPUT: &str = include_str!("input/18.txt");
 
 enum Expr {
 	Number(u64),
@@ -57,9 +57,7 @@ fn evaluate(expr: &Expr) -> u64 {
 }
 
 pub fn part1() -> u64 {
-	read_lines("input/18.txt")
-		.map(|line| evaluate(&parse(&line)))
-		.sum()
+	INPUT.lines().map(|line| evaluate(&parse(line))).sum()
 }
 
 fn parse_2(line: &str) -> Expr {
@@ -112,7 +110,5 @@ fn parse_term_2(tokens: &[u8]) -> Option<(Expr, &[u8])> {
 }
 
 pub fn part2() -> u64 {
-	read_lines("input/18.txt")
-		.map(|line| evaluate(&parse_2(&line)))
-		.sum()
+	INPUT.lines().map(|line| evaluate(&parse_2(line))).sum()
 }

@@ -5,10 +5,10 @@ use std::{
 
 use itertools::Itertools;
 
-use aoc::io::read_lines;
-
 aoc::test::test_part!(test1, part1, 454);
 aoc::test::test_part!(test2, part2, 74287);
+
+const INPUT: &str = include_str!("input/22.txt");
 
 struct Point {
 	x: usize,
@@ -37,7 +37,8 @@ impl Brick {
 }
 
 fn read_bricks() -> Vec<Brick> {
-	read_lines("input/22.txt")
+	INPUT
+		.lines()
 		.map(|line| {
 			let (start, end) =
 				line.split('~').map(parse_point).collect_tuple().unwrap();

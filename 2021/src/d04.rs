@@ -1,10 +1,9 @@
-use aoc::io::read_lines;
-
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 38594);
 aoc::test::test_part!(test2, part2, 21184);
 
+const INPUT: &str = include_str!("input/04.txt");
 const SIDE_LENGTH: usize = 5;
 
 struct Board {
@@ -42,7 +41,7 @@ impl Board {
 	}
 }
 
-fn read_numbers(lines: &mut impl Iterator<Item = String>) -> Vec<i64> {
+fn read_numbers(lines: &mut impl Iterator<Item = &'static str>) -> Vec<i64> {
 	lines
 		.next()
 		.expect("missing first line")
@@ -51,7 +50,7 @@ fn read_numbers(lines: &mut impl Iterator<Item = String>) -> Vec<i64> {
 		.collect()
 }
 
-fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
+fn read_boards(lines: &mut impl Iterator<Item = &'static str>) -> Vec<Board> {
 	lines
 		.chunks(SIDE_LENGTH + 1)
 		.into_iter()
@@ -77,7 +76,7 @@ fn read_boards(lines: &mut impl Iterator<Item = String>) -> Vec<Board> {
 }
 
 pub fn part1() -> i64 {
-	let mut lines = read_lines("input/04.txt");
+	let mut lines = INPUT.lines();
 	let numbers = read_numbers(&mut lines);
 	let mut boards = read_boards(&mut lines);
 
@@ -93,7 +92,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut lines = read_lines("input/04.txt");
+	let mut lines = INPUT.lines();
 	let numbers = read_numbers(&mut lines);
 	let mut boards = read_boards(&mut lines);
 

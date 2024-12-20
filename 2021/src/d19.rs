@@ -1,9 +1,10 @@
-use aoc::io::read_lines;
 use itertools::Itertools;
 use std::{collections::HashSet, hash::Hash, ops::Index};
 
 aoc::test::test_part!(test1, part1, 357);
 aoc::test::test_part!(test2, part2, 12317);
+
+const INPUT: &str = include_str!("input/19.txt");
 
 pub fn part1() -> usize {
 	let mut scanners = read_scanners();
@@ -57,7 +58,7 @@ pub fn part2() -> i32 {
 }
 
 fn read_scanners() -> Vec<Scanner> {
-	let mut lines = read_lines("input/19.txt");
+	let mut lines = INPUT.lines();
 	let mut scanners = Vec::new();
 	while lines.next().is_some() {
 		scanners.push(read_scanner(&mut lines));
@@ -65,7 +66,7 @@ fn read_scanners() -> Vec<Scanner> {
 	scanners
 }
 
-fn read_scanner(lines: &mut impl Iterator<Item = String>) -> Scanner {
+fn read_scanner(lines: &mut impl Iterator<Item = &'static str>) -> Scanner {
 	let mut readings = HashSet::new();
 	loop {
 		match lines.next() {
