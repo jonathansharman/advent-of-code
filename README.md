@@ -14,9 +14,9 @@ cargo test d01::test1 --release -- --nocapture
 Leave out `test1`/`d01::test1` to run both parts/the entire year.
 
 Note that puzzle inputs are not checked into the repo. You'll need to manually
-place input files under `2020/src/input/01.txt`, etc. Since I `include_str!` the
-inputs into the source, solutions won't even compile until there's at least an
-empty input file for each day.
+place an `input.txt` in each day's module, e.g. `2020/src/d01/input.txt`. Since
+these inputs are `include_str!`'d into the source code, a year's crate won't
+even compile unless there's at least an empty input file present for each day.
 
 Note also that not all of my solutions are general - some only work for my
 personal input file.
