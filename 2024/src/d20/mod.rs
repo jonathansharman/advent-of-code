@@ -7,7 +7,8 @@ aoc::test::test_part!(test1, part1, 1422);
 aoc::test::test_part!(test2, part2, ?);
 
 const INPUT: &str = include_str!("input.txt");
-const MIN_SAVINGS: usize = 76;
+const MIN_SAVINGS: usize = 100;
+const MAX_CHEAT_TIME: i64 = 20;
 
 struct Maze {
 	grid: Grid<bool>,
@@ -41,9 +42,9 @@ fn read_maze() -> Maze {
 pub fn part1() -> usize {
 	let maze = read_maze();
 	let mut cheats = 0;
-	for (coords, &tile) in &maze.grid {
+	for (coords, &open) in &maze.grid {
 		// Only consider walls.
-		if tile {
+		if open {
 			continue;
 		}
 		for offset in [NORTH, WEST] {
@@ -75,42 +76,37 @@ pub fn part1() -> usize {
 	cheats
 }
 
-const MAX_CHEAT_TIME: i64 = 20;
-
 pub fn part2() -> usize {
 	let maze = read_maze();
 	let mut cheats = 0;
-	for (coords, &tile) in &maze.grid {
+	for (start, &start_open) in &maze.grid {
 		// Only consider floors.
-		if !tile {
+		if !start_open {
 			continue;
 		}
 		// This tile must be able to reach the end.
-		let Some(d1) = maze.to_end.distance(&coords) else {
+		let Some(d1) = maze.to_end.distance(&start) else {
 			continue;
 		};
 		// Consider all tiles reachable in up to the max amount of cheat time.
 		for row_offset in -MAX_CHEAT_TIME..=MAX_CHEAT_TIME {
-			let max_col_offset = MAX_CHEAT_TIME.abs_diff(row_offset) as i64;
+			let max_col_offset = MAX_CHEAT_TIME - row_offset.abs();
 			for col_offset in -max_col_offset..=max_col_offset {
-				let nc = coords + Vector::new(row_offset, col_offset);
-				let Some(n) = maze.grid.get(nc) else {
+				let end = start + Vector::new(row_offset, col_offset);
+				let Some(end_open) = maze.grid.get(end) else {
 					continue;
 				};
 				// Must land on a floor tile.
-				if !n {
+				if !end_open {
 					continue;
 				}
 				// The other tile must be able to reach the end.
-				let Some(d2) = maze.to_end.distance(&nc) else {
+				let Some(d2) = maze.to_end.distance(&end) else {
 					continue;
 				};
-				// The difference must meet the minimum required savings.
-				if d1.saturating_sub(d2) >= MIN_SAVINGS {
-					println!(
-						"{coords:?} to {nc:?} saves {}",
-						d1.saturating_sub(d2)
-					);
+				// The time savings must meet the minimum required.
+				let d = (row_offset.abs() + col_offset.abs()) as usize;
+				if d1.saturating_sub(d2).saturating_sub(d) >= MIN_SAVINGS {
 					cheats += 1;
 				}
 			}
