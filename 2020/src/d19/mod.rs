@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 220);
 aoc::test::test_part!(test2, part2, 439);
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone)]
 enum Rule {
@@ -83,7 +83,7 @@ fn parse_rule_set(lines: &mut impl Iterator<Item = &'static str>) -> RuleSet {
 }
 
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let mut rule_set =
 		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
 	rule_set.eval(&0);
@@ -92,7 +92,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let mut rule_set =
 		parse_rule_set(&mut lines.by_ref().take_while(|line| !line.is_empty()));
 	// Replacing rules 8 and 11, rule 0 is equivalent to: 0 -> 42+ 42{n} 31{n}.

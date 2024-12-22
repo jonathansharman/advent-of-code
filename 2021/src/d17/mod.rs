@@ -1,9 +1,8 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 5253);
 aoc::test::test_part!(test2, part2, 1770);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> i64 {
 	let target = read_target();
@@ -100,7 +99,7 @@ impl Trajectory {
 }
 
 fn read_target() -> Target {
-	let input = INPUT.lines().next().unwrap();
+	let input = input!().lines().next().unwrap();
 	let x_start = input.find("x=").unwrap() + 2;
 	let x_end = input.find(", y=").unwrap();
 	let y_start = x_end + 4;

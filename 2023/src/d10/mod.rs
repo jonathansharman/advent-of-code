@@ -3,7 +3,6 @@ use std::collections::HashSet;
 aoc::test::test_part!(test1, part1, 6875);
 aoc::test::test_part!(test2, part2, 471);
 
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Debug)]
 enum Pipe {
@@ -78,7 +77,7 @@ impl From<char> for Pipe {
 }
 
 pub fn part1() -> usize {
-	let mut pipes = INPUT
+	let mut pipes = input!()
 		.lines()
 		.map(|line| line.chars().map(|c| c.into()).collect::<Vec<Pipe>>())
 		.collect::<Vec<_>>();
@@ -123,7 +122,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut pipes = INPUT
+	let mut pipes = input!()
 		.lines()
 		.map(|line| line.chars().map(|c| c.into()).collect::<Vec<Pipe>>())
 		.collect::<Vec<_>>();

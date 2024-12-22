@@ -5,7 +5,6 @@ use itertools::Itertools;
 aoc::test::test_part!(test1, part1, 484023871);
 aoc::test::test_part!(test2, part2, 46294175);
 
-const INPUT: &str = include_str!("input.txt");
 
 struct RangeMap {
 	dst: usize,
@@ -52,7 +51,7 @@ impl Map {
 }
 
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let seeds = lines
 		.next()
 		.unwrap()
@@ -93,7 +92,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let seed_ranges = lines
 		.next()
 		.unwrap()

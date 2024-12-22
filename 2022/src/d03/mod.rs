@@ -1,11 +1,10 @@
 use std::collections::HashSet;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 8088);
 aoc::test::test_part!(test2, part2, 2522);
-
-const INPUT: &str = include_str!("input.txt");
 
 fn priority(item: &u8) -> u32 {
 	if item.is_ascii_uppercase() {
@@ -16,7 +15,7 @@ fn priority(item: &u8) -> u32 {
 }
 
 pub fn part1() -> u32 {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let line = line.as_bytes();
@@ -29,7 +28,7 @@ pub fn part1() -> u32 {
 }
 
 pub fn part2() -> u32 {
-	INPUT
+	input!()
 		.lines()
 		.chunks(3)
 		.into_iter()

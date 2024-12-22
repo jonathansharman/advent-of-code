@@ -1,13 +1,12 @@
+use aoc::input;
 use regex::Regex;
 
 aoc::test::test_part!(test1, part1, 170068701);
 aoc::test::test_part!(test2, part2, 78683433);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> usize {
 	let regex = Regex::new(r"mul\(([1-9]\d*),([1-9]\d*)\)").unwrap();
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let mut sum = 0;
@@ -25,7 +24,7 @@ pub fn part2() -> usize {
 	let regex =
 		Regex::new(r"do\(\)|don't\(\)|mul\(([1-9]\d*),([1-9]\d*)\)").unwrap();
 	let mut enabled = true;
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let mut sum = 0;

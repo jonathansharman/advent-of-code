@@ -9,7 +9,6 @@ use z3::{
 aoc::test::test_part!(test1, part1, 11995);
 aoc::test::test_part!(test2, part2, 983620716335751);
 
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy, Debug)]
 struct Vector([i64; 3]);
@@ -72,7 +71,7 @@ impl FromStr for Point {
 }
 
 fn read_hail_stones() -> Vec<(Point, Vector)> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let (p, v) = line.split_once(" @ ").unwrap();

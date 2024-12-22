@@ -1,10 +1,10 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 540);
 aoc::test::test_part!(test2, part2, 872);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> usize {
-	INPUT
+	input!()
 		.lines()
 		.filter(|line| {
 			let bounds: Vec<u32> =
@@ -17,7 +17,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	INPUT
+	input!()
 		.lines()
 		.filter(|line| {
 			let bounds: Vec<u32> =

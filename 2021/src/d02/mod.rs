@@ -1,13 +1,12 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 2187380);
 aoc::test::test_part!(test2, part2, 2086357770);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> i64 {
 	let (depth, latitude) =
-		INPUT
+		input!()
 			.lines()
 			.map(|line| {
 				let (direction, distance_string) = line
@@ -31,7 +30,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let (depth, latitude, _) = INPUT
+	let (depth, latitude, _) = input!()
 		.lines()
 		.map(|line| {
 			let (direction, distance_string) = line

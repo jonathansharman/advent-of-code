@@ -1,12 +1,12 @@
 use aoc::{
 	graph::{self, DijkstraResults},
 	grid::{Grid, Point, Vector, NORTH, WEST},
+	input,
 };
 
 aoc::test::test_part!(test1, part1, 1422);
 aoc::test::test_part!(test2, part2, ?);
 
-const INPUT: &str = include_str!("input.txt");
 const MIN_SAVINGS: usize = 100;
 const MAX_CHEAT_TIME: i64 = 20;
 
@@ -17,7 +17,7 @@ struct Maze {
 
 fn read_maze() -> Maze {
 	let mut end = Point::zero();
-	let grid: Grid<bool> = INPUT
+	let grid: Grid<bool> = input!()
 		.lines()
 		.enumerate()
 		.map(|(i, line)| {

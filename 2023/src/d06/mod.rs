@@ -1,10 +1,9 @@
 aoc::test::test_part!(test1, part1, 449550);
 aoc::test::test_part!(test2, part2, 28360140);
 
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
-	let lines = INPUT
+	let lines = input!()
 		.lines()
 		.map(|line| {
 			line.split_whitespace()
@@ -22,7 +21,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let lines = INPUT
+	let lines = input!()
 		.lines()
 		.map(|line| {
 			line.chars()

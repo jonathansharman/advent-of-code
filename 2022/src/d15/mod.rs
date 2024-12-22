@@ -1,9 +1,8 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 4748135);
 aoc::test::test_part!(test2, part2, 13743542639657);
-
-const INPUT: &str = include_str!("input.txt");
 
 struct Area {
 	x: i64,
@@ -75,7 +74,7 @@ impl Range {
 }
 
 fn ranges_points(target_y: i64) -> (Vec<Range>, Vec<(i64, i64)>) {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let (sensor, beacon) = line.split_once(':').unwrap();
@@ -146,7 +145,7 @@ pub fn part1() -> usize {
 }
 
 fn get_areas() -> Vec<Area> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let (sensor, beacon) = line.split_once(':').unwrap();

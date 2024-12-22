@@ -3,13 +3,11 @@ use std::collections::HashSet;
 use aoc::{
 	graph::Digraph,
 	grid::{Point, Vector, COMPASS, EAST},
-	input::ParseGrid,
+	input::{input, ParseGrid},
 };
 
 aoc::test::test_part!(test1, part1, 78428);
 aoc::test::test_part!(test2, part2, 463);
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy)]
 enum Tile {
@@ -45,7 +43,8 @@ struct Maze {
 
 fn read_maze() -> Maze {
 	let grid =
-		INPUT.parse_grid(|c| if c == '#' { Tile::Wall } else { Tile::Floor });
+		input!()
+			.parse_grid(|c| if c == '#' { Tile::Wall } else { Tile::Floor });
 
 	let start = State {
 		coords: Point {

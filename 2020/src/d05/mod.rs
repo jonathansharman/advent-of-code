@@ -1,3 +1,4 @@
+use aoc::input;
 use itertools::Itertools;
 
 use std::collections::BTreeSet;
@@ -5,10 +6,8 @@ use std::collections::BTreeSet;
 aoc::test::test_part!(test1, part1, 904);
 aoc::test::test_part!(test2, part2, 669);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> u32 {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| Pass::from(line.as_bytes()).seat_id())
 		.max()
@@ -16,7 +15,7 @@ pub fn part1() -> u32 {
 }
 
 pub fn part2() -> u32 {
-	let seat_ids: BTreeSet<_> = INPUT
+	let seat_ids: BTreeSet<_> = input!()
 		.lines()
 		.map(|line| Pass::from(line.as_bytes()).seat_id())
 		.collect();

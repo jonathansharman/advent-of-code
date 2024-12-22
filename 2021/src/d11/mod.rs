@@ -1,13 +1,15 @@
-use aoc::grid::{Grid, Point};
+use aoc::{
+	grid::{Grid, Point},
+	input,
+};
 
 aoc::test::test_part!(test1, part1, 1757);
 aoc::test::test_part!(test2, part2, 422);
 
-const INPUT: &str = include_str!("input.txt");
 const WIDTH: usize = 10;
 
 pub fn part1() -> usize {
-	let mut grid: Grid<u32> = INPUT
+	let mut grid: Grid<u32> = input!()
 		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();
@@ -40,7 +42,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> i64 {
-	let mut grid: Grid<u32> = INPUT
+	let mut grid: Grid<u32> = input!()
 		.lines()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
 		.collect();

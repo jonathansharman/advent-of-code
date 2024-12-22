@@ -1,15 +1,14 @@
 use std::collections::HashMap;
 
+use aoc::input;
 use itertools::Itertools;
 use regex::Regex;
 
 aoc::test::test_part!(test1, part1, 340);
 aoc::test::test_part!(test2, part2, 717561822679428);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let patterns = lines.next().unwrap().split(", ").join("|");
 	let regex = Regex::new(&format!("^({patterns})+$",)).unwrap();
 	lines.skip(1).filter(|towel| regex.is_match(towel)).count()
@@ -36,7 +35,7 @@ fn combos<'a>(
 }
 
 pub fn part2() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let patterns: Vec<String> = lines
 		.next()
 		.unwrap()

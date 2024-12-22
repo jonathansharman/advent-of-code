@@ -1,9 +1,9 @@
 use std::{collections::HashSet, ops::RangeInclusive};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 21071);
 aoc::test::test_part!(test2, part2, 3429967441937);
-
-const INPUT: &str = include_str!("input.txt");
 
 struct Rule {
 	field: String,
@@ -15,7 +15,7 @@ fn parse_ticket(s: &str) -> Vec<usize> {
 }
 
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let rules = lines
 		.by_ref()
 		.map_while(|line| {
@@ -56,7 +56,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let rules = lines
 		.by_ref()
 		.map_while(|line| {

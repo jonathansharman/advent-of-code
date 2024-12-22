@@ -1,14 +1,12 @@
-use aoc::input::ParseCommaSeparated;
+use aoc::input::{input, ParseCommaSeparated};
 
 use itertools::{Itertools, MinMaxResult};
 
 aoc::test::test_part!(test1, part1, 343605);
 aoc::test::test_part!(test2, part2, 96744904);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> i64 {
-	let crabs = INPUT.parse_comma_separated().collect::<Vec<i64>>();
+	let crabs = input!().parse_comma_separated().collect::<Vec<i64>>();
 	crabs
 		.iter()
 		.map(|crab1| {
@@ -21,7 +19,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let crabs = INPUT.parse_comma_separated().collect::<Vec<i64>>();
+	let crabs = input!().parse_comma_separated().collect::<Vec<i64>>();
 	let (&min, &max) = match crabs.iter().minmax() {
 		MinMaxResult::NoElements => panic!(),
 		MinMaxResult::OneElement(only) => (only, only),

@@ -9,7 +9,6 @@ use std::{
 aoc::test::test_part!(test1, part1, 112048);
 aoc::test::test_part!(test2, part2, 105606);
 
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Tile {
@@ -24,7 +23,7 @@ struct Tiles(Vec<Vec<Tile>>);
 impl Tiles {
 	fn read() -> Tiles {
 		Tiles(
-			INPUT
+			input!()
 				.lines()
 				.map(|line| {
 					line.chars()

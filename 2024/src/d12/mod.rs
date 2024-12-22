@@ -3,15 +3,17 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 use aoc::{
 	graph::Graph,
 	grid::{Grid, Point, Vector},
+	input,
 };
 
 aoc::test::test_part!(test1, part1, 1437300);
 aoc::test::test_part!(test2, part2, 849332);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn read_grid() -> Grid<char> {
-	INPUT.lines().map(|line| line.chars().collect()).collect()
+	input!()
+		.lines()
+		.map(|line| line.chars().collect())
+		.collect()
 }
 
 pub fn part1() -> usize {

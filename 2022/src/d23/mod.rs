@@ -1,11 +1,10 @@
 use std::collections::{HashMap, HashSet};
 
+use aoc::input;
 use itertools::{Itertools, MinMaxResult};
 
 aoc::test::test_part!(test1, part1, 4068);
 aoc::test::test_part!(test2, part2, 968);
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Coords {
@@ -15,7 +14,7 @@ struct Coords {
 
 fn get_elves() -> HashSet<Coords> {
 	let mut elves = HashSet::new();
-	for (row, line) in INPUT.lines().enumerate() {
+	for (row, line) in input!().lines().enumerate() {
 		for (col, c) in line.chars().enumerate() {
 			if c == '#' {
 				elves.insert(Coords {

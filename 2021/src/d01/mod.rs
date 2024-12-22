@@ -1,13 +1,11 @@
-use aoc::input::ParseLines;
+use aoc::input::{input, ParseLines};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 1162);
 aoc::test::test_part!(test2, part2, 1190);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> usize {
-	INPUT
+	input!()
 		.parse_lines()
 		.tuple_windows::<(u32, u32)>()
 		.filter(|(prev, next)| prev < next)
@@ -15,7 +13,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	INPUT
+	input!()
 		.parse_lines()
 		.tuple_windows::<(u32, u32, u32)>()
 		.map(|(first, second, third)| first + second + third)

@@ -3,12 +3,11 @@ use std::collections::HashSet;
 use aoc::{
 	graph::Digraph,
 	grid::{Grid, Point},
+	input,
 };
 
 aoc::test::test_part!(test1, part1, 688);
 aoc::test::test_part!(test2, part2, 1459);
-
-const INPUT: &str = include_str!("input.txt");
 
 struct Map {
 	trails: Digraph<Point>,
@@ -31,7 +30,7 @@ impl Map {
 }
 
 fn read_map() -> Map {
-	let grid: Grid<_> = INPUT
+	let grid: Grid<_> = input!()
 		.lines()
 		.map(|line| line.bytes().map(|b| b - b'0').collect())
 		.collect();

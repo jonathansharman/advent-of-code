@@ -1,11 +1,10 @@
 use std::collections::VecDeque;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 62491);
 aoc::test::test_part!(test2, part2, 17408399184);
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Debug)]
 enum Op {
@@ -34,7 +33,7 @@ where
 fn read_monkeys_and_worries() -> (Vec<Monkey>, Vec<u64>) {
 	let mut monkeys = Vec::new();
 	let mut worries: Vec<u64> = Vec::new();
-	let mut lines = INPUT.lines().filter(|line| !line.is_empty());
+	let mut lines = input!().lines().filter(|line| !line.is_empty());
 	while lines.next().is_some() {
 		let n = worries.len();
 		worries.append(

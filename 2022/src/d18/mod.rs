@@ -1,14 +1,13 @@
 use std::collections::HashSet;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 3396);
 aoc::test::test_part!(test2, part2, 2044);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn get_drop() -> HashSet<[i32; 3]> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			line.split(',')

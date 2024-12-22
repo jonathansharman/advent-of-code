@@ -1,11 +1,10 @@
 use std::collections::HashSet;
 
+use aoc::input;
 use rayon::prelude::*;
 
 aoc::test::test_part!(test1, part1, 5067);
 aoc::test::test_part!(test2, part2, 1793);
-
-const INPUT: &str = include_str!("input.txt");
 
 type Point = (i32, i32);
 type Dir = (i32, i32);
@@ -14,7 +13,7 @@ type Path = HashSet<(Dir, Point)>;
 
 fn read() -> (Tiles, Point) {
 	let mut guard: Point = (0, 0);
-	let tiles: Vec<Vec<char>> = INPUT
+	let tiles: Vec<Vec<char>> = input!()
 		.lines()
 		.enumerate()
 		.map(|(i, line)| {

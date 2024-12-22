@@ -5,7 +5,6 @@ use itertools::Itertools;
 aoc::test::test_part!(test1, part1, 250474325);
 aoc::test::test_part!(test2, part2, 248909434);
 
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 enum Type {
@@ -61,7 +60,7 @@ fn get_type(hand: &[Rank]) -> Type {
 }
 
 pub fn part1() -> usize {
-	let mut hands_and_bids = INPUT
+	let mut hands_and_bids = input!()
 		.lines()
 		.map(|line| {
 			let (hand, bid) = line.split_once(' ').unwrap();
@@ -160,7 +159,7 @@ fn get_type2(hand: &[Rank2]) -> Type {
 }
 
 pub fn part2() -> usize {
-	let mut hands_and_bids = INPUT
+	let mut hands_and_bids = input!()
 		.lines()
 		.map(|line| {
 			let (hand, bid) = line.split_once(' ').unwrap();

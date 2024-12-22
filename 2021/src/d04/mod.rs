@@ -1,9 +1,9 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 38594);
 aoc::test::test_part!(test2, part2, 21184);
 
-const INPUT: &str = include_str!("input.txt");
 const SIDE_LENGTH: usize = 5;
 
 struct Board {
@@ -76,7 +76,7 @@ fn read_boards(lines: &mut impl Iterator<Item = &'static str>) -> Vec<Board> {
 }
 
 pub fn part1() -> i64 {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let numbers = read_numbers(&mut lines);
 	let mut boards = read_boards(&mut lines);
 
@@ -92,7 +92,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let numbers = read_numbers(&mut lines);
 	let mut boards = read_boards(&mut lines);
 

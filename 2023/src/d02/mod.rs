@@ -1,7 +1,6 @@
 aoc::test::test_part!(test1, part1, 2237);
 aoc::test::test_part!(test2, part2, 66681);
 
-const INPUT: &str = include_str!("input.txt");
 
 struct Game {
 	id: usize,
@@ -45,7 +44,7 @@ fn parse_game(line: &str) -> Game {
 }
 
 pub fn part1() -> usize {
-	INPUT
+	input!()
 		.lines()
 		.filter_map(|line| {
 			let game = parse_game(&line);
@@ -60,7 +59,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let game = parse_game(&line);

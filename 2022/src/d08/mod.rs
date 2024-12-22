@@ -1,12 +1,11 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 1798);
 aoc::test::test_part!(test2, part2, 259308);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> usize {
-	let grid: Vec<Vec<i32>> = INPUT
+	let grid: Vec<Vec<i32>> = input!()
 		.lines()
 		.map(|line| line.as_bytes().iter().map(|c| (c - b'0') as i32).collect())
 		.collect();
@@ -51,7 +50,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let grid: Vec<Vec<i32>> = INPUT
+	let grid: Vec<Vec<i32>> = input!()
 		.lines()
 		.map(|line| line.as_bytes().iter().map(|c| (c - b'0') as i32).collect())
 		.collect();

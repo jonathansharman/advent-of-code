@@ -1,16 +1,15 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 323613);
 aoc::test::test_part!(test2, part2, 3103006161);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> i64 {
-	INPUT.lines().map(score1).sum()
+	input!().lines().map(score1).sum()
 }
 
 pub fn part2() -> i64 {
-	let scores: Vec<i64> = INPUT
+	let scores: Vec<i64> = input!()
 		.lines()
 		.map(score2)
 		.filter(|&score| score != 0)

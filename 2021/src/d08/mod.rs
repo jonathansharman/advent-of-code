@@ -1,12 +1,12 @@
 use std::collections::{HashMap, HashSet};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 367);
 aoc::test::test_part!(test2, part2, 974512);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> i64 {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| -> i64 {
 			line.split(" | ")
@@ -23,7 +23,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| -> i64 {
 			let split = line

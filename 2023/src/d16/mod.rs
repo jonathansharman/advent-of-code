@@ -1,7 +1,6 @@
 aoc::test::test_part!(test1, part1, 7870);
 aoc::test::test_part!(test2, part2, 8143);
 
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy, Default)]
 struct BeamSet {
@@ -254,7 +253,7 @@ impl Cave {
 
 fn read_cave() -> Cave {
 	Cave(
-		INPUT
+		input!()
 			.lines()
 			.map(|line| line.chars().collect::<Vec<_>>())
 			.collect(),

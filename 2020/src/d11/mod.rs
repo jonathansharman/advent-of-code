@@ -1,9 +1,10 @@
-use aoc::grid::{Grid, Point};
+use aoc::{
+	grid::{Grid, Point},
+	input,
+};
 
 aoc::test::test_part!(test1, part1, 2273);
 aoc::test::test_part!(test2, part2, 2064);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	let mut layout = read_layout();
@@ -69,7 +70,7 @@ enum Dir {
 }
 
 fn read_layout() -> Grid<Space> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			line.chars()

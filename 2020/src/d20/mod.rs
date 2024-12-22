@@ -1,9 +1,7 @@
-use aoc::grid::Grid;
+use aoc::{grid::Grid, input};
 
 aoc::test::test_part!(test1, part1, ?);
 aoc::test::test_part!(test2, part2, ?);
-
-const INPUT: &str = include_str!("input.txt");
 
 struct Tile {
 	id: usize,
@@ -30,7 +28,7 @@ impl Tile {
 
 fn read_tiles() -> Vec<Tile> {
 	let mut tiles = Vec::new();
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	while let Some(label) = lines.next() {
 		let id = label
 			.strip_prefix("Tile ")

@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 17481577045893);
 aoc::test::test_part!(test2, part2, 4160009892257);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	let mut mem: HashMap<usize, usize> = HashMap::new();
 	let mut on_mask = 0;
 	let mut off_mask = 0;
-	for instruction in INPUT.lines() {
+	for instruction in input!().lines() {
 		let (lhs, rhs) = instruction.split_once(" = ").unwrap();
 		if lhs == "mask" {
 			on_mask = 0;
@@ -34,7 +34,7 @@ pub fn part2() -> usize {
 	let mut mem: HashMap<usize, usize> = HashMap::new();
 	let mut on_mask = 0;
 	let mut float_bits = Vec::new();
-	for instruction in INPUT.lines() {
+	for instruction in input!().lines() {
 		let (lhs, rhs) = instruction.split_once(" = ").unwrap();
 		if lhs == "mask" {
 			on_mask = 0;

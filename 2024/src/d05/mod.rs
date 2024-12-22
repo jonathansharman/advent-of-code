@@ -1,9 +1,9 @@
 use std::{cmp::Ordering, collections::HashSet};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 5747);
 aoc::test::test_part!(test2, part2, 5502);
-
-const INPUT: &str = include_str!("input.txt");
 
 fn get_less(
 	rules: &mut impl Iterator<Item = &'static str>,
@@ -21,7 +21,7 @@ fn get_less(
 }
 
 pub fn part1() -> u32 {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let less = get_less(lines.by_ref());
 	lines
 		.map(|update| {
@@ -40,7 +40,7 @@ pub fn part1() -> u32 {
 }
 
 pub fn part2() -> u32 {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let less = get_less(lines.by_ref());
 	lines
 		.map(|update| {

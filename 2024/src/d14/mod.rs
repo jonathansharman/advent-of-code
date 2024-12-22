@@ -1,12 +1,13 @@
 use std::cmp::Ordering;
 
-use aoc::grid::{Grid, Point, Vector};
+use aoc::{
+	grid::{Grid, Point, Vector},
+	input,
+};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 230435667);
 aoc::test::test_part!(test2, part2, 7709);
-
-const INPUT: &str = include_str!("input.txt");
 
 struct Robot {
 	p0: Point,
@@ -23,7 +24,7 @@ impl Robot {
 }
 
 fn read_robots() -> Vec<Robot> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let parse_tuple = |s: &str| {

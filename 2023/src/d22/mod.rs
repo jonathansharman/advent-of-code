@@ -8,7 +8,6 @@ use itertools::Itertools;
 aoc::test::test_part!(test1, part1, 454);
 aoc::test::test_part!(test2, part2, 74287);
 
-const INPUT: &str = include_str!("input.txt");
 
 struct Point {
 	x: usize,
@@ -37,7 +36,7 @@ impl Brick {
 }
 
 fn read_bricks() -> Vec<Brick> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let (start, end) =

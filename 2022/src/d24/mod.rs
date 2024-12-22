@@ -1,11 +1,10 @@
 use std::collections::{HashSet, VecDeque};
 
+use aoc::input;
 use num::integer::lcm;
 
 aoc::test::test_part!(test1, part1, 334);
 aoc::test::test_part!(test2, part2, ?);
-
-const INPUT: &str = include_str!("input.txt");
 
 enum Tile {
 	Wall,
@@ -21,7 +20,7 @@ struct Tiles(Vec<Vec<Tile>>);
 impl Tiles {
 	fn load() -> Tiles {
 		Tiles(
-			INPUT
+			input!()
 				.lines()
 				.map(|line| {
 					line.chars()

@@ -1,14 +1,14 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 759);
 aoc::test::test_part!(test2, part2, 45763);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> i64 {
 	let mut x = 0;
 	let mut y = 0;
 	let mut dx = 1;
 	let mut dy = 0;
-	for line in INPUT.lines() {
+	for line in input!().lines() {
 		let (direction, amount) = line.split_at(1);
 		let amount = amount.parse::<i64>().unwrap();
 		match direction {
@@ -63,7 +63,7 @@ pub fn part1() -> i64 {
 pub fn part2() -> i64 {
 	let (mut x, mut y) = (0, 0);
 	let (mut fx, mut fy) = (10, 1);
-	for line in INPUT.lines() {
+	for line in input!().lines() {
 		let (direction, amount) = line.split_at(1);
 		let amount = amount.parse::<i64>().unwrap();
 		match direction {

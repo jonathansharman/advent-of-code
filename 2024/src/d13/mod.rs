@@ -1,10 +1,11 @@
-use aoc::vector::{Point, Vector};
+use aoc::{
+	input,
+	vector::{Point, Vector},
+};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 29187);
 aoc::test::test_part!(test2, part2, 99968222587852);
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Debug)]
 struct Machine {
@@ -14,7 +15,7 @@ struct Machine {
 }
 
 fn read_machines() -> Vec<Machine> {
-	INPUT
+	input!()
 		.lines()
 		.filter(|line| !line.is_empty())
 		.chunks(3)

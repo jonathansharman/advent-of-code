@@ -3,15 +3,14 @@ use itertools::Itertools;
 aoc::test::test_part!(test1, part1, 36679);
 aoc::test::test_part!(test2, part2, 88007104020978);
 
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> i64 {
-	let instructions = INPUT.lines().map(parse1).collect::<Vec<_>>();
+	let instructions = input!().lines().map(parse1).collect::<Vec<_>>();
 	area(&instructions)
 }
 
 pub fn part2() -> i64 {
-	let vectors = INPUT.lines().map(parse2).collect::<Vec<_>>();
+	let vectors = input!().lines().map(parse2).collect::<Vec<_>>();
 	area(&vectors)
 }
 

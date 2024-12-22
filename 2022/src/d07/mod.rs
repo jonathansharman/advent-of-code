@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 1315285);
 aoc::test::test_part!(test2, part2, 9847279);
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Debug)]
 enum Node {
@@ -15,7 +15,7 @@ fn build_nodes() -> HashMap<Vec<String>, Node> {
 	let mut nodes = HashMap::new();
 	nodes.insert(Vec::new(), Node::Directory(Vec::new()));
 	let mut wd = Vec::new();
-	for line in INPUT.lines().skip(1) {
+	for line in input!().lines().skip(1) {
 		if line == "$ ls" {
 			continue;
 		} else if line == "$ cd .." {

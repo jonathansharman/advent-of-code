@@ -3,10 +3,9 @@ use std::{collections::HashMap, ops::RangeInclusive};
 aoc::test::test_part!(test1, part1, 532551);
 aoc::test::test_part!(test2, part2, 134343280273968);
 
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let rules = read_rules(lines.by_ref());
 	let parts = read_parts(lines);
 	let mut result = 0;
@@ -38,7 +37,7 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	let rules = read_rules(INPUT.lines().by_ref());
+	let rules = read_rules(input!().lines().by_ref());
 	combinations("in", &rules, Parts::new())
 }
 

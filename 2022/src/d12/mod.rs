@@ -1,11 +1,12 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use aoc::grid::{Grid, Point, Vector};
+use aoc::{
+	grid::{Grid, Point, Vector},
+	input,
+};
 
 aoc::test::test_part!(test1, part1, 449);
 aoc::test::test_part!(test2, part2, 443);
-
-const INPUT: &str = include_str!("input.txt");
 
 struct Map {
 	start: Point,
@@ -15,7 +16,7 @@ struct Map {
 
 fn read_map() -> Map {
 	let (mut start, mut end) = (Point::zero(), Point::zero());
-	let heights = INPUT
+	let heights = input!()
 		.lines()
 		.enumerate()
 		.map(|(r, line)| {

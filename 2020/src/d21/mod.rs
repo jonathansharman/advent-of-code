@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 2461);
@@ -8,8 +9,6 @@ aoc::test::test_part!(
 	part2,
 	"ltbj,nrfmm,pvhcsn,jxbnb,chpdjkf,jtqt,zzkq,jqnhd".to_string()
 );
-
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 struct Ingredient(String);
@@ -23,7 +22,7 @@ struct Food {
 }
 
 fn read_foods() -> Vec<Food> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let (left, right) =

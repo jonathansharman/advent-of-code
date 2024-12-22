@@ -3,7 +3,6 @@ use std::collections::HashMap;
 aoc::test::test_part!(test1, part1, 19631);
 aoc::test::test_part!(test2, part2, 21003205388413);
 
-const INPUT: &str = include_str!("input.txt");
 
 #[derive(Clone, Copy)]
 enum Direction {
@@ -14,7 +13,7 @@ enum Direction {
 type Network = HashMap<String, (String, String)>;
 
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let directions = lines
 		.next()
 		.unwrap()
@@ -66,7 +65,7 @@ fn time(
 }
 
 pub fn part2() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let directions = lines
 		.next()
 		.unwrap()

@@ -1,14 +1,14 @@
 use std::collections::HashSet;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 6782);
 aoc::test::test_part!(test2, part2, 3596);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	let mut sum = 0;
 	let mut group = HashSet::new();
-	for line in INPUT.lines() {
+	for line in input!().lines() {
 		if line.is_empty() {
 			sum += group.len();
 			group.clear();
@@ -36,7 +36,7 @@ pub fn part2() -> usize {
 			.len();
 		group.clear();
 	};
-	for line in INPUT.lines() {
+	for line in input!().lines() {
 		if line.is_empty() {
 			process_group(&mut group);
 		} else {

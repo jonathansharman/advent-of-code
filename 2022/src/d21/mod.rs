@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 93813115694560);
 aoc::test::test_part!(test2, part2, 3910938071092);
-
-const INPUT: &str = include_str!("input.txt");
 
 enum Yell {
 	Number(f64),
@@ -16,7 +15,7 @@ enum Yell {
 }
 
 fn get_yells() -> HashMap<String, Yell> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let (monkey, yell) = line.split_once(": ").unwrap();

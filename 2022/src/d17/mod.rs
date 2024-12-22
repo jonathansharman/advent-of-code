@@ -1,12 +1,12 @@
 use std::collections::{BTreeSet, HashSet};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 3179);
 aoc::test::test_part!(test2, part2, 1567723342929);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn get_wind() -> Vec<i64> {
-	INPUT
+	input!()
 		.chars()
 		.map(|c| if c == '>' { 1 } else { -1 })
 		.collect()

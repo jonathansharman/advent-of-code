@@ -1,11 +1,11 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 6398608069280);
 aoc::test::test_part!(test2, part2, 6427437134372);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn read_disk() -> Vec<Option<usize>> {
 	let mut disk = Vec::new();
-	for (i, size) in INPUT
+	for (i, size) in input!()
 		.lines()
 		.next()
 		.unwrap()

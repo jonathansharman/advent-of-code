@@ -3,18 +3,19 @@ use std::{
 	ops::RangeBounds,
 };
 
-use aoc::grid::{Grid, Point};
+use aoc::{
+	grid::{Grid, Point},
+	input,
+};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 423);
 aoc::test::test_part!(test2, part2, 1287);
 
-const INPUT: &str = include_str!("input.txt");
-
 type Map = Grid<Option<char>>;
 
 fn read_map() -> Map {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| line.chars().map(|c| (c != '.').then_some(c)).collect())
 		.collect()

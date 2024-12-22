@@ -1,14 +1,13 @@
 use std::collections::HashSet;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, "4,1,5,3,1,5,3,5,7");
 aoc::test::test_part!(test2, part2, 164542125272765);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn read() -> (Computer, Vec<u8>) {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let a = lines
 		.next()
 		.unwrap()

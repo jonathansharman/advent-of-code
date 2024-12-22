@@ -1,7 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 6225);
 aoc::test::test_part!(test2, part2, 22116);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	intersections(true)
@@ -23,7 +23,7 @@ struct Line {
 }
 
 fn intersections(ignore_diagonals: bool) -> usize {
-	let lines = INPUT
+	let lines = input!()
 		.lines()
 		.map(|line_str| {
 			let points = line_str

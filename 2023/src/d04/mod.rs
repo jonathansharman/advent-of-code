@@ -3,10 +3,9 @@ use std::collections::{BTreeMap, HashSet};
 aoc::test::test_part!(test1, part1, 21959);
 aoc::test::test_part!(test2, part2, 5132675);
 
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let line = &line[line.find(':').unwrap() + 1..];
@@ -35,7 +34,7 @@ struct Card {
 }
 
 pub fn part2() -> usize {
-	let cards = INPUT
+	let cards = input!()
 		.lines()
 		.map(|line| {
 			let line = &line[line.find(':').unwrap() + 1..];

@@ -1,10 +1,10 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 138);
 aoc::test::test_part!(test2, part2, 226845233210288);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> usize {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let earliest: usize = lines.next().unwrap().parse().unwrap();
 	let (wait, id) = lines
 		.next()
@@ -21,7 +21,7 @@ pub fn part1() -> usize {
 // All the inputs "happen" to be prime and are thus pairwise coprime, so we can
 // use the Chinese remainder theorem (CRT).
 pub fn part2() -> usize {
-	let (divisors, remainders): (Vec<_>, Vec<_>) = INPUT
+	let (divisors, remainders): (Vec<_>, Vec<_>) = input!()
 		.lines()
 		.nth(1)
 		.unwrap()

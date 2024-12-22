@@ -1,10 +1,9 @@
 aoc::test::test_part!(test1, part1, 512950);
 aoc::test::test_part!(test2, part2, 247153);
 
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
-	INPUT.lines().next().unwrap().split(',').map(hash).sum()
+	input!().lines().next().unwrap().split(',').map(hash).sum()
 }
 
 fn hash(label: &str) -> usize {
@@ -47,7 +46,7 @@ impl LensBoxes {
 }
 
 pub fn part2() -> usize {
-	INPUT
+	input!()
 		.lines()
 		.next()
 		.unwrap()

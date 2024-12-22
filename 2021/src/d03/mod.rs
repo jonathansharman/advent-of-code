@@ -1,11 +1,11 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 841526);
 aoc::test::test_part!(test2, part2, 4790390);
 
-const INPUT: &str = include_str!("input.txt");
-
 pub fn part1() -> i64 {
 	let (bit_len, lines) = {
-		let mut lines = INPUT.lines().peekable();
+		let mut lines = input!().lines().peekable();
 		let len = lines
 			.peek()
 			.expect("expected at least one line of input")
@@ -34,7 +34,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
-	let mut lines = INPUT.lines().collect::<Vec<_>>();
+	let mut lines = input!().lines().collect::<Vec<_>>();
 
 	// Sort the lines to enable partitioning by bits at each index.
 	lines.sort();

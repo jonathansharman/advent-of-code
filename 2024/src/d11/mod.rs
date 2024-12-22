@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 194782);
 aoc::test::test_part!(test2, part2, 233007586663131);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn read_stones() -> HashMap<usize, usize> {
-	INPUT
+	input!()
 		.lines()
 		.next()
 		.unwrap()

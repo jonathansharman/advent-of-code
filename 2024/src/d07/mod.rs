@@ -1,7 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 882304362421);
 aoc::test::test_part!(test2, part2, 145149066755184);
-
-const INPUT: &str = include_str!("input.txt");
 
 fn parse_equation(value: &str) -> (i64, Vec<i64>) {
 	let (lhs, rhs) = value.split_once(": ").unwrap();
@@ -22,7 +22,7 @@ fn has_solution(lhs: i64, rhs: &[i64]) -> bool {
 }
 
 pub fn part1() -> i64 {
-	INPUT
+	input!()
 		.lines()
 		.filter_map(|line| {
 			let (lhs, rhs) = parse_equation(line);
@@ -49,7 +49,7 @@ fn has_solution_2(lhs: i64, rhs: &[i64]) -> bool {
 }
 
 pub fn part2() -> i64 {
-	INPUT
+	input!()
 		.lines()
 		.filter_map(|line| {
 			let (lhs, rhs) = parse_equation(line);

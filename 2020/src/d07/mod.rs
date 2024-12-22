@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 248);
 aoc::test::test_part!(test2, part2, 57281);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	let contained_bags = get_contained_bags();
@@ -38,7 +38,7 @@ fn contains_gold(
 }
 
 fn get_contained_bags() -> HashMap<String, Vec<(usize, String)>> {
-	INPUT
+	input!()
 		.lines()
 		.map(|line| {
 			let tokens: Vec<_> = line.split_whitespace().collect();

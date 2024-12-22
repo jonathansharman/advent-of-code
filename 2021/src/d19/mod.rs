@@ -1,10 +1,9 @@
+use aoc::input;
 use itertools::Itertools;
 use std::{collections::HashSet, hash::Hash, ops::Index};
 
 aoc::test::test_part!(test1, part1, 357);
 aoc::test::test_part!(test2, part2, 12317);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	let mut scanners = read_scanners();
@@ -58,7 +57,7 @@ pub fn part2() -> i32 {
 }
 
 fn read_scanners() -> Vec<Scanner> {
-	let mut lines = INPUT.lines();
+	let mut lines = input!().lines();
 	let mut scanners = Vec::new();
 	while lines.next().is_some() {
 		scanners.push(read_scanner(&mut lines));

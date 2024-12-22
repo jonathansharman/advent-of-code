@@ -4,9 +4,9 @@ use std::{
 	str::FromStr,
 };
 
-aoc::test::test_part!(test1, part1, "2=2-1-010==-0-1-=--2");
+use aoc::input;
 
-const INPUT: &str = include_str!("input.txt");
+aoc::test::test_part!(test1, part1, "2=2-1-010==-0-1-=--2");
 
 /// Little-endian representation of SNAFU numbers.
 struct Snafu {
@@ -100,7 +100,7 @@ impl From<Snafu> for i64 {
 }
 
 pub fn part1() -> String {
-	INPUT
+	input!()
 		.lines()
 		.map(|snafu| snafu.parse::<Snafu>().unwrap())
 		.reduce(|a, b| a + b)

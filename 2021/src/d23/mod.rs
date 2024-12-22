@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 11608);
 aoc::test::test_part!(test2, part2, 46754);
-
-const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> u32 {
 	read_state().min_energy_to_solve(&mut HashMap::new())
@@ -189,7 +189,7 @@ fn steps_between(hall_idx: usize, room_idx: usize) -> u32 {
 }
 
 fn read_state() -> State {
-	let mut lines = INPUT.lines().map(str::as_bytes).skip(2);
+	let mut lines = input!().lines().map(str::as_bytes).skip(2);
 	let depth0 = lines.next().unwrap();
 	let depth1 = lines.next().unwrap();
 	State {

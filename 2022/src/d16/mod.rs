@@ -1,17 +1,16 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 1944);
 aoc::test::test_part!(test2, part2, 2679);
 
-const INPUT: &str = include_str!("input.txt");
-
 fn get_tunnels_and_rates(
 ) -> (HashMap<String, Vec<String>>, HashMap<String, i32>) {
 	let mut tunnels = HashMap::new();
 	let mut rates = HashMap::new();
-	for line in INPUT.lines() {
+	for line in input!().lines() {
 		let words: Vec<&str> = line
 			.split(|c: char| !c.is_alphanumeric())
 			.filter(|s| !s.is_empty())
