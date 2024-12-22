@@ -1,4 +1,5 @@
 use aoc::input::{input, ParseLines};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 aoc::test::test_part!(test1, part1, 14180628689);
 aoc::test::test_part!(test2, part2, 1690);
@@ -52,7 +53,7 @@ pub fn part2() -> i64 {
 			for k in -9..=9 {
 				for l in -9..=9 {
 					let bananas = prices_and_changes
-						.iter()
+						.par_iter()
 						.map(|monkey| {
 							monkey
 								.windows(4)
