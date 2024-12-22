@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use aoc::input::parse_comma_separated_items;
+use aoc::input::ParseCommaSeparated;
 
 aoc::test::test_part!(test1, part1, 403);
 aoc::test::test_part!(test2, part2, 6823);
@@ -9,7 +9,7 @@ const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
 	let mut called_numbers =
-		parse_comma_separated_items(INPUT).collect::<Vec<usize>>();
+		INPUT.parse_comma_separated().collect::<Vec<usize>>();
 	let mut last_called_turns = called_numbers[..called_numbers.len() - 1]
 		.iter()
 		.enumerate()
@@ -32,7 +32,7 @@ pub fn part1() -> usize {
 
 pub fn part2() -> usize {
 	let mut called_numbers =
-		parse_comma_separated_items(INPUT).collect::<Vec<usize>>();
+		INPUT.parse_comma_separated().collect::<Vec<usize>>();
 	let mut last_called_turns = called_numbers[..called_numbers.len() - 1]
 		.iter()
 		.enumerate()

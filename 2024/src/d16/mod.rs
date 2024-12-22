@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use aoc::{
 	graph::Digraph,
 	grid::{Point, Vector, COMPASS, EAST},
-	input::parse_grid,
+	input::ParseGrid,
 };
 
 aoc::test::test_part!(test1, part1, 78428);
@@ -45,7 +45,7 @@ struct Maze {
 
 fn read_maze() -> Maze {
 	let grid =
-		parse_grid(INPUT, |c| if c == '#' { Tile::Wall } else { Tile::Floor });
+		INPUT.parse_grid(|c| if c == '#' { Tile::Wall } else { Tile::Floor });
 
 	let start = State {
 		coords: Point {

@@ -1,4 +1,4 @@
-use aoc::input::parse_comma_separated_items;
+use aoc::input::ParseCommaSeparated;
 
 use std::collections::{hash_map::Entry, HashMap};
 
@@ -17,7 +17,8 @@ pub fn part2() -> i64 {
 
 pub fn fish(days: i64) -> i64 {
 	let mut cache: HashMap<(i64, i64), i64> = HashMap::new();
-	parse_comma_separated_items(INPUT)
+	INPUT
+		.parse_comma_separated()
 		.fold(0, |acc, timer| acc + get_count(&mut cache, timer, days))
 }
 

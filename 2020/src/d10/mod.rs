@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
+use aoc::input::ParseLines;
 use itertools::Itertools;
-
-use aoc::input::parse_lines;
 
 aoc::test::test_part!(test1, part1, 2592);
 aoc::test::test_part!(test2, part2, 198428693313536);
@@ -10,7 +9,7 @@ aoc::test::test_part!(test2, part2, 198428693313536);
 const INPUT: &str = include_str!("input.txt");
 
 pub fn part1() -> usize {
-	let mut adapters = parse_lines(INPUT).sorted().collect::<Vec<usize>>();
+	let mut adapters = INPUT.parse_lines().sorted().collect::<Vec<usize>>();
 	adapters.insert(0, 0);
 	adapters.push(adapters.last().unwrap() + 3);
 	let (diff1s, diff3s) = adapters
@@ -53,7 +52,7 @@ fn valid_arrangements(
 pub fn part2() -> usize {
 	// Note that due to part 1, we already know the end is reachable from any
 	// index.
-	let mut adapters = parse_lines(INPUT).sorted().collect::<Vec<usize>>();
+	let mut adapters = INPUT.parse_lines().sorted().collect::<Vec<usize>>();
 	adapters.insert(0, 0);
 	let mut cache = HashMap::new();
 	cache.insert(adapters.len() - 1, 1);

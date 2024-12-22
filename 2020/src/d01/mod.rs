@@ -1,4 +1,4 @@
-use aoc::input::parse_lines;
+use aoc::input::ParseLines;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 731731);
@@ -15,7 +15,8 @@ pub fn part2() -> i64 {
 }
 
 fn solve(k: usize) -> i64 {
-	parse_lines(INPUT)
+	INPUT
+		.parse_lines()
 		.combinations(k)
 		.filter_map(|elems| {
 			if elems.iter().sum::<i64>() == 2020 {
