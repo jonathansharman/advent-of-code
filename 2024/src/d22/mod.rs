@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use aoc::input::{input, ParseLines};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -29,6 +29,7 @@ pub fn part1() -> i64 {
 }
 
 pub fn part2() -> i64 {
+	let mut all_sequences = HashSet::new();
 	let mut first_match_maps = Vec::new();
 	input!().parse_lines().for_each(|mut secret: i64| {
 		let mut first_match_map = HashMap::new();
@@ -36,31 +37,26 @@ pub fn part2() -> i64 {
 		for _ in 0..EVOLUTIONS {
 			let next = evolve(secret);
 			let price = next % 10;
-			changes.push_back(price - secret % 10);
+			let change = price - secret % 10;
+			changes.push_back(change);
 			secret = next;
 			if changes.len() == 5 {
 				changes.pop_front();
-				first_match_map
-					.entry([changes[0], changes[1], changes[2], changes[3]])
-					.or_insert(price);
+				let sequence = [changes[0], changes[1], changes[2], changes[3]];
+				first_match_map.entry(sequence).or_insert(price);
+				all_sequences.insert(sequence);
 			}
 		}
 		first_match_maps.push(first_match_map);
 	});
-	let mut max_bananas = 0;
-	for i in -9..=9 {
-		for j in -9..=9 {
-			for k in -9..=9 {
-				for l in -9..=9 {
-					let sequence = [i, j, k, l];
-					let bananas = first_match_maps
-						.par_iter()
-						.map(|m| m.get(&sequence).unwrap_or(&0))
-						.sum();
-					max_bananas = max_bananas.max(bananas);
-				}
-			}
-		}
-	}
-	max_bananas
+	all_sequences
+		.par_iter()
+		.map(|sequence| {
+			first_match_maps
+				.iter()
+				.map(|m| m.get(sequence).unwrap_or(&0))
+				.sum()
+		})
+		.max()
+		.unwrap()
 }
