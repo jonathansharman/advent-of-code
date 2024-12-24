@@ -1,3 +1,5 @@
+use std::collections::{HashMap, VecDeque};
+
 use aoc::input::{input, ParseLines};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
@@ -26,45 +28,34 @@ pub fn part1() -> i64 {
 		.sum()
 }
 
-struct PriceAndChange {
-	price: i64,
-	change: i64,
-}
-
 pub fn part2() -> i64 {
-	let prices_and_changes: Vec<Vec<PriceAndChange>> = input!()
-		.parse_lines()
-		.map(|mut secret: i64| {
-			let mut prices_and_changes = Vec::with_capacity(EVOLUTIONS);
-			for _ in 0..EVOLUTIONS {
-				let next = evolve(secret);
-				prices_and_changes.push(PriceAndChange {
-					price: next % 10,
-					change: next % 10 - secret % 10,
-				});
-				secret = next;
+	let mut first_match_maps = Vec::new();
+	input!().parse_lines().for_each(|mut secret: i64| {
+		let mut first_match_map = HashMap::new();
+		let mut changes = VecDeque::new();
+		for _ in 0..EVOLUTIONS {
+			let next = evolve(secret);
+			let price = next % 10;
+			changes.push_back(price - secret % 10);
+			secret = next;
+			if changes.len() == 5 {
+				changes.pop_front();
+				first_match_map
+					.entry([changes[0], changes[1], changes[2], changes[3]])
+					.or_insert(price);
 			}
-			prices_and_changes
-		})
-		.collect();
+		}
+		first_match_maps.push(first_match_map);
+	});
 	let mut max_bananas = 0;
 	for i in -9..=9 {
 		for j in -9..=9 {
 			for k in -9..=9 {
 				for l in -9..=9 {
-					let bananas = prices_and_changes
+					let sequence = [i, j, k, l];
+					let bananas = first_match_maps
 						.par_iter()
-						.map(|monkey| {
-							monkey
-								.windows(4)
-								.find(|window| {
-									window
-										.iter()
-										.map(|pc| pc.change)
-										.eq([i, j, k, l].into_iter())
-								})
-								.map_or(0, |window| window[3].price)
-						})
+						.map(|m| m.get(&sequence).unwrap_or(&0))
 						.sum();
 					max_bananas = max_bananas.max(bananas);
 				}
