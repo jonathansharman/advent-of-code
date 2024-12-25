@@ -106,7 +106,7 @@ impl<T> Grid<T> {
 	pub fn get_row(&self, row_idx: i64) -> Option<Row<'_, T>> {
 		(0..self.row_count()).contains(&row_idx).then(|| {
 			let start = (row_idx * self.size.col) as usize;
-			let end = ((row_idx + 1) + self.size.col) as usize;
+			let end = start + self.size.col as usize;
 			Row {
 				tiles: &self.tiles[start..end],
 			}
