@@ -71,6 +71,8 @@ impl<T: Node> DijkstraResults<T> {
 	}
 
 	/// A digraph from `end` back through all shortest paths to the start node.
+	/// If `end` is not reachable from the start node, then the start node will
+	/// not be reachable from the returned digraph.
 	pub fn backtrace(&self, end: T) -> Digraph<T> {
 		let mut digraph = Digraph::new();
 		let mut queue = vec![end];
@@ -84,6 +86,25 @@ impl<T: Node> DijkstraResults<T> {
 			}
 		}
 		digraph
+	}
+
+	/// An arbitrary shortest path from the start node to `end`, if there is
+	/// one.
+	pub fn path(&self, end: T) -> Option<Vec<T>> {
+		self.distances.contains_key(&end).then(|| {
+			let mut node = end.clone();
+			let mut path = vec![node.clone()];
+			while let Some(parent) = self
+				.parents
+				.get(&node)
+				.and_then(|parents| parents.iter().next())
+			{
+				node = parent.clone();
+				path.push(node.clone());
+			}
+			path.reverse();
+			path
+		})
 	}
 }
 
