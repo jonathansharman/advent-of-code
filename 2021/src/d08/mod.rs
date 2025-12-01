@@ -83,11 +83,11 @@ pub fn part2() -> i64 {
 			// Determine signals with unique frequency.
 			signal_map.insert(
 				'e',
-				*signal_frequencies.iter().find(|(_, &v)| v == 4).unwrap().0,
+				*signal_frequencies.iter().find(|&(_, &v)| v == 4).unwrap().0,
 			);
 			signal_map.insert(
 				'f',
-				*signal_frequencies.iter().find(|(_, &v)| v == 9).unwrap().0,
+				*signal_frequencies.iter().find(|&(_, &v)| v == 9).unwrap().0,
 			);
 			// '7' \ '1' = 'a'.
 			signal_map.insert(
@@ -99,7 +99,7 @@ pub fn part2() -> i64 {
 				'c',
 				*signal_frequencies
 					.iter()
-					.find(|(&k, &v)| k != signal_map[&'a'] && v == 8)
+					.find(|&(&k, &v)| k != signal_map[&'a'] && v == 8)
 					.unwrap()
 					.0,
 			);

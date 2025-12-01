@@ -169,10 +169,10 @@ fn simulate(elves: &mut HashSet<Coords>, rounds: Option<usize>) -> usize {
 		if stable {
 			return round;
 		}
-		if let Some(rounds) = rounds {
-			if round == rounds {
-				return round;
-			}
+		if let Some(rounds) = rounds
+			&& round == rounds
+		{
+			return round;
 		}
 	}
 }

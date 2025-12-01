@@ -6,11 +6,12 @@ members = [
 	"2022",
 	"2023",
 	"2024",
+	"2025",
 ]
 
 [package]
 name = "aoc"
-edition = "2021"
+edition = "2024"
 version = "0.1.0"
 
 [dependencies]

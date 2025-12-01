@@ -80,7 +80,7 @@ pub fn part2() -> usize {
 	// Map each field index to its set of possible field labels.
 	let all_fields = rules.iter().map(|rule| rule.field.clone()).collect();
 	let mut possible_fields: Vec<HashSet<String>> =
-		std::iter::repeat(all_fields).take(ticket.len()).collect();
+		std::iter::repeat_n(all_fields, ticket.len()).collect();
 	// Eliminate field possibilities using valid nearby tickets.
 	for line in lines.skip(2) {
 		let ticket = parse_ticket(line);
@@ -103,7 +103,7 @@ pub fn part2() -> usize {
 	// singleton possibility sets remain.
 	let mut queue: Vec<String> = possible_fields
 		.iter()
-		.filter(|&fields| (fields.len() == 1))
+		.filter(|&fields| fields.len() == 1)
 		.map(|fields| fields.iter().next().unwrap().clone())
 		.collect();
 	while let Some(singleton) = queue.pop() {

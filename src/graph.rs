@@ -250,7 +250,7 @@ impl<T: Node> Digraph<T> {
 				for (neighbor, weight) in edges {
 					let candidate = distance + weight;
 					let d = distances.get(neighbor);
-					if d.map_or(true, |d| candidate < *d) {
+					if d.is_none_or(|d| candidate < *d) {
 						queue.push(State {
 							distance: candidate,
 							node: neighbor.clone(),
@@ -280,7 +280,7 @@ impl<T: Node> Digraph<T> {
 			for (neighbor, weight) in edges {
 				let candidate = distance + weight;
 				let d = distances.get(neighbor);
-				if d.map_or(true, |&d| candidate < d) {
+				if d.is_none_or(|&d| candidate < d) {
 					queue.push(State {
 						distance: candidate,
 						node: neighbor.clone(),
@@ -288,7 +288,7 @@ impl<T: Node> Digraph<T> {
 					*parents.entry(neighbor.clone()).or_default() =
 						[node.clone()].into();
 					distances.insert(neighbor.clone(), candidate);
-				} else if d.map_or(true, |&d| candidate == d) {
+				} else if d.is_none_or(|&d| candidate == d) {
 					queue.push(State {
 						distance: candidate,
 						node: neighbor.clone(),

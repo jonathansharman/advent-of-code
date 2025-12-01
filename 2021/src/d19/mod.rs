@@ -138,22 +138,21 @@ impl Scanner {
 					}
 					None
 				};
-				if let Some(x) = axis_alignment(0) {
-					if let Some(y) = axis_alignment(1) {
-						if let Some(z) = axis_alignment(2) {
-							let other = other.translate(x, y, z);
-							return Some((
-								Scanner {
-									readings: self
-										.readings
-										.union(&other.readings)
-										.cloned()
-										.collect(),
-								},
-								[x, y, z],
-							));
-						}
-					}
+				if let Some(x) = axis_alignment(0)
+					&& let Some(y) = axis_alignment(1)
+					&& let Some(z) = axis_alignment(2)
+				{
+					let other = other.translate(x, y, z);
+					return Some((
+						Scanner {
+							readings: self
+								.readings
+								.union(&other.readings)
+								.cloned()
+								.collect(),
+						},
+						[x, y, z],
+					));
 				}
 			}
 		}

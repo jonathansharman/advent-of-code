@@ -164,10 +164,10 @@ fn line_of_sight(
 ) -> Option<Point> {
 	let mut coords = start;
 	while let Some(space) = layout.get(coords) {
-		if coords != start {
-			if let Space::Empty | Space::Occupied = space {
-				return Some(coords);
-			}
+		if coords != start
+			&& let Space::Empty | Space::Occupied = space
+		{
+			return Some(coords);
 		}
 		match direction {
 			Dir::Up | Dir::UpRight | Dir::UpLeft => coords.row -= 1,

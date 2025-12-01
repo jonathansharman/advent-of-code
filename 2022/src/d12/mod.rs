@@ -110,7 +110,7 @@ pub fn part2() -> u32 {
 	let distances = bfs(map.end, map.heights.size(), &graph);
 	map.heights
 		.iter()
-		.filter(|(_, &h)| (h == 0))
+		.filter(|&(_, &h)| h == 0)
 		.map(|(coords, _)| distances[coords])
 		.min()
 		.unwrap()

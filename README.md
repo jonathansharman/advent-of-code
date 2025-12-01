@@ -7,7 +7,7 @@ that the test macro can print solutions and timing info. For example, to check
 the part 1 solution for day 1, 2021:
 
 ```
-cd  2021
+cd 2021
 cargo test d01::test1 --release -- --nocapture
 ```
 
