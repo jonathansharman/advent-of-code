@@ -5,3 +5,4 @@ version = "0.1.0"
 
 [dependencies]
 aoc = { path = ".." }
+itertools = "0.14.0"
