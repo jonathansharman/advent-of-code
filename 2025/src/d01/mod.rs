@@ -1,7 +1,7 @@
 use aoc::input;
 
 aoc::test::test_part!(test1, part1, 1055);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 6386);
 
 fn rotations() -> impl Iterator<Item = i32> {
 	input!().lines().map(|s| {
@@ -28,5 +28,23 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> usize {
-	0
+	let mut dial = 50;
+	let mut zeros = 0;
+	for mut rotation in rotations() {
+		while rotation > 0 {
+			rotation -= 1;
+			dial = (dial + 1) % MOD;
+			if dial == 0 {
+				zeros += 1;
+			}
+		}
+		while rotation < 0 {
+			rotation += 1;
+			dial = (dial + MOD - 1) % MOD;
+			if dial == 0 {
+				zeros += 1;
+			}
+		}
+	}
+	zeros
 }
