@@ -1,8 +1,9 @@
 use std::{cmp::Ordering, collections::HashMap};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 7718);
 aoc::test::test_part!(test2, part2, 128741994134728);
-
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Spring {

@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 543867);
 aoc::test::test_part!(test2, part2, 79613331);
-
 
 fn neighbor_is_symbol(lines: &[Vec<char>], i: usize, j: usize) -> bool {
 	for (ii, line) in lines.iter().skip(i - 1).take(3).enumerate() {

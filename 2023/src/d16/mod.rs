@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 7870);
 aoc::test::test_part!(test2, part2, 8143);
-
 
 #[derive(Clone, Copy, Default)]
 struct BeamSet {

@@ -1,8 +1,7 @@
-use crate::{graph::Digraph, io::read_lines};
+use aoc::{graph::Digraph, input};
 
 aoc::test::test_part!(test1, part1, 970);
 aoc::test::test_part!(test2, part2, 1149);
-
 
 pub fn part1() -> usize {
 	solve(1, 3)

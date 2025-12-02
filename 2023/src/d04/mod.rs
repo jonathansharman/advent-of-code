@@ -1,8 +1,9 @@
 use std::collections::{BTreeMap, HashSet};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 21959);
 aoc::test::test_part!(test2, part2, 5132675);
-
 
 pub fn part1() -> usize {
 	input!()

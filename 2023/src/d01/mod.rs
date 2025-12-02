@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 55971);
 aoc::test::test_part!(test2, part2, 54719);
-
 
 pub fn part1() -> usize {
 	input!()

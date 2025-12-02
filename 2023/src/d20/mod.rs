@@ -1,8 +1,9 @@
 use std::collections::{HashMap, VecDeque};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 1020211150);
 aoc::test::test_part!(test2, part2, 238815727638557);
-
 
 pub fn part1() -> usize {
 	let mut modules = read_modules();

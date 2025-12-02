@@ -1,7 +1,6 @@
-use crate::{graph::Graph, io::read_lines};
+use aoc::{graph::Graph, input};
 
 aoc::test::test_part!(test1, part1, 562772);
-
 
 pub fn part1() -> usize {
 	let mut graph = Graph::new();
@@ -19,6 +18,6 @@ pub fn part1() -> usize {
 	graph
 		.into_connected_components()
 		.into_iter()
-		.map(|g| g.get_nodes().len())
+		.map(|g| g.nodes().len())
 		.product()
 }

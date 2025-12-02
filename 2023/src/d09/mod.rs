@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 1921197370);
 aoc::test::test_part!(test2, part2, 1124);
-
 
 fn prediction(history: Vec<i64>) -> i64 {
 	let mut rows = vec![history];

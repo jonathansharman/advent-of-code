@@ -1,21 +1,17 @@
 use std::{
 	cmp::Ordering,
-	collections::{hash_map::Entry, HashMap, HashSet, VecDeque},
+	collections::{HashMap, HashSet, VecDeque, hash_map::Entry},
 };
 
+use aoc::{grid::Grid, input::ParseGrid};
+use aoc::{grid::Point, input};
 use itertools::Itertools;
-
-use crate::{io::read_lines, neighbors};
 
 aoc::test::test_part!(test1, part1, 3733);
 aoc::test::test_part!(test2, part2, 617729401414635);
 
-
-fn read_grid() -> Vec<Vec<bool>> {
-	input!()
-		.lines()
-		.map(|line| line.chars().map(|c| c == '.' || c == 'S').collect())
-		.collect()
+fn read_grid() -> Grid<bool> {
+	input!().parse_grid(|c| c == '.' || c == 'S')
 }
 
 const TOTAL_STEPS_1: usize = 64;
@@ -24,20 +20,20 @@ const PARITY_1: usize = TOTAL_STEPS_1 % 2;
 pub fn part1() -> usize {
 	let grid = read_grid();
 	// All available inputs are square with S in the center. ¯\_(ツ)_/¯
-	let radius = grid.len() / 2;
-	let start = (radius, radius);
+	let radius = grid.row_count() / 2;
+	let start = Point::new(radius, radius);
 	let mut count = 0;
 	let mut queue = VecDeque::from([(start, 0)]);
 	let mut visited = HashSet::new();
-	while let Some(((i, j), d)) = queue.pop_front() {
-		if !visited.insert((i, j)) {
+	while let Some((p, d)) = queue.pop_front() {
+		if !visited.insert(p) {
 			continue;
 		}
 		if d % 2 == PARITY_1 {
 			count += 1;
 		}
-		for n in neighbors::four(grid.len(), grid[0].len(), i, j) {
-			if grid[n.0][n.1] && d < TOTAL_STEPS_1 {
+		for (n, &open) in grid.four_neighbors(p) {
+			if open && d < TOTAL_STEPS_1 {
 				queue.push_back((n, d + 1));
 			}
 		}
@@ -50,14 +46,14 @@ const PARITY_2: usize = TOTAL_STEPS_2 % 2;
 
 pub fn part2() -> usize {
 	let grid = read_grid();
-	let diameter = grid.len();
+	let diameter = grid.row_count();
 	let radius = diameter / 2;
 	let critical_points = (0..=2)
 		.cartesian_product(0..=2)
 		.map(|(i, j)| {
-			let coords = (i * radius, j * radius);
-			let degrees_of_freedom = i.abs_diff(1) + j.abs_diff(1);
-			let zone_distance = degrees_of_freedom * (radius + 1);
+			let coords = Point::new(i * radius, j * radius);
+			let degrees_of_freedom = (i.abs_diff(1) + j.abs_diff(1)) as usize;
+			let zone_distance = degrees_of_freedom * (radius + 1) as usize;
 			let distances = get_distances(&grid, coords);
 			CriticalPoint {
 				zone_distance,
@@ -76,7 +72,7 @@ pub fn part2() -> usize {
 			};
 			// Compute the tile distance from the first tile in this critical
 			// point's zone to farthest reachable tile.
-			let n = remaining / diameter;
+			let n = remaining / diameter as usize;
 			// Check whether this point has correct parity in the first tile.
 			let correct_parity = (p.zone_distance + d) % 2 == PARITY_2;
 			match p.degrees_of_freedom {
@@ -100,7 +96,7 @@ pub fn part2() -> usize {
 					if correct_parity {
 						count += (n / 2 + 1).pow(2);
 					} else {
-						count += ((n + 1) / 2) * ((n + 1) / 2 + 1);
+						count += n.div_ceil(2) * (n.div_ceil(2) + 1);
 					}
 				}
 				_ => unreachable!(),
@@ -118,23 +114,20 @@ struct CriticalPoint {
 	/// Distance from the start to this point's zone.
 	zone_distance: usize,
 	/// Distances from the point to every other point within the primary tile.
-	distances: HashMap<(usize, usize), usize>,
+	distances: HashMap<Point, usize>,
 }
 
-fn get_distances(
-	grid: &[Vec<bool>],
-	start: (usize, usize),
-) -> HashMap<(usize, usize), usize> {
+fn get_distances(grid: &Grid<bool>, start: Point) -> HashMap<Point, usize> {
 	let mut queue = VecDeque::from([(start, 0)]);
 	let mut distance_counts = HashMap::new();
-	while let Some(((i, j), d)) = queue.pop_front() {
-		if let Entry::Vacant(entry) = distance_counts.entry((i, j)) {
+	while let Some((p, d)) = queue.pop_front() {
+		if let Entry::Vacant(entry) = distance_counts.entry(p) {
 			entry.insert(d);
 		} else {
 			continue;
 		}
-		for n in neighbors::four(grid.len(), grid[0].len(), i, j) {
-			if grid[n.0][n.1] {
+		for (n, &open) in grid.four_neighbors(p) {
+			if open {
 				queue.push_back((n, d + 1));
 			}
 		}

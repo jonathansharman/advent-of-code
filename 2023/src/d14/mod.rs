@@ -1,14 +1,15 @@
 use std::{
 	collections::{
-		hash_map::{DefaultHasher, Entry},
 		HashMap,
+		hash_map::{DefaultHasher, Entry},
 	},
 	hash::{Hash, Hasher},
 };
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 112048);
 aoc::test::test_part!(test2, part2, 105606);
-
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Tile {

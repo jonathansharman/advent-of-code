@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 250474325);
 aoc::test::test_part!(test2, part2, 248909434);
-
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 enum Type {

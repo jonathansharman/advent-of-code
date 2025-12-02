@@ -1,8 +1,8 @@
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 36679);
 aoc::test::test_part!(test2, part2, 88007104020978);
-
 
 pub fn part1() -> i64 {
 	let instructions = input!().lines().map(parse1).collect::<Vec<_>>();
@@ -14,7 +14,7 @@ pub fn part2() -> i64 {
 	area(&vectors)
 }
 
-fn parse1(s: String) -> (i64, i64) {
+fn parse1(s: &str) -> (i64, i64) {
 	let parts = s.split_whitespace().collect::<Vec<_>>();
 	let len = parts[1].parse().unwrap();
 	match parts[0] {
@@ -26,7 +26,7 @@ fn parse1(s: String) -> (i64, i64) {
 	}
 }
 
-fn parse2(s: String) -> (i64, i64) {
+fn parse2(s: &str) -> (i64, i64) {
 	let start = s.find('#').unwrap() + 1;
 	let len = i64::from_str_radix(
 		&s.chars().skip(start).take(5).collect::<String>(),

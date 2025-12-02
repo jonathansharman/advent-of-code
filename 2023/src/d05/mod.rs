@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 484023871);
 aoc::test::test_part!(test2, part2, 46294175);
-
 
 struct RangeMap {
 	dst: usize,

@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 6875);
 aoc::test::test_part!(test2, part2, 471);
-
 
 #[derive(Debug)]
 enum Pipe {

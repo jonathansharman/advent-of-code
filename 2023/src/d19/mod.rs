@@ -1,8 +1,9 @@
 use std::{collections::HashMap, ops::RangeInclusive};
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 532551);
 aoc::test::test_part!(test2, part2, 134343280273968);
-
 
 pub fn part1() -> usize {
 	let mut lines = input!().lines();
@@ -73,8 +74,8 @@ fn combinations(
 	}
 }
 
-fn read_rules(
-	lines: &mut impl Iterator<Item = String>,
+fn read_rules<'a>(
+	lines: &mut impl Iterator<Item = &'a str>,
 ) -> HashMap<String, Vec<Rule>> {
 	lines
 		.take_while(|s| !s.is_empty())
@@ -116,7 +117,7 @@ fn read_rules(
 		.collect()
 }
 
-fn read_parts(lines: impl Iterator<Item = String>) -> Vec<Part> {
+fn read_parts<'a>(lines: impl Iterator<Item = &'a str>) -> Vec<Part> {
 	lines
 		.map(|line| {
 			let line = line.trim_matches(&['{', '}'] as &[_]);
@@ -148,7 +149,7 @@ struct Parts([RangeInclusive<usize>; 4]);
 
 impl Parts {
 	fn new() -> Parts {
-		Parts(std::array::from_fn(|_| (1..=4000)))
+		Parts(std::array::from_fn(|_| 1..=4000))
 	}
 
 	fn replace(mut self, index: usize, range: RangeInclusive<usize>) -> Parts {

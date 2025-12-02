@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 449550);
 aoc::test::test_part!(test2, part2, 28360140);
-
 
 pub fn part1() -> usize {
 	let lines = input!()

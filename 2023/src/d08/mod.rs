@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 19631);
 aoc::test::test_part!(test2, part2, 21003205388413);
-
 
 #[derive(Clone, Copy)]
 enum Direction {

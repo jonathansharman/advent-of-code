@@ -3,11 +3,11 @@ use std::{
 	collections::{HashMap, HashSet},
 };
 
+use aoc::input;
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 454);
 aoc::test::test_part!(test2, part2, 74287);
-
 
 struct Point {
 	x: usize,

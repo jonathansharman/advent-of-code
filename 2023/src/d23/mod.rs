@@ -1,12 +1,15 @@
 use std::collections::HashSet;
 
+use aoc::{
+	graph::Graph,
+	grid::{Grid, Point},
+	input,
+	input::ParseGrid,
+};
 use rayon::prelude::*;
-
-use crate::{graph::Graph, io::read_lines, neighbors};
 
 aoc::test::test_part!(test1, part1, 2414);
 aoc::test::test_part!(test2, part2, 6598);
-
 
 enum Tile {
 	Path,
@@ -109,35 +112,31 @@ pub fn part2() -> usize {
 	let graph = get_graph(&tiles);
 	// Uncomment to generate Graphviz/DOT file:
 	// std::fs::write("src/y23/23.dot", graph.graphviz_undirected()).unwrap();
-	let goal = (tiles.len() - 1, tiles[0].len() - 2);
-	longest_walk(&graph, HashSet::new(), (0, 1), goal, 0)
+	let goal = Point::new(tiles.row_count() - 1, tiles.col_count() - 2);
+	longest_walk(&graph, HashSet::new(), Point::new(0, 1), goal, 0)
 }
 
-fn read_tiles() -> Vec<Vec<bool>> {
-	input!()
-		.lines()
-		.map(|line| line.chars().map(|c| c != '#').collect())
-		.collect()
+fn read_tiles() -> Grid<bool> {
+	input!().parse_grid(|c| c != '#')
 }
 
-fn get_graph(tiles: &[Vec<bool>]) -> Graph<(usize, usize)> {
-	let (n, m) = (tiles.len(), tiles[0].len());
+fn get_graph(tiles: &Grid<bool>) -> Graph<Point> {
 	let mut graph = Graph::new();
-	let start = (0, 1);
+	let start = Point::new(0, 1);
 	let mut nodes = HashSet::from([start]);
 	let mut visited = HashSet::from([start]);
-	let mut queue = vec![(start, (1, 1), 0)];
+	let mut queue = vec![(start, Point::new(1, 1), 0)];
 	while let Some((node, current, len)) = queue.pop() {
 		if !visited.insert(current) {
 			continue;
 		}
 		let mut node_neighbors = Vec::new();
 		let mut open_neighbors = Vec::new();
-		for n in neighbors::four(n, m, current.0, current.1) {
+		for (n, &open) in tiles.four_neighbors(current) {
 			if n != node && nodes.contains(&n) {
 				node_neighbors.push(n);
 			}
-			if !visited.contains(&n) && tiles[n.0][n.1] {
+			if !visited.contains(&n) && open {
 				open_neighbors.push(n);
 			}
 		}
@@ -170,10 +169,10 @@ fn get_graph(tiles: &[Vec<bool>]) -> Graph<(usize, usize)> {
 }
 
 fn longest_walk(
-	graph: &Graph<(usize, usize)>,
-	mut visited: HashSet<(usize, usize)>,
-	from: (usize, usize),
-	to: (usize, usize),
+	graph: &Graph<Point>,
+	mut visited: HashSet<Point>,
+	from: Point,
+	to: Point,
 	steps: usize,
 ) -> usize {
 	if from == to {

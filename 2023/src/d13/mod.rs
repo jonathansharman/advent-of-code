@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 32723);
 aoc::test::test_part!(test2, part2, 34536);
-
 
 pub fn part1() -> usize {
 	let mut pattern = Vec::new();

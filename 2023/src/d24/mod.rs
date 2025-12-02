@@ -1,14 +1,11 @@
 use std::{num::ParseIntError, str::FromStr};
 
+use aoc::input;
 use itertools::Itertools;
-use z3::{
-	ast::{Ast, Int},
-	Config, Context, Solver,
-};
+use z3::{Solver, ast::Int};
 
 aoc::test::test_part!(test1, part1, 11995);
 aoc::test::test_part!(test2, part2, 983620716335751);
-
 
 #[derive(Clone, Copy, Debug)]
 struct Vector([i64; 3]);
@@ -113,33 +110,31 @@ pub fn part1() -> usize {
 }
 
 pub fn part2() -> i64 {
-	let cfg = Config::default();
-	let ctx = Context::new(&cfg);
-	let solver = Solver::new(&ctx);
-	let spx = Int::new_const(&ctx, "spx");
-	let spy = Int::new_const(&ctx, "spy");
-	let spz = Int::new_const(&ctx, "spz");
-	let svx = Int::new_const(&ctx, "svx");
-	let svy = Int::new_const(&ctx, "svy");
-	let svz = Int::new_const(&ctx, "svz");
+	let solver = Solver::new();
+	let spx = Int::new_const("spx");
+	let spy = Int::new_const("spy");
+	let spz = Int::new_const("spz");
+	let svx = Int::new_const("svx");
+	let svy = Int::new_const("svy");
+	let svz = Int::new_const("svz");
 	for (hp, hv) in read_hail_stones() {
-		let hpx = Int::from_i64(&ctx, hp.x());
-		let hpy = Int::from_i64(&ctx, hp.y());
-		let hpz = Int::from_i64(&ctx, hp.z());
-		let hvx = Int::from_i64(&ctx, hv.x());
-		let hvy = Int::from_i64(&ctx, hv.y());
-		let hvz = Int::from_i64(&ctx, hv.z());
+		let hpx = Int::from_i64(hp.x());
+		let hpy = Int::from_i64(hp.y());
+		let hpz = Int::from_i64(hp.z());
+		let hvx = Int::from_i64(hv.x());
+		let hvy = Int::from_i64(hv.y());
+		let hvz = Int::from_i64(hv.z());
 		solver.assert(
-			&((&spx - &hpx) * (&hvy - &svy))
-				._eq(&((&spy - &hpy) * (&hvx - &svx))),
+			((&spx - &hpx) * (&hvy - &svy))
+				.eq(&((&spy - &hpy) * (&hvx - &svx))),
 		);
 		solver.assert(
-			&((&spx - &hpx) * (&hvz - &svz))
-				._eq(&((&spz - &hpz) * (&hvx - &svx))),
+			((&spx - &hpx) * (&hvz - &svz))
+				.eq(&((&spz - &hpz) * (&hvx - &svx))),
 		);
 		solver.assert(
-			&((&spy - &hpy) * (&hvz - &svz))
-				._eq(&((&spz - &hpz) * (&hvy - &svy))),
+			((&spy - &hpy) * (&hvz - &svz))
+				.eq(&((&spz - &hpz) * (&hvy - &svy))),
 		);
 	}
 	solver.check();

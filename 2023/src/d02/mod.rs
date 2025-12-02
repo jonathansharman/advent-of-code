@@ -1,6 +1,7 @@
+use aoc::input;
+
 aoc::test::test_part!(test1, part1, 2237);
 aoc::test::test_part!(test2, part2, 66681);
-
 
 struct Game {
 	id: usize,
