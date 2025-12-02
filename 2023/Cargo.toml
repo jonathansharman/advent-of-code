@@ -4,8 +4,8 @@ name = "aoc-2023"
 version = "0.1.0"
 
 [dependencies]
-itertools = "0.13.0"
+itertools = "0.14.0"
 num = "0.4.3"
-rayon = "1.10.0"
-z3 = { version = "0.12.1", features = ["static-link-z3"] }
+rayon = "1.11.0"
+z3 = { version = "0.19.5", features = ["static-link-z3"] }
 aoc = { path = ".." }
