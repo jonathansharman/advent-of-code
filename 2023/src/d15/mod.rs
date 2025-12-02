@@ -53,7 +53,7 @@ pub fn part2() -> usize {
 		.unwrap()
 		.split(',')
 		.fold(LensBoxes::new(), |mut acc, s| {
-			let (label, rhs) = s.split_once(|c| c == '-' || c == '=').unwrap();
+			let (label, rhs) = s.split_once(['-', '=']).unwrap();
 			let h = hash(label);
 			if rhs.is_empty() {
 				acc.0[h].remove(label)

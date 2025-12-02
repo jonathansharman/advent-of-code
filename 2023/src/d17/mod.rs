@@ -75,24 +75,3 @@ fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Digraph<Coords> {
 	}
 	graph
 }
-
-#[derive(PartialEq, Eq)]
-struct State {
-	cost: usize,
-	coords: Coords,
-}
-
-impl Ord for State {
-	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-		other
-			.cost
-			.cmp(&self.cost)
-			.then_with(|| self.coords.cmp(&other.coords))
-	}
-}
-
-impl PartialOrd for State {
-	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-		Some(self.cmp(other))
-	}
-}

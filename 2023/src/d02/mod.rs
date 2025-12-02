@@ -48,7 +48,7 @@ pub fn part1() -> usize {
 	input!()
 		.lines()
 		.filter_map(|line| {
-			let game = parse_game(&line);
+			let game = parse_game(line);
 			for draw in game.draws {
 				if draw.red > 12 || draw.green > 13 || draw.blue > 14 {
 					return None;
@@ -63,7 +63,7 @@ pub fn part2() -> usize {
 	input!()
 		.lines()
 		.map(|line| {
-			let game = parse_game(&line);
+			let game = parse_game(line);
 			let draw = game
 				.draws
 				.into_iter()
