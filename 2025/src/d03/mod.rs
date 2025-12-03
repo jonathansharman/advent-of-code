@@ -62,40 +62,25 @@ fn max_jolts<'a>(
 	max
 }
 
-pub fn part1() -> usize {
+fn solve(max_batteries: usize) -> usize {
 	input!()
 		.lines()
 		.map(|bank| {
-			let batteries = bank.as_bytes();
-			batteries[..batteries.len() - 1]
-				.iter()
-				.enumerate()
-				.map(|(i, b1)| {
-					batteries[i + 1..]
-						.iter()
-						.map(|b2| (10 * (b1 - b'0') + b2 - b'0') as usize)
-						.max()
-						.unwrap()
-				})
-				.max()
-				.unwrap()
+			max_jolts(
+				&mut HashMap::new(),
+				State {
+					bank: bank.as_bytes(),
+					batteries_left: max_batteries,
+				},
+			)
 		})
 		.sum()
 }
 
+pub fn part1() -> usize {
+	solve(2)
+}
+
 pub fn part2() -> usize {
-	input!()
-		.lines()
-		.map(|bank| {
-			let max = max_jolts(
-				&mut HashMap::new(),
-				State {
-					bank: bank.as_bytes(),
-					batteries_left: 12,
-				},
-			);
-			println!("{max}");
-			max
-		})
-		.sum()
+	solve(12)
 }
