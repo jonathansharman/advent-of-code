@@ -33,30 +33,33 @@ fn max_jolts<'a>(
 	// Convert first battery character to integer.
 	let first = (first - b'0') as usize;
 
-	let without_first = max_jolts(
+	// Recursively compute the max for the rest of the bank after the first,
+	// using all remaining batteries.
+	let max1 = max_jolts(
 		cache,
 		State {
 			bank: rest,
-			..state
+			batteries_left: state.batteries_left,
 		},
 	);
-	let with_first = max_jolts(
+
+	// Compute the max for the rest when spending one battery on the first.
+	let max2 = max_jolts(
 		cache,
 		State {
 			bank: rest,
 			batteries_left: state.batteries_left - 1,
 		},
 	);
-	let with_first = if with_first == 0 {
-		first
-	} else {
-		(first.to_string() + &with_first.to_string())
-			.parse()
-			.unwrap()
-	};
 
-	// Compute and cache the answer.
-	let max = without_first.max(with_first);
+	// Combine the smaller subresult with the first battery, which needs to be
+	// shifted based on the number of digits in the subresult.
+	let max2 = max2
+		.checked_ilog10()
+		.map_or(first, |log| first * 10usize.pow(log + 1) + max2);
+
+	// Compute and cache the answer as the better of the two choices.
+	let max = max1.max(max2);
 	cache.insert(state, max);
 
 	max
