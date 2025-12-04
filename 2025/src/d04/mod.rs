@@ -32,7 +32,7 @@ pub fn part2() -> usize {
 	let mut queue = free_coords(&rolls).collect::<BTreeSet<_>>();
 	let mut removed = 0;
 	while let Some(p) = queue.pop_first() {
-		if !rolls[p] || !is_free(&rolls, p) {
+		if !is_free(&rolls, p) {
 			continue;
 		}
 		rolls[p] = false;
