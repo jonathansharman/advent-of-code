@@ -8,7 +8,7 @@ aoc::test::test_part!(test2, part2, 342018167474526);
 
 type Range = RangeInclusive<usize>;
 
-fn get_ranges(lines: &mut impl Iterator<Item = &'static str>) -> Vec<Range> {
+fn parse_ranges(lines: &mut impl Iterator<Item = &'static str>) -> Vec<Range> {
 	lines
 		.by_ref()
 		.map_while(|line| {
@@ -24,18 +24,6 @@ fn get_ranges(lines: &mut impl Iterator<Item = &'static str>) -> Vec<Range> {
 		.collect()
 }
 
-pub fn part1() -> usize {
-	let mut lines = input!().lines();
-	let ranges = get_ranges(lines.by_ref());
-	lines
-		.filter(|&ingredient| {
-			ranges
-				.iter()
-				.any(|range| range.contains(&ingredient.parse().unwrap()))
-		})
-		.count()
-}
-
 /// The overlapping range of `r1` and `r2` or else `None`.
 fn merge_ranges(r1: &Range, r2: &Range) -> Option<Range> {
 	// Ensure the lower bound of r1 is not greater than that of r2.
@@ -49,9 +37,9 @@ fn merge_ranges(r1: &Range, r2: &Range) -> Option<Range> {
 		.then_some(*r1.start()..=*(r1.end().max(r2.end())))
 }
 
-pub fn part2() -> usize {
+fn merge_all_ranges(ranges: Vec<Range>) -> Vec<Range> {
 	let mut merged = Vec::new();
-	let mut queue = get_ranges(&mut input!().lines());
+	let mut queue = ranges;
 	'queue: while let Some(next) = queue.pop() {
 		for i in 0..merged.len() {
 			if let Some(new) = merge_ranges(&merged[i], &next) {
@@ -63,6 +51,22 @@ pub fn part2() -> usize {
 		merged.push(next);
 	}
 	merged
+}
+
+pub fn part1() -> usize {
+	let mut lines = input!().lines();
+	let ranges = merge_all_ranges(parse_ranges(lines.by_ref()));
+	lines
+		.filter(|&ingredient| {
+			ranges
+				.iter()
+				.any(|range| range.contains(&ingredient.parse().unwrap()))
+		})
+		.count()
+}
+
+pub fn part2() -> usize {
+	merge_all_ranges(parse_ranges(&mut input!().lines()))
 		.into_iter()
 		.map(|range| range.end() - range.start() + 1)
 		.sum()
