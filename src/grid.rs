@@ -42,8 +42,23 @@ impl<T> Grid<T> {
 	}
 
 	/// An iterator over the grid's coordinate-tile pairs.
-	pub fn iter(&self) -> GridIter<'_, T> {
-		self.into_iter()
+	pub fn iter(&self) -> impl DoubleEndedIterator<Item = (Point, &T)> {
+		let col_count = self.col_count();
+		self.tiles.iter().enumerate().map(move |(i, value)| {
+			let coords = Point::new(i as i64 / col_count, i as i64 % col_count);
+			(coords, value)
+		})
+	}
+
+	/// An iterator over pairs of grid coordinates and mutable tile references.
+	pub fn iter_mut(
+		&mut self,
+	) -> impl DoubleEndedIterator<Item = (Point, &mut T)> {
+		let col_count = self.col_count();
+		self.tiles.iter_mut().enumerate().map(move |(i, value)| {
+			let coords = Point::new(i as i64 / col_count, i as i64 % col_count);
+			(coords, value)
+		})
 	}
 
 	/// Converts the grid into a vector of all of its tiles.
