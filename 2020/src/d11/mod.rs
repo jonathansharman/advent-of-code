@@ -46,7 +46,6 @@ pub fn part2() -> usize {
 	while evolve2(&mut layout, &los_neighbors) {}
 	layout
 		.tiles()
-		.iter()
 		.filter(|&&space| space == Space::Occupied)
 		.count()
 }

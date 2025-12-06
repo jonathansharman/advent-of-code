@@ -51,17 +51,14 @@ impl<T> Grid<T> {
 		self.tiles
 	}
 
-	// TODO: Implement Tiles and TilesMut iterators, similar to Rows and
-	// RowsMut, and use them to implement tiles and tiles_mut?
-
-	/// A slice of all the tiles in the grid.
-	pub fn tiles(&self) -> &[T] {
-		&self.tiles
+	/// An iterator over all the tiles in the grid.
+	pub fn tiles(&self) -> impl DoubleEndedIterator<Item = &T> {
+		self.tiles.iter()
 	}
 
-	/// Mutable references to all the tiles in the grid.
-	pub fn tiles_mut(&mut self) -> &mut [T] {
-		&mut self.tiles
+	/// An iterator over mutable references to all the tiles in the grid.
+	pub fn tiles_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut T> {
+		self.tiles.iter_mut()
 	}
 
 	/// An iterator over the coordinate-tile pairs orthogonally adjacent to
@@ -89,14 +86,16 @@ impl<T> Grid<T> {
 	}
 
 	/// An iterator over the rows of the grid.
-	pub fn rows(&self) -> impl Iterator<Item = Row<'_, T>> {
+	pub fn rows(&self) -> impl DoubleEndedIterator<Item = Row<'_, T>> {
 		self.tiles
 			.chunks_exact(self.size.col as usize)
 			.map(|chunk| Row { tiles: chunk })
 	}
 
 	/// An iterator over mutable references to the rows of the grid.
-	pub fn rows_mut(&mut self) -> impl Iterator<Item = RowMut<'_, T>> {
+	pub fn rows_mut(
+		&mut self,
+	) -> impl DoubleEndedIterator<Item = RowMut<'_, T>> {
 		self.tiles
 			.chunks_exact_mut(self.size.col as usize)
 			.map(|chunk| RowMut { tiles: chunk })
@@ -126,7 +125,9 @@ impl<T> Grid<T> {
 	}
 
 	/// An iterator over the columns of the grid.
-	pub fn cols(&self) -> impl Iterator<Item = impl Iterator<Item = &T>> {
+	pub fn cols(
+		&self,
+	) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &T>> {
 		(0..self.size.col).map(|col_idx| {
 			self.tiles
 				.iter()
@@ -141,7 +142,10 @@ impl<T> Grid<T> {
 
 	/// An iterator over the elements of the column at `col_idx`, if there is
 	/// one.
-	pub fn get_col(&self, col_idx: i64) -> Option<impl Iterator<Item = &T>> {
+	pub fn get_col(
+		&self,
+		col_idx: i64,
+	) -> Option<impl DoubleEndedIterator<Item = &T>> {
 		(0..=self.size.col).contains(&col_idx).then(move || {
 			self.tiles
 				.iter()
@@ -155,7 +159,7 @@ impl<T> Grid<T> {
 	pub fn get_col_mut(
 		&mut self,
 		col_idx: i64,
-	) -> Option<impl Iterator<Item = &mut T>> {
+	) -> Option<impl DoubleEndedIterator<Item = &mut T>> {
 		(0..=self.size.col).contains(&col_idx).then(move || {
 			self.tiles
 				.iter_mut()
@@ -423,6 +427,14 @@ impl<'a, T> Iterator for Row<'a, T> {
 	}
 }
 
+impl<'a, T> DoubleEndedIterator for Row<'a, T> {
+	fn next_back(&mut self) -> Option<Self::Item> {
+		let (last, rest) = self.tiles.split_last()?;
+		self.tiles = rest;
+		Some(last)
+	}
+}
+
 impl<T, Idx> Index<Idx> for Row<'_, T>
 where
 	Idx: std::slice::SliceIndex<[T]>,
@@ -459,6 +471,15 @@ impl<'a, T> Iterator for RowMut<'a, T> {
 		let (first, rest) = tiles.split_first_mut()?;
 		self.tiles = rest;
 		Some(first)
+	}
+}
+
+impl<'a, T> DoubleEndedIterator for RowMut<'a, T> {
+	fn next_back(&mut self) -> Option<Self::Item> {
+		let tiles = std::mem::take(&mut self.tiles);
+		let (last, rest) = tiles.split_last_mut()?;
+		self.tiles = rest;
+		Some(last)
 	}
 }
 
