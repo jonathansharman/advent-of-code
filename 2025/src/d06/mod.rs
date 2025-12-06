@@ -1,50 +1,53 @@
-use aoc::{grid::Grid, input};
+use aoc::{grid::Grid, input, input::ParseGrid};
 
 aoc::test::test_part!(test1, part1, 5784380717354);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 7996218225744);
 
-struct Problem {
-	operands: Vec<usize>,
-	operation: fn(usize, usize) -> usize,
-}
-
-fn parse_problems() -> Vec<Problem> {
-	let mut grid: Grid<&'static str> = input!()
-		.lines()
-		.map(|line| line.split_whitespace().collect())
-		.collect();
-	grid.transpose();
-	grid.rows()
-		.map(|column| {
-			let column = column.copied().collect::<Vec<&'static str>>();
-			Problem {
-				operands: column[..column.len() - 1]
-					.iter()
-					.map(|n| n.parse().unwrap())
-					.collect(),
-				operation: if column[column.len() - 1] == "*" {
-					|a, b| a * b
-				} else {
-					|a, b| a + b
-				},
-			}
-		})
-		.collect()
+fn op(s: char) -> fn(usize, usize) -> usize {
+	if s == '*' { |a, b| a * b } else { |a, b| a + b }
 }
 
 pub fn part1() -> usize {
-	parse_problems()
-		.into_iter()
-		.map(|problem| {
-			problem
-				.operands
-				.into_iter()
-				.reduce(problem.operation)
+	input!()
+		.lines()
+		.map(|line| line.split_whitespace().collect())
+		.collect::<Grid<&'static str>>()
+		.cols()
+		.map(|column| {
+			let column = column.copied().collect::<Vec<&'static str>>();
+			column[..column.len() - 1]
+				.iter()
+				.map(|n| n.parse().unwrap())
+				.reduce(op(column[column.len() - 1].chars().next().unwrap()))
 				.unwrap()
 		})
 		.sum()
 }
 
 pub fn part2() -> usize {
-	0
+	let mut total = 0;
+	let mut operands = Vec::new();
+	for column in input!().parse_grid(|c| c).cols().rev() {
+		let mut n = 0;
+		for &c in column {
+			match c {
+				' ' => {
+					if n != 0 {
+						operands.push(n);
+						n = 0;
+					}
+				}
+				'+' | '*' => {
+					if n != 0 {
+						operands.push(n);
+						n = 0;
+					}
+					total += operands.iter().copied().reduce(op(c)).unwrap();
+					operands.clear();
+				}
+				_ => n = n * 10 + c.to_digit(10).unwrap() as usize,
+			}
+		}
+	}
+	total
 }
