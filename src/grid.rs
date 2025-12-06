@@ -333,6 +333,13 @@ impl<T> FromIterator<Vec<T>> for Grid<T> {
 	}
 }
 
+// TODO: Once impl_trait_in_assoc_type is stabilized (tracking issue:
+// https://github.com/rust-lang/rust/issues/63063), eliminate the GridIter and
+// implement IntoIterator for &Grid using Grid::iter and for &mut Grid using
+// Grid::iter_mut. impl_trait_in_assoc_type is necessary in order to define the
+// IntoIter associated types without having to name the complicated concrete
+// iterator types that Grid::iter and Grid::iter_mut return.
+
 /// An iterator over a [`Grid`]'s coordinate-tile pairs.
 pub struct GridIter<'a, T> {
 	grid: &'a Grid<T>,
@@ -359,24 +366,6 @@ impl<'a, T> Iterator for GridIter<'a, T> {
 }
 
 impl<'a, T> IntoIterator for &'a Grid<T> {
-	type Item = (Point, &'a T);
-
-	type IntoIter = GridIter<'a, T>;
-
-	fn into_iter(self) -> Self::IntoIter {
-		GridIter {
-			grid: self,
-			coords: Point::zero(),
-		}
-	}
-}
-
-// TODO: Implement Grid::iter_mut and IntoIterator for &mut Grid using
-// Grid::iter_mut once the use of impl trait in associated types is stabilized.
-// At the same time, could probably get rid of GridIter and reimplement Iterator
-// for &Grid more simply using Grid::iter.
-
-impl<'a, T> IntoIterator for &'a mut Grid<T> {
 	type Item = (Point, &'a T);
 
 	type IntoIter = GridIter<'a, T>;
