@@ -41,7 +41,7 @@ impl State {
 			.map(|line| {
 				let (lhs, out) = line.split_once(" -> ").unwrap();
 				let (in1, op, in2) =
-					lhs.split_whitespace().tuples().next().unwrap();
+					lhs.split_whitespace().collect_tuple().unwrap();
 				let op = match op {
 					"AND" => Op::And,
 					"OR" => Op::Or,
