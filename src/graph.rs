@@ -339,6 +339,17 @@ impl<T: Node> Digraph<T> {
 	}
 }
 
+impl<T: Node> FromIterator<(T, T, usize)> for Digraph<T> {
+	fn from_iter<E: IntoIterator<Item = (T, T, usize)>>(edges: E) -> Self {
+		edges
+			.into_iter()
+			.fold(Digraph::new(), |mut acc, (from, to, weight)| {
+				acc.insert_edge(from, to, weight);
+				acc
+			})
+	}
+}
+
 impl<T: Node> std::fmt::Debug for Digraph<T>
 where
 	T: std::fmt::Debug,
@@ -470,6 +481,17 @@ impl<T: Node> Graph<T> {
 	/// shortest distance between them.
 	pub fn all_to_all_shortest_distances(&self) -> Digraph<T> {
 		self.0.all_to_all_shortest_distances()
+	}
+}
+
+impl<T: Node> FromIterator<(T, T, usize)> for Graph<T> {
+	fn from_iter<E: IntoIterator<Item = (T, T, usize)>>(edges: E) -> Self {
+		edges
+			.into_iter()
+			.fold(Graph::new(), |mut acc, (from, to, weight)| {
+				acc.insert_edge(from, to, weight);
+				acc
+			})
 	}
 }
 
