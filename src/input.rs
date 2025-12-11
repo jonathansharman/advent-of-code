@@ -34,7 +34,7 @@ pub trait ParseCommaSeparated {
 		<Item as std::str::FromStr>::Err: std::fmt::Debug;
 }
 
-impl ParseCommaSeparated for &'static str {
+impl ParseCommaSeparated for &str {
 	fn parse_comma_separated<Item>(&self) -> impl Iterator<Item = Item> + '_
 	where
 		Item: std::str::FromStr,
