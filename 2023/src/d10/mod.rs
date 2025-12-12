@@ -176,25 +176,26 @@ pub fn part2() -> usize {
 			// traveling tangent to the loop and crossing over an inflection
 			// point.
 			let mut north = false;
-			for jj in 0..j {
-				if loop_tiles.contains(&(i, jj)) {
-					match pipes[i][jj] {
-						Pipe::NorthSouth => intersections += 1,
-						Pipe::NorthEast => north = true,
-						Pipe::NorthWest => {
-							if !north {
-								intersections += 1;
-							}
-							north = false;
+			for (jj, pipe) in pipes[i].iter().take(j).enumerate() {
+				if !loop_tiles.contains(&(i, jj)) {
+					continue;
+				}
+				match pipe {
+					Pipe::NorthSouth => intersections += 1,
+					Pipe::NorthEast => north = true,
+					Pipe::NorthWest => {
+						if !north {
+							intersections += 1;
 						}
-						Pipe::SouthWest => {
-							if north {
-								intersections += 1;
-							}
-							north = false;
-						}
-						_ => {}
+						north = false;
 					}
+					Pipe::SouthWest => {
+						if north {
+							intersections += 1;
+						}
+						north = false;
+					}
+					_ => {}
 				}
 			}
 			if intersections % 2 == 1 {
