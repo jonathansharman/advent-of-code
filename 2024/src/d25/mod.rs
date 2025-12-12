@@ -9,11 +9,7 @@ pub fn part1() -> usize {
 
 	let mut lines = input!().lines();
 	loop {
-		let grid: Grid<char> = lines
-			.by_ref()
-			.take(7)
-			.map(|line| line.chars().collect())
-			.collect();
+		let grid: Grid<char> = lines.by_ref().take(7).map(str::chars).collect();
 		let item: Vec<usize> = grid
 			.cols()
 			.map(|col| col.filter(|&&c| c == '#').count())

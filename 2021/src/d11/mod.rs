@@ -11,7 +11,7 @@ const WIDTH: usize = 10;
 pub fn part1() -> usize {
 	let mut grid: Grid<u32> = input!()
 		.lines()
-		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()))
 		.collect();
 	let mut flashes = 0;
 	let mut queue = Vec::new();
@@ -44,7 +44,7 @@ pub fn part1() -> usize {
 pub fn part2() -> i64 {
 	let mut grid: Grid<u32> = input!()
 		.lines()
-		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()))
 		.collect();
 	let mut queue = Vec::new();
 	let mut time = 0;

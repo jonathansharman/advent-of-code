@@ -38,7 +38,7 @@ fn read_map() -> Map {
 					};
 					h as u32
 				})
-				.collect()
+				.collect::<Vec<_>>()
 		})
 		.collect();
 	Map {

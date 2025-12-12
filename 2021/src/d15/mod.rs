@@ -18,7 +18,7 @@ pub fn part2() -> u32 {
 fn read_maze() -> Grid<u32> {
 	input!()
 		.lines()
-		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect())
+		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()))
 		.collect()
 }
 

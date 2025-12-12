@@ -313,8 +313,8 @@ impl<T> Grid<T> {
 	}
 }
 
-impl<T> FromIterator<Vec<T>> for Grid<T> {
-	fn from_iter<I: IntoIterator<Item = Vec<T>>>(iter: I) -> Self {
+impl<T, Row: IntoIterator<Item = T>> FromIterator<Row> for Grid<T> {
+	fn from_iter<I: IntoIterator<Item = Row>>(iter: I) -> Self {
 		let tiles: Vec<Vec<T>> = iter
 			.into_iter()
 			.map(|row| row.into_iter().collect())

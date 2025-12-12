@@ -10,7 +10,7 @@ fn op(s: char) -> fn(usize, usize) -> usize {
 pub fn part1() -> usize {
 	input!()
 		.lines()
-		.map(|line| line.split_whitespace().collect())
+		.map(str::split_whitespace)
 		.collect::<Grid<&'static str>>()
 		.cols()
 		.map(|column| {

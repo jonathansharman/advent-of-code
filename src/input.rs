@@ -50,8 +50,6 @@ pub trait ParseGrid {
 
 impl ParseGrid for &'static str {
 	fn parse_grid<T>(&self, f: impl Fn(char) -> T) -> Grid<T> {
-		self.lines()
-			.map(|line| line.chars().map(&f).collect())
-			.collect()
+		self.lines().map(|line| line.chars().map(&f)).collect()
 	}
 }

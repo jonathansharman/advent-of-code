@@ -40,7 +40,7 @@ pub fn part2() -> usize {
 					})
 					.collect()
 				})
-				.collect()
+				.collect::<Vec<_>>()
 		})
 		.collect();
 	while evolve2(&mut layout, &los_neighbors) {}
@@ -72,14 +72,12 @@ fn read_layout() -> Grid<Space> {
 	input!()
 		.lines()
 		.map(|line| {
-			line.chars()
-				.map(|c| match c {
-					'.' => Space::Floor,
-					'L' => Space::Empty,
-					'#' => Space::Occupied,
-					_ => panic!("invalid character"),
-				})
-				.collect()
+			line.chars().map(|c| match c {
+				'.' => Space::Floor,
+				'L' => Space::Empty,
+				'#' => Space::Occupied,
+				_ => panic!("invalid character"),
+			})
 		})
 		.collect()
 }
@@ -111,7 +109,7 @@ fn evolve(layout: &mut Grid<Space>) -> bool {
 						_ => *space,
 					}
 				})
-				.collect()
+				.collect::<Vec<_>>()
 		})
 		.collect();
 	if changed {
@@ -147,7 +145,7 @@ fn evolve2(layout: &mut Grid<Space>, los_neighbors: &Grid<Vec<Point>>) -> bool {
 						_ => *space,
 					}
 				})
-				.collect()
+				.collect::<Vec<_>>()
 		})
 		.collect();
 	if changed {

@@ -10,10 +10,7 @@ aoc::test::test_part!(test1, part1, 1437300);
 aoc::test::test_part!(test2, part2, 849332);
 
 fn read_grid() -> Grid<char> {
-	input!()
-		.lines()
-		.map(|line| line.chars().collect())
-		.collect()
+	input!().lines().map(str::chars).collect()
 }
 
 pub fn part1() -> usize {

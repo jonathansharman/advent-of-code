@@ -4,7 +4,7 @@ use std::{
 };
 
 use aoc::{
-	grid::{Grid, Point, Vector},
+	grid::{EAST, Grid, NORTH, Point, SOUTH, Vector, WEST},
 	input,
 };
 
@@ -57,7 +57,6 @@ impl Warehouse {
 					Tile::Wall => [Tile::Wall; 2],
 					_ => panic!("inexpansible tile"),
 				})
-				.collect()
 			})
 			.collect();
 		Warehouse { robot, tiles }
@@ -109,7 +108,7 @@ impl Warehouse {
 					);
 				}
 				// Vertical pushes can cause a tree of additional pushes.
-				let right_coords = coords + Vector::new(0, 1);
+				let right_coords = coords + EAST;
 				self.push(visited, right_coords + offset, offset).and_then(
 					|mut to_move| {
 						if !visited.contains(&right_coords) {
@@ -138,7 +137,7 @@ impl Warehouse {
 					);
 				}
 				// Vertical pushes can cause a tree of additional pushes.
-				let left_coords = coords - Vector::new(0, 1);
+				let left_coords = coords + WEST;
 				self.push(visited, left_coords + offset, offset).and_then(
 					|mut to_move| {
 						if !visited.contains(&left_coords) {
@@ -189,9 +188,9 @@ fn read() -> (Warehouse, Vec<Vector>) {
 						'.' => Tile::Floor,
 						'O' => Tile::Box,
 						'#' => Tile::Wall,
-						_ => panic!("invalid tile"),
+						_ => panic!("invalid tile '{c}' at index {j}"),
 					})
-					.collect()
+					.collect::<Vec<_>>()
 			})
 		})
 		.collect();
@@ -199,10 +198,10 @@ fn read() -> (Warehouse, Vec<Vector>) {
 		.flat_map(|line| {
 			line.chars()
 				.map(|b| match b {
-					'^' => Vector::new(-1, 0),
-					'v' => Vector::new(1, 0),
-					'<' => Vector::new(0, -1),
-					'>' => Vector::new(0, 1),
+					'^' => NORTH,
+					'v' => SOUTH,
+					'<' => WEST,
+					'>' => EAST,
 					_ => panic!("invalid movement"),
 				})
 				.collect::<Vec<_>>()

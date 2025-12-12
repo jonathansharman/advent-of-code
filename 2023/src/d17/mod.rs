@@ -1,4 +1,8 @@
-use aoc::{graph::Digraph, input};
+use aoc::{
+	graph::Digraph,
+	grid::{Grid, Point},
+	input,
+};
 
 aoc::test::test_part!(test1, part1, 970);
 aoc::test::test_part!(test2, part2, 1149);
@@ -11,13 +15,13 @@ pub fn part2() -> usize {
 	solve(4, 10)
 }
 
-type Coords = (usize, usize, usize);
+type Coords = (i64, i64, i64);
 
-fn solve(min: usize, max: usize) -> usize {
+fn solve(min: i64, max: i64) -> usize {
 	let costs = read_costs();
 	let graph = get_graph(&costs, min, max);
 	let pred = |c: &Coords| -> bool {
-		c.0 == costs.len() - 1 && c.1 == costs[0].len() - 1
+		c.0 == costs.row_count() - 1 && c.1 == costs.col_count() - 1
 	};
 	graph
 		.shortest_distance((0, 0, 0), pred)
@@ -25,50 +29,55 @@ fn solve(min: usize, max: usize) -> usize {
 		.unwrap()
 }
 
-fn read_costs() -> Vec<Vec<usize>> {
+fn read_costs() -> Grid<usize> {
 	input!()
 		.lines()
-		.map(|line| line.bytes().map(|b| (b - b'0') as usize).collect())
+		.map(|line| line.bytes().map(|b| (b - b'0') as usize))
 		.collect()
 }
 
-fn get_graph(costs: &[Vec<usize>], min: usize, max: usize) -> Digraph<Coords> {
-	let (n, m) = (costs.len(), costs[0].len());
+fn get_graph(costs: &Grid<usize>, min: i64, max: i64) -> Digraph<Coords> {
 	// Model the graph as two planes. Each move must move between min and max
 	// spaces vertically or horizontally (depending on the current plane) and
 	// move to the other plane, to force alternating horizontal and vertical
 	// move sequences.
 	let mut graph = Digraph::new();
-	for i in 0..n {
-		for j in 0..m {
-			let n0 = (i, j, 0);
-			let mut cost = 0;
-			for ii in (i.saturating_sub(max)..i).rev() {
-				cost += costs[ii][j];
-				if i.abs_diff(ii) >= min {
-					graph.insert_edge(n0, (ii, j, 1), cost);
+	for (p, _) in costs {
+		let n0 = (p.row, p.col, 0);
+		let mut cost = 0;
+		for row in (p.row - max..p.row).rev() {
+			if let Some(c) = costs.get(Point::new(row, p.col)) {
+				cost += c;
+				if p.row - row >= min {
+					graph.insert_edge(n0, (row, p.col, 1), cost);
 				}
 			}
-			let mut cost = 0;
-			for (ii, c) in costs.iter().enumerate().skip(i + 1).take(max) {
-				cost += c[j];
-				if i.abs_diff(ii) >= min {
-					graph.insert_edge(n0, (ii, j, 1), cost);
+		}
+		let mut cost = 0;
+		for row in p.row + 1..=p.row + max {
+			if let Some(c) = costs.get(Point::new(row, p.col)) {
+				cost += c;
+				if row - p.row >= min {
+					graph.insert_edge(n0, (row, p.col, 1), cost);
 				}
 			}
-			let n1 = (i, j, 1);
-			let mut cost = 0;
-			for jj in (j.saturating_sub(max)..j).rev() {
-				cost += costs[i][jj];
-				if j.abs_diff(jj) >= min {
-					graph.insert_edge(n1, (i, jj, 0), cost);
+		}
+		let n1 = (p.row, p.col, 1);
+		let mut cost = 0;
+		for col in (p.col - max..p.col).rev() {
+			if let Some(c) = costs.get(Point::new(p.row, col)) {
+				cost += c;
+				if p.col - col >= min {
+					graph.insert_edge(n1, (p.row, col, 0), cost);
 				}
 			}
-			let mut cost = 0;
-			for jj in j + 1..=(j + max).min(m - 1) {
-				cost += costs[i][jj];
-				if j.abs_diff(jj) >= min {
-					graph.insert_edge(n1, (i, jj, 0), cost);
+		}
+		let mut cost = 0;
+		for col in p.col + 1..=p.col + max {
+			if let Some(c) = costs.get(Point::new(p.row, col)) {
+				cost += c;
+				if col - p.col >= min {
+					graph.insert_edge(n1, (p.row, col, 0), cost);
 				}
 			}
 		}

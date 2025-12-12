@@ -1,53 +1,29 @@
-use aoc::input;
+use aoc::{
+	grid::{EAST, Grid, Point, SOUTH, SOUTHEAST, Vector},
+	input,
+};
 
 aoc::test::test_part!(test1, part1, 2496);
 aoc::test::test_part!(test2, part2, 1967);
 
-fn xmas(
-	word_search: &[Vec<char>],
-	row: isize,
-	col: isize,
-	drow: isize,
-	dcol: isize,
-) -> bool {
-	if row + drow < 0
-		|| row + drow >= word_search.len() as isize
-		|| col + dcol < 0
-		|| col + dcol >= word_search[0].len() as isize
-	{
-		return false;
-	}
-	let x = word_search
-		.get(row as usize)
-		.and_then(|line| line.get(col as usize))
-		.map(|c| *c == 'X')
-		.unwrap_or(false);
-	let m = word_search
-		.get((row + drow) as usize)
-		.and_then(|line| line.get((col + dcol) as usize))
-		.map(|c| *c == 'M')
-		.unwrap_or(false);
-	let a = word_search
-		.get((row + 2 * drow) as usize)
-		.and_then(|line| line.get((col + 2 * dcol) as usize))
-		.map(|c| *c == 'A')
-		.unwrap_or(false);
-	let s = word_search
-		.get((row + 3 * drow) as usize)
-		.and_then(|line| line.get((col + 3 * dcol) as usize))
-		.map(|c| *c == 'S')
-		.unwrap_or(false);
-	x && m && a && s
+fn xmas(word_search: &Grid<char>, p: Point, v: Vector) -> bool {
+	word_search.get(p).map(|c| *c == 'X').unwrap_or(false)
+		&& word_search.get(p + v).map(|c| *c == 'M').unwrap_or(false)
+		&& word_search
+			.get(p + 2 * v)
+			.map(|c| *c == 'A')
+			.unwrap_or(false)
+		&& word_search
+			.get(p + 3 * v)
+			.map(|c| *c == 'S')
+			.unwrap_or(false)
 }
 
 pub fn part1() -> usize {
-	let word_search: Vec<Vec<char>> = input!()
-		.lines()
-		.map(|line| line.chars().collect())
-		.collect();
+	let word_search: Grid<char> = input!().lines().map(str::chars).collect();
 	let mut sum = 0;
-	for row in 0..word_search.len() {
-		for col in 0..word_search[row].len() {
+	for row in 0..word_search.row_count() {
+		for col in 0..word_search.col_count() {
 			for drow in -1..=1 {
 				for dcol in -1..=1 {
 					if drow == 0 && dcol == 0 {
@@ -55,10 +31,8 @@ pub fn part1() -> usize {
 					}
 					if xmas(
 						&word_search,
-						row as isize,
-						col as isize,
-						drow,
-						dcol,
+						Point::new(row, col),
+						Vector::new(drow, dcol),
 					) {
 						sum += 1;
 					}
@@ -69,29 +43,26 @@ pub fn part1() -> usize {
 	sum
 }
 
-fn x_mas(word_search: &[Vec<char>], row: usize, col: usize) -> bool {
+fn x_mas(word_search: &Grid<char>, p: Point) -> bool {
 	matches!(
 		(
-			word_search[row][col],
-			word_search[row + 1][col + 1],
-			word_search[row + 2][col + 2]
+			word_search[p],
+			word_search[p + SOUTHEAST],
+			word_search[p + 2 * SOUTHEAST]
 		),
 		('M', 'A', 'S') | ('S', 'A', 'M')
 	) && matches!(
-		(word_search[row + 2][col], word_search[row][col + 2]),
+		(word_search[p + 2 * SOUTH], word_search[p + 2 * EAST]),
 		('M', 'S') | ('S', 'M')
 	)
 }
 
 pub fn part2() -> usize {
-	let word_search: Vec<Vec<char>> = input!()
-		.lines()
-		.map(|line| line.chars().collect())
-		.collect();
+	let word_search: Grid<char> = input!().lines().map(str::chars).collect();
 	let mut sum = 0;
-	for row in 0..word_search.len() - 2 {
-		for col in 0..word_search[row].len() - 2 {
-			if x_mas(&word_search, row, col) {
+	for row in 0..word_search.row_count() - 2 {
+		for col in 0..word_search.col_count() - 2 {
+			if x_mas(&word_search, Point::new(row, col)) {
 				sum += 1;
 			}
 		}

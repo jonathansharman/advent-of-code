@@ -17,7 +17,7 @@ type Map = Grid<Option<char>>;
 fn read_map() -> Map {
 	input!()
 		.lines()
-		.map(|line| line.chars().map(|c| (c != '.').then_some(c)).collect())
+		.map(|line| line.chars().map(|c| (c != '.').then_some(c)))
 		.collect()
 }
 

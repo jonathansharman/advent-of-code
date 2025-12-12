@@ -32,7 +32,7 @@ impl Map {
 fn read_map() -> Map {
 	let grid: Grid<_> = input!()
 		.lines()
-		.map(|line| line.bytes().map(|b| b - b'0').collect())
+		.map(|line| line.bytes().map(|b| b - b'0'))
 		.collect();
 	let mut trails = Digraph::new();
 	let mut trailheads = HashSet::new();

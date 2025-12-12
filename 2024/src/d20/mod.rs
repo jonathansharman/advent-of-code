@@ -1,6 +1,6 @@
 use aoc::{
 	graph::{self, DijkstraResults},
-	grid::{Grid, Point, Vector, NORTH, WEST},
+	grid::{Grid, NORTH, Point, Vector, WEST},
 	input,
 };
 
@@ -31,7 +31,7 @@ fn read_maze() -> Maze {
 					}
 					_ => false,
 				})
-				.collect()
+				.collect::<Vec<_>>()
 		})
 		.collect();
 	let graph = graph::from_bool_grid(&grid);

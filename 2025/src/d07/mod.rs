@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fmt::Debug};
 
 use aoc::{
-	grid::{Grid, Point, Vector},
+	grid::{EAST, Grid, Point, SOUTH, SOUTHEAST, SOUTHWEST, WEST},
 	input,
 	input::ParseGrid,
 };
@@ -40,8 +40,8 @@ fn split_beams() -> Grid<Tile> {
 			}
 			let coords = Point::new(i, j);
 			if let Tile::Splitter = diagram[coords] {
-				diagram[coords - Vector::new(0, 1)] = Tile::Beam;
-				diagram[coords + Vector::new(0, 1)] = Tile::Beam;
+				diagram[coords + WEST] = Tile::Beam;
+				diagram[coords + EAST] = Tile::Beam;
 			} else {
 				diagram[coords] = Tile::Beam;
 			}
@@ -76,10 +76,10 @@ fn paths(
 	let paths = match diagram.get(start) {
 		Some(Tile::Space) => panic!("where did the beam go?"),
 		Some(Tile::Splitter) => {
-			paths(cache, diagram, start + Vector::new(1, -1))
-				+ paths(cache, diagram, start + Vector::new(1, 1))
+			paths(cache, diagram, start + SOUTHWEST)
+				+ paths(cache, diagram, start + SOUTHEAST)
 		}
-		Some(Tile::Beam) => paths(cache, diagram, start + Vector::new(1, 0)),
+		Some(Tile::Beam) => paths(cache, diagram, start + SOUTH),
 		None => 1,
 	};
 	cache.insert(start, paths);

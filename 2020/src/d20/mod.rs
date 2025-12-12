@@ -39,7 +39,7 @@ fn read_tiles() -> Vec<Tile> {
 		let grid = lines
 			.by_ref()
 			.take_while(|line| !line.is_empty())
-			.map(|line| line.chars().map(|c| c == '#').collect())
+			.map(|line| line.chars().map(|c| c == '#'))
 			.collect();
 		tiles.push(Tile { id, grid });
 	}
