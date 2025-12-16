@@ -1,10 +1,10 @@
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet};
 
 use aoc::{graph::Graph, input};
 use itertools::Itertools;
 
 aoc::test::test_part!(test1, part1, 68112);
-aoc::test::test_part!(test2, part2, ?);
+aoc::test::test_part!(test2, part2, 44543856);
 
 type Point = [u64; 3];
 
@@ -34,7 +34,7 @@ impl Ord for Edge {
 	}
 }
 
-fn parse_boxes() -> Vec<Point> {
+fn parse_boxes<T: FromIterator<Point>>() -> T {
 	input!()
 		.lines()
 		.map(|line| {
@@ -46,10 +46,12 @@ fn parse_boxes() -> Vec<Point> {
 		.collect()
 }
 
-fn get_closest_edges(boxes: &[Point]) -> BinaryHeap<Edge> {
+fn get_closest_edges<'a>(
+	boxes: impl IntoIterator<Item = &'a Point> + Copy,
+) -> BinaryHeap<Edge> {
 	let mut closest_edges = BinaryHeap::new();
-	for (i, &b1) in boxes.iter().enumerate() {
-		for &b2 in boxes.iter().skip(i + 1) {
+	for (i, &b1) in boxes.into_iter().enumerate() {
+		for &b2 in boxes.into_iter().skip(i + 1) {
 			closest_edges.push(Edge(b1, b2));
 		}
 	}
@@ -57,15 +59,15 @@ fn get_closest_edges(boxes: &[Point]) -> BinaryHeap<Edge> {
 }
 
 pub fn part1() -> usize {
-	let boxes = parse_boxes();
+	let boxes: Vec<Point> = parse_boxes();
 	let mut closest_edges = get_closest_edges(&boxes);
 
 	let mut circuits = Graph::new();
 	for _ in 0..1000 {
-		let Some(edge) = closest_edges.pop() else {
+		let Some(Edge(p1, p2)) = closest_edges.pop() else {
 			break;
 		};
-		circuits.insert_edge(edge.0, edge.1, 1);
+		circuits.insert_edge(p1, p2, 1);
 	}
 
 	let mut largest_circuits = circuits
@@ -76,6 +78,17 @@ pub fn part1() -> usize {
 	(0..3).map(|_| largest_circuits.pop().unwrap()).product()
 }
 
-pub fn part2() -> usize {
-	0
+pub fn part2() -> u64 {
+	let mut boxes: HashSet<Point> = parse_boxes();
+	let mut closest_edges = get_closest_edges(&boxes);
+
+	while let Some(Edge(p1, p2)) = closest_edges.pop() {
+		boxes.remove(&p1);
+		boxes.remove(&p2);
+		if boxes.is_empty() {
+			return p1[0] * p2[0];
+		}
+	}
+
+	panic!("unable to connect all boxes");
 }
