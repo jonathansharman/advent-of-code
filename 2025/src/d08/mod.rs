@@ -3,16 +3,16 @@ use std::collections::BinaryHeap;
 use aoc::{graph::Graph, input};
 use itertools::Itertools;
 
-aoc::test::test_part!(test1, part1, ?); // 15980 is too low
+aoc::test::test_part!(test1, part1, 68112);
 aoc::test::test_part!(test2, part2, ?);
 
-type Point = [u32; 3];
+type Point = [u64; 3];
 
 #[derive(PartialEq, Eq)]
 struct Edge(Point, Point);
 
 impl Edge {
-	fn length_squared(&self) -> u32 {
+	fn length_squared(&self) -> u64 {
 		(self.1[0] - self.0[0]).pow(2)
 			+ (self.1[1] - self.0[1]).pow(2)
 			+ (self.1[2] - self.0[2]).pow(2)
