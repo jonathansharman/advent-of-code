@@ -1,7 +1,7 @@
 use aoc::{input, input::ParseCommaSeparated};
 use regex::Regex;
 
-aoc::test::test_part!(test1, part1, ?);
+aoc::test::test_part!(test1, part1, 436);
 aoc::test::test_part!(test2, part2, ?);
 
 struct Machine {
@@ -12,7 +12,7 @@ struct Machine {
 
 fn parse_machines() -> impl Iterator<Item = Machine> {
 	let lights_regex = Regex::new(r"\[(.+)\]").unwrap();
-	let button_regex = Regex::new(r"\(([0-9,]+)\)").unwrap();
+	let button_regex = Regex::new(r"\(([0-9]+(,[0-9]+)*)\)").unwrap();
 	let joltages_regex = Regex::new(r"\{(.+)\}").unwrap();
 
 	input!().lines().map(move |line| {
@@ -22,17 +22,14 @@ fn parse_machines() -> impl Iterator<Item = Machine> {
 			.map(|(i, c)| if c == '#' { 1 << i } else { 0 })
 			.sum();
 		let buttons = button_regex
-			.captures(line)
-			.unwrap()
-			.iter()
-			.skip(1)
-			.map(|button| {
-				button
+			.captures_iter(line)
+			.map(|captures| {
+				captures
+					.get(1)
 					.unwrap()
 					.as_str()
 					.parse_comma_separated::<u32>()
-					.enumerate()
-					.map(|(i, bit)| bit << i)
+					.map(|bit| 1 << bit)
 					.sum()
 			})
 			.collect();
@@ -49,15 +46,16 @@ fn parse_machines() -> impl Iterator<Item = Machine> {
 
 fn fewest_presses(machine: Machine) -> u32 {
 	(0..2u32.pow(machine.buttons.len() as u32))
-		.filter_map(|mut button_mask| {
+		.filter_map(|button_mask| {
 			let mut lights = 0;
 			let mut i = 0;
-			while button_mask > 0 {
-				if (button_mask & 1) == 1 {
+			let mut bits = button_mask;
+			while bits > 0 {
+				if (bits & 1) == 1 {
 					lights ^= machine.buttons[i];
 				}
 				i += 1;
-				button_mask >>= 1;
+				bits >>= 1;
 			}
 			(lights == machine.lights).then(|| button_mask.count_ones())
 		})
