@@ -34,8 +34,8 @@ impl Ord for Edge {
 	}
 }
 
-pub fn part1() -> usize {
-	let boxes: Vec<Point> = input!()
+fn parse_boxes() -> Vec<Point> {
+	input!()
 		.lines()
 		.map(|line| {
 			line.split(',')
@@ -43,40 +43,37 @@ pub fn part1() -> usize {
 				.collect_array()
 				.unwrap()
 		})
-		.collect();
+		.collect()
+}
 
+fn get_closest_edges(boxes: &[Point]) -> BinaryHeap<Edge> {
 	let mut closest_edges = BinaryHeap::new();
 	for (i, &b1) in boxes.iter().enumerate() {
 		for &b2 in boxes.iter().skip(i + 1) {
 			closest_edges.push(Edge(b1, b2));
 		}
 	}
+	closest_edges
+}
+
+pub fn part1() -> usize {
+	let boxes = parse_boxes();
+	let mut closest_edges = get_closest_edges(&boxes);
 
 	let mut circuits = Graph::new();
 	for _ in 0..1000 {
 		let Some(edge) = closest_edges.pop() else {
 			break;
 		};
-		println!("connecting {:?} and {:?}", edge.0, edge.1);
 		circuits.insert_edge(edge.0, edge.1, 1);
 	}
 
 	let mut largest_circuits = circuits
 		.into_connected_components()
 		.into_iter()
-		.map(|circuit| {
-			println!("circuit of size {}", circuit.nodes().len());
-			circuit.nodes().len()
-		})
+		.map(|circuit| circuit.nodes().len())
 		.collect::<BinaryHeap<_>>();
-
-	(0..3)
-		.map(|_| {
-			let size = largest_circuits.pop().unwrap();
-			println!("top-3 circuit of size {size}");
-			size
-		})
-		.product()
+	(0..3).map(|_| largest_circuits.pop().unwrap()).product()
 }
 
 pub fn part2() -> usize {
