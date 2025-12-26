@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use aoc::{input, input::ParseCommaSeparated};
 use regex::Regex;
 
@@ -6,8 +8,14 @@ aoc::test::test_part!(test2, part2, ?);
 
 struct Machine {
 	lights: u32,
-	buttons: Vec<u32>,
-	joltages: Vec<u32>,
+	buttons: Vec<HashSet<usize>>,
+	joltages: Vec<Joltage>,
+}
+
+#[derive(Clone, Debug)]
+struct Joltage {
+	level: u32,
+	buttons: HashSet<usize>,
 }
 
 fn parse_machines() -> impl Iterator<Item = Machine> {
@@ -21,20 +29,30 @@ fn parse_machines() -> impl Iterator<Item = Machine> {
 			.enumerate()
 			.map(|(i, c)| if c == '#' { 1 << i } else { 0 })
 			.sum();
-		let buttons = button_regex
+		let buttons: Vec<HashSet<usize>> = button_regex
 			.captures_iter(line)
 			.map(|captures| {
 				captures
 					.get(1)
 					.unwrap()
 					.as_str()
-					.parse_comma_separated::<u32>()
-					.map(|bit| 1 << bit)
-					.sum()
+					.parse_comma_separated()
+					.collect()
 			})
 			.collect();
 		let joltages = (&joltages_regex.captures(line).unwrap()[1])
 			.parse_comma_separated()
+			.enumerate()
+			.map(|(i, level)| {
+				let buttons = buttons
+					.iter()
+					.enumerate()
+					.filter_map(|(j, button_joltages)| {
+						button_joltages.contains(&i).then_some(j)
+					})
+					.collect();
+				Joltage { level, buttons }
+			})
 			.collect();
 		Machine {
 			lights,
@@ -51,7 +69,11 @@ fn fewest_presses_lights(machine: Machine) -> u32 {
 			let mut i = 0;
 			let mut bits = button_mask;
 			while bits > 0 {
-				lights ^= (bits & 1) * machine.buttons[i];
+				if (bits & 1) == 1 {
+					for light in &machine.buttons[i] {
+						lights ^= 1 << light;
+					}
+				}
 				i += 1;
 				bits >>= 1;
 			}
@@ -66,39 +88,80 @@ pub fn part1() -> u32 {
 }
 
 fn fewest_presses_joltage(
-	buttons: &[u32],
-	joltages: Vec<u32>,
+	buttons: HashMap<usize, HashSet<usize>>,
+	joltages: HashMap<usize, Joltage>,
 	current_presses: u32,
 ) -> Option<u32> {
-	let Some((first, rest)) = buttons.split_first() else {
-		return joltages
-			.into_iter()
-			.all(|joltage| joltage == 0)
-			.then_some(current_presses);
+	// println!("===");
+	// println!("buttons {buttons:?}");
+	// println!("joltages {joltages:?}");
+	// println!("current_presses {current_presses:?}");
+
+	// Choose the joltage to eliminate based on which has the fewest affecting
+	// buttons, to reduce the search space of possible buttons to press.
+	let Some(joltage) = joltages
+		.values()
+		.min_by(|j1, j2| j1.buttons.len().cmp(&j2.buttons.len()))
+	else {
+		// println!("FOUND A SOLUTION: {current_presses}");
+
+		return Some(current_presses);
 	};
-	// Compute the max number of useful presses of the first button without
-	// immediately exceeding any joltage limits.
-	let max_presses = joltages
+
+	// Try pressing each button some number of times up to the remaining joltage
+	// level, L. As an optimization, if only one button affects this joltage, we
+	// only need to try exactly L presses since pressing it fewer times
+	// certainly can't produce a valid solution.
+	let min_presses = if joltage.buttons.len() == 1 {
+		joltage.level
+	} else {
+		0
+	};
+	joltage
+		.buttons
 		.iter()
-		.enumerate()
-		.filter_map(|(i, &joltage)| {
-			(((first >> i) & 1) == 1).then_some(joltage)
-		})
-		.min()
-		// Every button should affect at least one joltage, but if one doesn't,
-		// then there's no benefit to pressing it.
-		.unwrap_or(0);
-	(0..=max_presses)
-		.filter_map(|presses| {
-			let updated_presses = current_presses + presses;
-			// The problem expresses joltages as increasing with each button
-			// press, but it's simpler to count down.
-			let mut reduced_joltages = joltages.clone();
-			for (i, reduced_joltage) in reduced_joltages.iter_mut().enumerate()
-			{
-				*reduced_joltage -= ((first >> i) & 1) * presses;
-			}
-			fewest_presses_joltage(rest, reduced_joltages, updated_presses)
+		.filter_map(|button_idx| {
+			// println!("pressing {button_idx}");
+
+			let button_joltages = &buttons[button_idx];
+			(min_presses..=joltage.level)
+				.filter_map(|presses| {
+					let next_presses = current_presses + presses;
+
+					// This button will not be pressed again.
+					let mut next_buttons = buttons.clone();
+					next_buttons.remove(button_idx);
+
+					// Update each joltage to account for the button presses.
+					let mut next_joltages = joltages.clone();
+					for joltage_idx in button_joltages {
+						// If a joltage for this button is missing, then that
+						// joltage has already reached zero, and this button
+						// can't be pressed.
+						let joltage = next_joltages.get_mut(joltage_idx)?;
+						// Remove the pressed button from the joltages' button
+						// sets.
+						joltage.buttons.remove(button_idx);
+						// A joltage may not be reduced below zero.
+						joltage.level = joltage.level.checked_sub(presses)?;
+						// Remove a joltage when its level reaches zero.
+						if joltage.level == 0 {
+							next_joltages.remove(joltage_idx);
+						} else if joltage.buttons.is_empty() {
+							// This joltage level wasn't satisfied but also no
+							// longer has any buttons, so there's no solution on
+							// this path.
+							return None;
+						}
+					}
+
+					fewest_presses_joltage(
+						next_buttons,
+						next_joltages,
+						next_presses,
+					)
+				})
+				.min()
 		})
 		.min()
 }
@@ -106,8 +169,12 @@ fn fewest_presses_joltage(
 pub fn part2() -> u32 {
 	parse_machines()
 		.map(|machine| {
-			fewest_presses_joltage(&machine.buttons, machine.joltages, 0)
-				.unwrap()
+			fewest_presses_joltage(
+				machine.buttons.into_iter().enumerate().collect(),
+				machine.joltages.into_iter().enumerate().collect(),
+				0,
+			)
+			.unwrap()
 		})
 		.sum()
 }
