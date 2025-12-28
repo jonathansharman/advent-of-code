@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use aoc::{input, input::ParseCommaSeparated};
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use regex::Regex;
 
 aoc::test::test_part!(test1, part1, 436);
@@ -92,23 +93,20 @@ fn fewest_presses_joltage(
 	joltages: HashMap<usize, Joltage>,
 	current_presses: u32,
 ) -> Option<u32> {
-	// println!("===");
-	// println!("buttons {buttons:?}");
-	// println!("joltages {joltages:?}");
-	// println!("current_presses {current_presses:?}");
-
 	// Choose the joltage to eliminate based on which has the fewest affecting
-	// buttons, to reduce the search space of possible buttons to press.
-	let Some(joltage) = joltages
-		.values()
-		.min_by(|j1, j2| j1.buttons.len().cmp(&j2.buttons.len()))
-	else {
-		// println!("FOUND A SOLUTION: {current_presses}");
-
+	// buttons, to reduce the search space of possible buttons to press. Break
+	// ties arbitrarily using the joltage indices.
+	let Some((_, joltage)) = joltages.iter().min_by(|(i1, j1), (i2, j2)| {
+		j1.buttons.len().cmp(&j2.buttons.len()).then(i1.cmp(i2))
+	}) else {
 		return Some(current_presses);
 	};
 
-	// Try pressing each button some number of times up to the remaining joltage
+	// Choose an arbitrary button that affects this joltage.
+	let button_idx = joltage.buttons.iter().next().unwrap();
+	let button_joltages = &buttons[button_idx];
+
+	// Try pressing the button some number of times up to the remaining joltage
 	// level, L. As an optimization, if only one button affects this joltage, we
 	// only need to try exactly L presses since pressing it fewer times
 	// certainly can't produce a valid solution.
@@ -117,57 +115,47 @@ fn fewest_presses_joltage(
 	} else {
 		0
 	};
-	joltage
-		.buttons
-		.iter()
-		.filter_map(|button_idx| {
-			// println!("pressing {button_idx}");
+	(min_presses..=joltage.level)
+		.filter_map(|presses| {
+			let next_presses = current_presses + presses;
 
-			let button_joltages = &buttons[button_idx];
-			(min_presses..=joltage.level)
-				.filter_map(|presses| {
-					let next_presses = current_presses + presses;
+			// This button will not be pressed again.
+			let mut next_buttons = buttons.clone();
+			next_buttons.remove(button_idx);
 
-					// This button will not be pressed again.
-					let mut next_buttons = buttons.clone();
-					next_buttons.remove(button_idx);
-
-					// Update each joltage to account for the button presses.
-					let mut next_joltages = joltages.clone();
-					for joltage_idx in button_joltages {
-						// If a joltage for this button is missing, then that
-						// joltage has already reached zero, and this button
-						// can't be pressed.
-						let joltage = next_joltages.get_mut(joltage_idx)?;
-						// Remove the pressed button from the joltages' button
-						// sets.
-						joltage.buttons.remove(button_idx);
-						// A joltage may not be reduced below zero.
-						joltage.level = joltage.level.checked_sub(presses)?;
-						// Remove a joltage when its level reaches zero.
-						if joltage.level == 0 {
-							next_joltages.remove(joltage_idx);
-						} else if joltage.buttons.is_empty() {
-							// This joltage level wasn't satisfied but also no
-							// longer has any buttons, so there's no solution on
-							// this path.
-							return None;
-						}
+			// Update each joltage to account for the button presses.
+			let mut next_joltages = joltages.clone();
+			for joltage_idx in button_joltages {
+				// If a joltage for this button is missing, then that
+				// joltage has already reached zero, and this button can't
+				// be pressed.
+				let joltage = next_joltages.get_mut(joltage_idx)?;
+				// Remove the pressed button from the joltages' button sets.
+				joltage.buttons.remove(button_idx);
+				// A joltage may not be reduced below zero.
+				joltage.level = joltage.level.checked_sub(presses)?;
+				// Remove a joltage when its level reaches zero.
+				if joltage.level == 0 {
+					next_joltages.remove(joltage_idx);
+					for button_joltages in next_buttons.values_mut() {
+						button_joltages.remove(joltage_idx);
 					}
+				} else if joltage.buttons.is_empty() {
+					// This joltage level wasn't satisfied but also no
+					// longer has any buttons, so there's no solution on
+					// this path.
+					return None;
+				}
+			}
 
-					fewest_presses_joltage(
-						next_buttons,
-						next_joltages,
-						next_presses,
-					)
-				})
-				.min()
+			fewest_presses_joltage(next_buttons, next_joltages, next_presses)
 		})
 		.min()
 }
 
 pub fn part2() -> u32 {
 	parse_machines()
+		.par_bridge()
 		.map(|machine| {
 			fewest_presses_joltage(
 				machine.buttons.into_iter().enumerate().collect(),
